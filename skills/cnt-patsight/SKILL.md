@@ -1,15 +1,25 @@
 ---
 name: cnt-patsight
-description: Structure, screen, extract, validate, and analyze CNT papers, patents, metadata, and experimental records for industrial R&D, especially CVD/CCVD routes using methane or natural gas. Use for source screening, run-level extraction, catalyst and process comparison, evidence tracking, CNT-type verification, scale-up review, or R&D recommendations in CNT-PatSight.
+description: Extract, structure, validate, and review CNT papers, patents, and experimental records for CNT-PatSight. Use for source screening, PDF or full-text extraction, run planning, five-table mapping, catalyst/process/product comparison, CNT-type verification, evidence tracking, source observations, patent examples, and curated CNT R&D data preparation, especially for CVD/CCVD routes.
 ---
 
-# CNT-PatSight Skill
+# CNT-PatSight Curated Extraction
 
-## Mission
+## Current Phase
 
-Act as an industrial CNT R&D data engineer. Convert papers, patents, reports, and later internal experiments into structured, evidence-backed records that help researchers reproduce, compare, and prioritize CNT synthesis routes.
+Treat the current phase as **v0.1 curated-paper extraction**.
 
-Use the following five main tables as the stable v0.1 formal schema:
+- Process about 10 high-quality papers manually provided by the user.
+- Produce accurate, traceable, database-ready sample records.
+- Keep first-pass records at `needs_review` until human verification.
+- Use the samples to test the stable five-table schema.
+- Do not build bulk pipelines, crawlers, web products, local-model systems, ML predictions, complex schemas, or industrial scoring systems unless explicitly requested.
+
+Optimize for: **extract accurately, preserve evidence, support review**.
+
+## Stable Data Contract
+
+Use only these five formal business tables:
 
 ```text
 source_run
@@ -19,49 +29,35 @@ yield_quality
 cost_scale_review
 ```
 
-Do not add fields to these five tables by default unless the user explicitly requests a schema change. This schema stability is not a content filter: preserve technically valuable information that cannot map stably to the tables or cannot form a complete run through `source_level_observations`, `valuable_unmapped_information`, and `data/interim/source_observations.jsonl`.
+Follow **schema strict, capture broad**:
 
-## Operating principles
+- Do not add, remove, rename, split, or repurpose formal fields by default.
+- Do not create another formal business table by default.
+- Preserve useful information outside the five tables in `source_level_observations`, `valuable_unmapped_information`, and `data/interim/source_observations.jsonl`.
+- Treat `source_observations.jsonl` as a temporary observation pool, not a sixth business table.
+- After 20-30 representative sources, summarize recurring observation types and ask the user before promoting any into the formal schema.
 
-- Prioritize methane/natural-gas CVD/CCVD routes and industrial MWCNT questions without treating that priority as a permanent boundary.
-- Follow the rule: **schema strict, capture broad.**
-- Preserve the relationship between source, catalyst, process, product result, evidence, and industrial interpretation.
-- Distinguish `reported`, `inferred`, `calculated`, and `review_assessment` information.
-- Preserve uncertainty. Do not invent missing values or present broad claims as completed experiments.
-- Keep the v0.1 main-table fields stable unless the user explicitly requests a change.
-- Retain unusual observations that may influence mechanism, reproducibility, product type, scale-up, cost, or future experiments without forcing new formal fields.
-- Treat controls, failed conditions, deactivation, low-yield runs, and contradictory observations as useful R&D evidence rather than noise.
-- Keep public sources and confidential internal records separable. Do not send internal data to external services without authorization.
+Read [references/schema.md](references/schema.md) when mapping or validating the five tables. Treat it as field vocabulary, not permission to change the schema silently.
 
-## Schema-stable broad capture
+## Before Extracting Each Paper
 
-Use an existing v0.1 field when information fits it naturally. Do not add, rename, split, or repurpose a main-table field merely to capture one unusual source. Only change formal fields when the user explicitly requests it.
+Complete these four steps before filling the five tables.
 
-When information does not fit stably or cannot support a complete `run_id`:
+### 1. Source registration
 
-- Put source-level material in `source_level_observations`.
-- Put useful but currently unmapped material in `valuable_unmapped_information`.
-- When saving extraction results, append the observation records to `data/interim/source_observations.jsonl`.
+Establish:
 
-Treat `source_observations.jsonl` as a temporary information inbox, not as a sixth formal business table. Keep each observation traceable to its source and evidence location when practical, but do not impose a rigid observation schema that would recreate the same capture problem.
+- `source_id`
+- `source_type`
+- title
+- year
+- DOI or patent number
+- authors or assignee
+- document class: paper, patent, or review
 
-Use the inbox for mechanism explanations, failed conditions, deactivation causes, temperature effects, catalyst-preparation ideas, patent apparatus designs, scale-up risks, safety or environmental information, transferable information from other carbon sources or CNT types, and any potentially useful information that cannot yet form a run.
+### 2. Screening classification
 
-After approximately 20–30 representative sources have been extracted and reviewed, summarize recurring observation types. Ask the user before promoting any recurring type into a new or changed formal field.
-
-## Workflow
-
-### 1. Build or inspect the source pool
-
-When collecting at scale, start with metadata and relevance screening before downloading or extracting full text. When the user supplies a specific source, inspect it directly rather than forcing an unnecessary metadata-first sequence.
-
-Useful metadata commonly includes title, year, authors or assignee, DOI or patent number, source database, link, abstract or claim, keywords, access status, query hit, relevance score, and processing status.
-
-### 2. Screen as prioritization, not deletion
-
-Evaluate whether the source contains CNT synthesis, CVD/CCVD or catalytic decomposition, methane or natural gas, catalyst information, process conditions, product type, result metrics, or industrially useful observations.
-
-Assign one of these screening classes:
+Use exactly one class:
 
 ```text
 formal_extract
@@ -71,162 +67,345 @@ background_reference
 reject
 ```
 
-- `formal_extract`: extract evidence-supported runs into the five main tables and retain extra observations where useful.
-- `candidate_extract`: keep the source for human review before formal extraction.
-- `source_observation_only`: do not force a formal run; capture useful observations.
-- `background_reference`: retain the source as background without detailed formal extraction.
-- `reject`: use only when the source is clearly irrelevant.
+Use `reject` only for clearly irrelevant material. Do not reject a source merely because it is outside methane-MWCNT priority. Preserve transferable catalyst, activation, temperature, atmosphere, failure, CNT-type, reactor, scale-up, safety, or environmental evidence as observations.
 
-Do not reject a paper or patent merely because it is not methane-based MWCNT work. Preserve it as an observation when it contains transferable catalyst design, activation, temperature-window, CNT-type evidence, reactor, failure-mode, scale-up, safety, environmental, or industrial insight.
+### 3. Run plan
 
-### 3. Extract at run level when the evidence supports it
-
-Use a `run_id` for a coherent experimental record:
+List proposed `run_id` values before filling tables. Create one run only when evidence supports:
 
 ```text
 one identifiable catalyst system
 + one identifiable process/gas program
 + one corresponding product or yield result
+= one run_id
 ```
 
-Split runs when a change in catalyst, temperature, gas program, pressure, time, reactor, purification, or result represents a distinct experiment. This is the default analytical unit, not a reason to discard fragmentary evidence. If a valuable statement cannot be linked safely to a complete run, route it to observations and explain the limitation; do not fabricate a `run_id`.
+Split runs when catalyst, temperature, gas composition, gas flow, pressure, time, reactor, purification, or product result changes materially. Do not default to one run per paper and do not fabricate a run from fragmentary discussion.
 
-### 4. Preserve field-level evidence
+Represent heating, pretreatment or reduction, growth, and cooling as separate `reactor_process_gas` rows when reported.
 
-For important values, retain what is practical from the following:
+### 4. Evidence map
 
-```text
-field_name
-value
-unit
-original_value
-evidence_text
-evidence_location
-source_section
-value_status: reported / inferred / calculated / review_assessment
-confidence: high / medium / low
-```
+Locate evidence before populating fields. Check:
 
-Use evidence type, scope, or a `high`/`medium`/`low` confidence label when they help interpretation; they are not required for every minor field. Keep missing information as `null`, `not_reported`, or `not_applicable` as appropriate. Do not turn missing information into a guessed fact.
+- abstract
+- experimental section
+- catalyst preparation
+- CNT synthesis procedure
+- tables
+- figure captions
+- results discussion
+- conclusion
 
-When important sources or sections disagree, keep the conflict visible where practical rather than silently overwriting it. Minor wording differences do not need elaborate conflict records.
+Keep important fields traceable through `evidence_text`, `evidence_location`, and `source_section` where available. Preserve original terminology, values, units, and formulas before normalization.
 
-### 5. Normalize only when safe
+## Extraction Stages
 
-Preserve the original term, value, unit, and calculation basis. Add normalized values only when the conversion and semantic basis are clear.
+### `first_pass_extraction`
 
-For yield and productivity, always preserve the reported definition. Do not compare mass gain, g CNT/g catalyst, conversion, selectivity, array height, deposition rate, and percentage yield as though they were the same metric.
+- Extract reported facts.
+- Add only clear, useful calculations; record the formula and calculated status in the applicable note or evidence record.
+- Preserve missing and qualitative states without guessing.
+- Route valuable non-run information to observations.
+- Keep `extraction_status = needs_review`.
+- Store only reported cost, scale, throughput, reuse, safety, emission/waste facts, and missing industrial fields.
+- Leave `industrial_value_score`, `reproduction_priority`, `recommended_next_action`, and unsupported `major_cost_driver` null.
 
-### 6. Complete the first-round LLM extraction
+### `human_or_review_assessment`
 
-- Put evidence-supported formal run data into the five main tables.
-- Put valuable non-run information into observations.
-- Keep missing values as `null` or `not_reported`.
-- Do not assign industrial scores, rankings, or recommendations without supporting evidence.
+Enter this stage only when the user or a human reviewer explicitly reviews the record.
 
-### 7. Review for R&D usefulness
+- Compare routes and results.
+- Add reproduction priorities, industrial judgments, cost drivers, or recommendations only with an evidence basis.
+- Mark judgments as `review_assessment`.
+- Change `extraction_status` to `reviewed` only after the critical-field review described below.
 
-Assess whether the record helps explain what was tried, why it worked or failed, which evidence supports the product assignment, which conditions may be reproducible, and what remains unknown for industrial adoption.
+Keep `reported`, `inferred`, `calculated`, and `review_assessment` distinguishable.
 
-## Five-table routing guidance
-
-Read [references/schema.md](references/schema.md) when mapping records, validating fields, or preparing table outputs. Treat its v0.1 fields as stable defaults and do not modify them unless the user explicitly requests a schema change. Incomplete fields are acceptable; route useful unmapped information to observations.
+## Five-Table Routing
 
 ### `source_run`
 
-Store source identity, run identity, route classification, extraction status, and concise context. Use `combo_key` as a derived aggregation key for catalyst-carbon-source-reactor-product combinations:
-
-```text
-combo_key = catalyst_key + carbon_source + reactor_type + CNT_type
-```
-
-Keep the components separately and mark `combo_key` as calculated or derived. Do not treat it as an experimental fact.
+- Store source and run identity, route classification, extraction status, and concise context.
+- Use `data_type = experimental_run` for demonstrated paper experiments; use explicit values such as `patent_example` or `review_context` when appropriate.
+- Use a route-specific `target_track`, such as `CH4_CCVD_t-MWCNT`; do not use `priority`.
+- Derive `combo_key` from separately retained catalyst, carbon source, reactor, and CNT-type components. Mark it derived/calculated, not reported.
 
 ### `catalyst_system`
 
-Store catalyst composition, support, promoter, precursor, preparation, and physicochemical properties. Route acidification, complexation, and activation information here, including support acidification, catalyst acidification, acids used as complexing or sol-gel agents, calcination, reduction, and other activation steps.
-
-Use a summary field when details are sparse. When acid type, concentration, ratio, pH, time, temperature, washing endpoint, or purpose is explicitly reported, retain those details without requiring every source to populate identical columns.
+- Store active metals, support, promoter, precursors, preparation, complexation, drying, thermal decomposition/calcination, reduction, activation, particle evidence, BET/pore data, phases, and dispersion.
+- Include every metal central to catalyst function in `active_metals`.
+- Keep promoter designation separate from the complete active-metal description.
+- Keep catalyst preparation temperatures separate from CNT growth temperatures.
 
 ### `reactor_process_gas`
 
-Store reactor, scale, process stages, temperature program, pressure, gases, flows, ratios, space velocity, and residence time. Route reported suitable temperature, reported optimum temperature, failed temperature, and temperature-effect interpretation here.
-
-Keep the actual temperature of each run separate from a literature-level suitable range or an author-reported optimum. Use `combo_key` later to aggregate temperature behavior across comparable catalyst-process-product combinations.
+- Store one row per process stage.
+- Store reactor, catalyst loading, bed position, temperature, time, pressure, individual gases and flows, ratios, and heating/cooling conditions.
+- Prefer `pretreatment` when the source says pretreatment; do not replace it with vague `activation`.
+- Put cross-run or discussion-level temperature effects in observations rather than forcing them into run fields.
 
 ### `yield_quality`
 
-Store yield, productivity, conversion, CNT type, morphology, dimensions, purity, defects, residues, characterization, and purification. Route SWCNT status and evidence here.
-
-Separate author-reported type from confirmed type. Evaluate SWCNT evidence using available TEM/HRTEM, Raman RBM, diameter, wall count, and exclusion of multi-walled or fiber-like products. A title or unsupported label alone does not require confirmation; record the claim and uncertainty instead.
+- Preserve yield identity and definition, CNT identity and evidence, morphology, dimensions, Raman data, TGA/carbon content, residuals, characterization, and post-treatment.
+- Keep author-reported CNT type separate from evidence-supported confirmation.
+- Do not let boolean-like type fields hide mixed products. Use `partial_mixed` for `is_t_MWCNT` or `is_MWCNT` when the supported type is only one component of a materially mixed product; reserve `yes` for an unambiguous assignment that does not imply a misleading clean success. Repeat the mixture in `CNT_type_evidence` or notes.
+- Confirm SWCNT only with suitable evidence such as TEM/HRTEM, Raman RBM, diameter, or wall count.
+- Keep TGA carbon content distinct from post-purification application-grade CNT purity.
 
 ### `cost_scale_review`
 
-Store reported cost and scale facts, missing industrial information, reproduction value, best-condition synthesis, risks, and recommended next actions. Route “most suitable conditions,” “worth reproducing,” and industrial judgments here.
+- During first pass, store reported material, scale, cost, throughput, continuous-operation, reuse, safety, emission/waste facts, and missing industrial fields.
+- Do not treat an unquantified effect as an absent fact.
+- Do not generate recommendations or scores during first pass.
+- Separate author-claimed scale from demonstrated experimental scale. When both matter, preserve both in `scale_level_claimed`, for example `author_claimed_large_scale; actual_0.1g_lab_batch`.
 
-Keep reported facts separate from review assessments. Explain the basis for rankings or recommendations, especially when methane conversion, catalyst lifetime, continuous operation, product consistency, or real cost data are missing.
+In `reactor_process_gas.scale_level`, use a concrete, evidence-backed setup label when reactor size and loading support it, rather than leaving the field empty merely because throughput is unreported. Do not translate a large tube diameter into industrial throughput.
 
-## Patent handling
+## Field-Level Cautions
 
-- Treat examples and embodiments with concrete catalyst, process, and result information as potential runs.
-- Record claims, description ranges, and background statements when useful, but label their evidence type.
-- Do not present a protection range or list of alternatives as a verified experiment.
-- Preserve valuable apparatus, catalyst-recovery, continuous-operation, safety, and scale-up disclosures as observations when they do not form a complete run.
+### 1. Qualitative evidence versus missing data
 
-## Output pattern
+Do not leave a field empty when the source provides relevant qualitative evidence but no number. For `catalyst_particle_size_nm`, use an appropriate state when needed:
 
-Prefer an object containing a document decision, zero or more runs, five-table records where applicable, evidence objects, and unmatched valuable observations:
+```text
+not_reported
+not_applicable
+non_uniform_not_quantified
+qualitative_only
+uncertain
+```
+
+For example, when particles are explicitly described as non-uniform or agglomerated without a size value, use `non_uniform_not_quantified`, not an empty cell.
+
+### 2. Active metals versus promoter
+
+Include all core synergistic metals. For Fe-Mo/MgO, Co-Mo/MgO, or Ni-Mo/MgO, include Mo in `active_metals` when the source repeatedly describes bimetallic clusters or interactions. Mo may also appear in `promoter`.
+
+Example:
+
+```text
+active_metals = Fe; Mo
+promoter = Mo
+```
+
+### 3. Acid treatment versus acid complexing
+
+Distinguish:
+
+```text
+acid_washing
+support_acidification
+catalyst_acidification
+acid_complexing
+```
+
+For citric acid used as a sol-gel complexing agent, use:
+
+```text
+acid_treatment_flag = acid_complexing_only
+acid_treatment_type = acid_complexing
+```
+
+Do not label it generic acid treatment or acid washing.
+
+### 4. Temperature semantics
+
+Keep drying, catalyst calcination or thermal decomposition, reduction or pretreatment, CNT growth, cooling, author-reported optimum, and patent claim ranges distinct. Do not mix `700 °C for 2 h` catalyst thermal decomposition with `900 °C for 30 min` CNT growth.
+
+### 5. Gas flows
+
+Split reported flows into carbon source, CH4, H2, N2, Ar, other gas, total flow, and `gas_ratio_summary`. Do not retain only total flow when component flows are available. Mark extractor-calculated fractions or ratios as calculated and retain their formula and reported inputs.
+
+### 6. Yield definition
+
+Preserve the current schema equivalents of:
+
+- original yield name/value/unit
+- standardized value/unit
+- original definition and formula
+- standardization note or status
+
+Do not compare or relabel carbon weight gain, g CNT/g catalyst, methane conversion, carbon efficiency, productivity, growth rate, and array height as the same metric.
+
+For carbon weight gain, preserve:
+
+```text
+[(w_tot - w_cat) / w_cat] x 100
+```
+
+### 7. Raman ratio direction
+
+Treat `IG/ID` and `ID/IG` as inverse quantities. Put reported `IG/ID` only in `Raman_IG_ID`. Calculate a reciprocal only when useful, retain the reported direction, and mark the reciprocal calculated with its formula.
+
+### 8. TGA carbon content
+
+When TGA measures the as-synthesized product, state:
+
+```text
+TGA carbon content of as-synthesized product, not post-purification application-grade purity.
+```
+
+Do not overstate it as commercial purified-product purity.
+
+### 9. Cost facts versus unquantified cost impact
+
+Record a known material fact even when no cost analysis exists. If Mo is explicitly present, do not use `contains_expensive_metal = not_reported`. Use a statement such as:
+
+```text
+Mo present; cost impact not quantified
+```
+
+Keep the missing cost analysis in `missing_critical_fields` or an observation.
+
+### 10. First-pass industrial boundary
+
+During first pass, record only reported facts, clear calculated values, missing critical fields, and observations. Do not fill industrial scores, reproduction priority, recommendations, or unsupported major cost drivers.
+
+## Observation Pool
+
+Persist valuable information that does not fit the five tables to:
+
+```text
+data/interim/source_observations.jsonl
+```
+
+Prefer these `observation_type` values:
+
+```text
+mechanism
+failure_mode
+catalyst_preparation_hint
+temperature_effect
+scale_up_signal
+safety_environment
+data_gap
+quality_warning
+transferable_route
+patent_apparatus
+other
+```
+
+Use this complete structure for every observation, including warnings shown in `source_notes`:
 
 ```json
 {
-  "document_decision": {
-    "source_id": "Paper_001",
-    "relevance_class": "formal_extract",
-    "reason": "Catalyst, process and product evidence are available",
-    "warnings": []
-  },
-  "runs": [],
-  "source_level_observations": [],
-  "valuable_unmapped_information": []
+  "observation_id": null,
+  "source_id": null,
+  "related_run_id": null,
+  "observation_type": null,
+  "topic_tags": [],
+  "value_summary": null,
+  "original_text": null,
+  "evidence_location": null,
+  "why_valuable": null,
+  "confidence": null,
+  "promotion_decision": "not_promoted_yet"
 }
 ```
 
-An empty table or missing field is acceptable. Do not create filler values merely to make an output appear complete. When persisting a result, append items from `source_level_observations` and `valuable_unmapped_information` to `data/interim/source_observations.jsonl` with enough source and evidence context for later review. Do not treat that JSONL file as a formal main table.
+All keys must be present. `observation_id`, `source_id`, `observation_type`, `evidence_location`, `confidence`, and `promotion_decision` are required and non-null. Use `promotion_decision = not_promoted_yet` by default. Put a short source excerpt in `original_text` when useful wording exists; keep it concise and use null only when no compact source wording is available.
 
-## Quality review
+Export every warning and observation to the JSONL pool. Reconcile the per-source IDs and counts between `source_notes` and `data/interim/source_observations.jsonl`; no warning may exist only in the workbook.
 
-Before saving or reporting, use these as practical checks:
+Preserve mechanisms, failures, deactivation, catalyst-preparation hints, temperature effects, data gaps, quality warnings, scale-up risks, safety/environmental information, patent apparatus, transferable routes, and valuable information that cannot support a complete run.
 
-- Are source, catalyst, process, and product facts linked only as strongly as the evidence permits?
-- Are distinct experimental conditions split when useful for comparison?
-- Are acidification, complexation, activation, temperature effects, and CNT-type evidence routed consistently?
-- Are patent claims separated from demonstrated examples?
-- Are original units and yield definitions preserved?
-- Are important `reported`, `inferred`, `calculated`, and `review_assessment` values distinguishable?
-- Are useful conflicts, controls, failures, and negative results retained?
-- Has valuable information outside the stable v0.1 fields been retained in observations with context?
-- Were main-table fields left unchanged unless the user explicitly requested a schema change?
-- Are industrial recommendations evidence-based and explicit about missing information?
+## Extraction Status
 
-## Common failure modes
+Keep every Codex first-pass run at:
 
-- Treating one paper as one experiment.
-- Extracting only the best result and losing controls, failures, or temperature series.
-- Hard-rejecting a source solely because it is not methane-based MWCNT work.
-- Rejecting valuable evidence solely because it is outside the current priority or schema.
-- Adding a main-table field for every unusual observation instead of using the observation inbox.
-- Forcing incomplete information into a misleading run.
-- Treating `source_observations.jsonl` as a sixth formal business table.
-- Treating patent claims as experimental proof.
-- Filling missing fields without evidence.
-- Comparing incompatible yield definitions.
-- Confirming SWCNT without adequate evidence.
-- Mixing reported optimum conditions with the reviewer’s recommendation.
-- Sending confidential internal data to external APIs without approval.
+```text
+extraction_status = needs_review
+```
 
-## Response style
+Use `reviewed` only after a user or human reviewer verifies:
 
-- Use Chinese explanations when working with the user.
-- Use English `snake_case` for database fields.
-- Prefer concise structured output while preserving important exceptions and uncertainty.
-- Emphasize reproducibility, evidence quality, and industrial usefulness over raw record count.
+- run splitting and `run_id`
+- catalyst composition, active metals, and preparation
+- calcination, thermal decomposition, reduction, or pretreatment
+- growth temperature and gas flows
+- yield value, unit, and definition
+- CNT type and supporting evidence
+- diameter and wall number
+- Raman ratio direction
+- TGA carbon-content meaning
+- `evidence_text` and `evidence_location`
+- observation export
+
+## After Extraction Checklist
+
+### `source_run`
+
+- Check that the paper was not incorrectly reduced to one run.
+- Check unique `run_id` values and cross-table relationships.
+- Check explicit `data_type` and route-specific `target_track`.
+- Check that `combo_key` is derived/calculated.
+- Keep first-pass status at `needs_review`.
+
+### `catalyst_system`
+
+- Check all bimetallic active metals and promoter separation.
+- Check acid washing, acidification, and complexing distinctions.
+- Check quantitative particle size or qualitative particle evidence.
+- Reconcile BET area, pore size, and pore volume with the source table.
+
+### `reactor_process_gas`
+
+- Check catalyst-treatment and CNT-growth temperatures separately.
+- Check pretreatment/reduction, growth, and cooling stages.
+- Check individual CH4, H2, N2, Ar, and other-gas flows.
+- Check calculated-value labels and formulas.
+- Keep discussion-level temperature effects in observations when not run facts.
+
+### `yield_quality`
+
+- Check original yield definition and metric identity.
+- Check CNT-type evidence and avoid title-only SWCNT confirmation.
+- Check that mixed products use `partial_mixed`, not a clean-success `yes`, in boolean-like CNT-type fields.
+- Check Raman direction.
+- Check that TGA carbon content is not presented as application-grade purity.
+
+### `cost_scale_review`
+
+- Keep reported facts separate from missing industrial information.
+- Do not generate premature recommendations or scores.
+- Keep `review_assessment` separate from reported facts.
+- Do not turn unquantified cost impact into absence of a known material.
+
+### Observations
+
+- Export every warning and valuable source note to `source_observations.jsonl`.
+- Check every observation for complete keys and required non-null identity, type, evidence, confidence, and promotion fields.
+- Reconcile per-source observation IDs and counts between `source_notes` and JSONL.
+- Add short `original_text` excerpts where the source provides concise wording.
+- Give mechanism, failure, data-gap, quality, and scale signals evidence locations.
+- Do not create formal fields merely to store one-off observations.
+
+Run `scripts/validation/validate_tables.py` when CSV tables are produced. Do not report completion while validation errors remain.
+
+## P001-Style Regression Example
+
+For Dubey et al. 2012, verify these typical failure points:
+
+- Produce three runs: `SG-1`, `SG-2`, and `SG-3`.
+- Use `data_type = experimental_run`, `target_track = CH4_CCVD_t-MWCNT`, and `extraction_status = needs_review`.
+- Use SG-1 `catalyst_particle_size_nm = non_uniform_not_quantified`; use SG-2/SG-3 `3-6`.
+- Use Fe-Mo/MgO `active_metals = Fe; Mo`.
+- Treat citric acid as `acid_complexing`, not acid washing.
+- Keep `700 °C for 2 h` catalyst thermal decomposition separate from `900 °C for 30 min` CNT growth.
+- Preserve 0.1 g catalyst loading and separate heating, pretreatment, growth, and cooling rows.
+- Preserve 73%, 452%, and 370% as carbon weight gain, not methane conversion.
+- Put reported values 3.6, 4.7, and 3.1 in `Raman_IG_ID`, not `Raman_ID_IG`.
+- Label 43%, 85%, and 82% as as-synthesized TGA carbon content, not application-grade purity.
+- Use SG-1 `is_t_MWCNT = partial_mixed` and `is_MWCNT = partial_mixed`; retain the t-MWCNT/MWCNT/carbon-fiber caveat in evidence or notes.
+- Use `contains_expensive_metal = Mo present; cost impact not quantified`.
+- Use `scale_level_claimed = author_claimed_large_scale; actual_0.1g_lab_batch` and process-stage `scale_level = lab_batch_large_diameter_tube`.
+- Structure and export all five source warnings as observations with IDs, source, type, evidence location, confidence, and short original text where available.
+- Export Mo shielding, air-decomposition failure, Ar/H2 dispersion improvement, scale-up claim, and high-Mo interpretation as observations.
+
+## Response Style
+
+- Explain results in Chinese.
+- Use English `snake_case` for fields and controlled values.
+- Prefer concise, structured reporting.
+- Emphasize evidence quality, uncertainty, and review status over record count.
