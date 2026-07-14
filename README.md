@@ -1,104 +1,179 @@
 # CNT-PatSight
 
-CNT-PatSight 是一个面向碳纳米管（CNT）研发的数据工作区，目标是把分散在论文、专利、报告和实验记录中的 CNT 制备信息，整理成结构化、可追溯、可比较的研发数据。
+CNT-PatSight 是一个面向碳纳米管（CNT）研发的数据整理项目，目标是把论文、专利和后续实验记录中的 CNT 制备信息，转化为 **结构化、可追溯、可比较** 的研发数据。
 
-当前项目重点关注：**CVD / CCVD 法制备碳纳米管，尤其是以甲烷（CH4）或天然气为碳源制备多壁碳纳米管（MWCNT）的工业生产优化**。
-
-本项目现阶段的核心不是做网页或展示系统，而是先建立可靠的数据流程：
+当前阶段不是做网页、看板、爬虫或机器学习系统，而是先跑通一个小样本闭环：
 
 ```text
-公开文献 / 专利 / 实验记录
+10 篇高相关论文/专利
         ↓
-资料检索与候选池构建
+约 30 条 run-level 实验记录
         ↓
-相关性筛选
+LLM 辅助抽取
         ↓
-结构化字段抽取
+人工复核
         ↓
-证据保留与人工校正
-        ↓
-标准化数据库
-        ↓
-统计分析与研发建议
+验证 5 张主表是否够用
 ```
 
 ---
 
-## 项目背景
+## 1. 当前阶段：v0.1 小样本验证
 
-CNT 相关研究中有大量有价值的信息，例如催化剂配方、载体、助剂、CVD 温度、气体流量、反应时间、产率、产品质量和成本指标等。但这些信息通常分散在论文实验部分、图表、专利实施例、补充材料和表征结果中，直接阅读和比较效率很低。
+### v0.1 目标
 
-CNT-PatSight 希望解决的问题是：
+v0.1 的目标是验证 CNT 文献/专利能否被稳定抽取成结构化数据，而不是一次性搭建完整软件系统。
 
-> 将零散的 CNT 文献和专利信息，转化为研发人员可以查询、比较、复现和分析的结构化数据。
+第一阶段成功标准：
 
-它不是简单的论文摘要工具，而是面向工业 CNT 研发的数据工程项目。
+- 收集 10 篇高质量论文或专利；
+- 抽取约 30 条可复核的 `run_id` 记录；
+- 每条关键数据都有原文证据；
+- 能回答初步问题：哪些催化剂、温度、气体程序、产物类型和产率值得进一步关注；
+- 发现哪些字段经常有数据，哪些字段长期为空，再决定是否修改 schema。
 
----
+### 当前优先范围
 
-## 当前研究重点
-
-当前优先范围包括：
+优先关注：
 
 - CVD / CCVD / 催化裂解 / 催化热解制备 CNT；
-- 甲烷 CH4、天然气或富甲烷气体作为碳源；
-- 多壁碳纳米管 MWCNT；
-- 工业生产优化；
-- 催化剂配方、载体、助剂、制备与活化；
-- CVD 条件，包括温度、时间、压力、气体组成、流量和反应器类型；
-- 产率、生产率、甲烷转化率、产品质量、纯度、缺陷、灰分和成本；
-- 可放大性、连续运行、催化剂寿命、后处理负担和安全环保问题。
+- CH4、天然气或富甲烷气体作为碳源；
+- 工业生产相关的 MWCNT 或 t-MWCNT；
+- 催化剂配方、载体、助剂、制备和活化；
+- 温度、时间、压力、气体组成、流量、反应器类型；
+- 产率、生产率、纯度、灰分、金属残留、缺陷、管径和形貌；
+- 放大、连续运行、催化剂寿命、后处理负担和安全环保信息。
 
-该范围是当前工作重点，不是永久边界。后续可以扩展到其他碳源、其他 CNT 类型、公司内部实验数据、成本模型、机器学习建模或应用端产品指标。
+这只是当前优先级，不是永久边界。其他碳源、SWCNT、VACNT、CNT fiber、反应器设计、失败模式、催化剂机理等信息，如果有研发价值，可以进入观察池，不应直接丢弃。
 
----
+### 当前不做
 
-## 项目目标
+v0.1 暂不做：
 
-CNT-PatSight 的长期目标是建立一个 CNT 研发数据系统，用于支持：
-
-- 文献和专利情报分析；
-- 催化剂体系对比；
-- CVD 工艺窗口分析；
-- 产率与产品质量关系分析；
-- 工业可行性评价；
-- 实验复现和实验设计；
-- 内部实验数据整合；
-- 后续机器学习或统计建模；
-- 给 CNT 研发组输出可执行的实验建议。
-
-最终希望回答的问题包括：
-
-- 哪些催化剂体系被反复报道？
-- 哪些载体和助剂更常出现在高产率体系中？
-- 甲烷 CVD 制 MWCNT 的常见温度、时间和气体窗口是什么？
-- 哪些路线产率高，但产品质量或成本不理想？
-- 哪些专利路线具有工业放大价值？
-- 哪些条件值得研发组优先复现或改造？
+- 自动爬虫；
+- 网页或 dashboard；
+- 复杂数据库；
+- 机器学习预测；
+- 工业评分系统；
+- 自动生成实验方案；
+- 将内部实验数据发送到外部 API。
 
 ---
 
-## 数据理念
+## 2. 核心原则
 
-本项目强调三点：
+### 2.1 Schema strict, capture broad
 
-1. **结构化**：把文献和专利中的信息转化为统一字段。
-2. **可追溯**：关键字段必须保留原文证据、位置和置信度。
-3. **可比较**：单位、名称、产率定义和数据来源需要标准化或明确标注。
+本项目采用双层数据结构：
 
-重要原则：
+```text
+5 张主表：严格、可比较、可复核
+观察池：宽松保留暂时无法结构化但有价值的信息
+```
 
-- 不把没有证据的信息填入关键字段；
-- 不把专利权利要求中的宽泛范围当成真实实验数据；
-- 不强行统一不可比较的产率定义；
-- 不把一篇论文简单当成一条实验记录；
-- 不追求数量优先，而优先保证数据质量和复现价值。
+也就是说：
+
+- 主表字段不要随便增加；
+- 不能形成完整实验记录的信息不要硬塞进主表；
+- 但有潜在研发价值的信息也不要丢掉；
+- 放不进主表的信息进入 `source_observations.jsonl`，等待后续人工判断是否升级为正式字段。
+
+### 2.2 证据优先
+
+关键字段必须尽量保留：
+
+```text
+value
+unit
+original_value
+evidence_text
+evidence_location
+source_section
+value_status
+confidence
+```
+
+其中 `value_status` 建议使用：
+
+```text
+reported / inferred / calculated / review_assessment
+```
+
+第一轮抽取以 `reported` 为主。原文没有的信息保持 `null`、`not_reported` 或空值，不允许为了填表而猜测。
+
+### 2.3 不把一篇论文当成一条记录
+
+本项目以实验或专利实施例为单位，而不是以论文为单位。
+
+一个 `run_id` 表示：
+
+```text
+一个明确的催化剂体系
++ 一个明确的 CVD 工艺程序
++ 一个对应的产物 / 产率 / 表征结果
+= 一个 run_id
+```
+
+如果同一篇论文比较不同催化剂、不同温度、不同气体比例、不同时间或不同产物结果，应拆成多个 `run_id`。
+
+### 2.4 不强行统一不可比较指标
+
+特别注意产率和生产率。以下指标不能默认互相比较：
+
+```text
+g CNT / g catalyst
+mg CNT / g catalyst / h
+carbon yield %
+mass gain %
+methane conversion %
+array height growth rate
+selectivity
+```
+
+必须保留原始定义和单位。只有计算依据清楚时，才做标准化。
 
 ---
 
-## 推荐数据结构
+## 3. 数据流程
 
-当前推荐继续使用 **5 张主表** 组织数据，不再额外增加表：
+推荐工作流：
+
+```text
+1. 检索论文 / 专利 / 报告
+2. 填入 source candidate 信息
+3. 相关性筛选
+4. 复制关键文本：Abstract、Experimental、表格、图注、Results 关键段落
+5. LLM 按 prompt 抽取 JSON
+6. 人工核对催化剂、温度、气体、产率、CNT 类型和证据
+7. 写入 5 张主表
+8. 无法进入主表但有价值的信息写入 observation 池
+9. 小样本分析
+10. 决定是否调整字段
+```
+
+不建议第一阶段直接进行全文自动抽取。先用人工选择的高质量论文跑通闭环。
+
+---
+
+## 4. 筛选分级
+
+文献和专利筛选不是简单删除，而是分级处理。
+
+| 等级 | 含义 | 处理方式 |
+|---|---|---|
+| `formal_extract` | 有催化剂、工艺条件、产物/产率，能形成 run_id | 进入 5 张主表 |
+| `candidate_extract` | 可能能形成 run_id，但证据不完整 | 暂存，等待人工复核 |
+| `source_observation_only` | 不能形成完整 run，但有研发价值 | 进入观察池 |
+| `background_reference` | 综述、机理、背景或字段设计参考 | 保留为背景 |
+| `reject` | 明显无关 | 不进入项目数据 |
+
+不要因为一篇文献不是 CH4-MWCNT 就直接丢弃。如果它提供了催化剂制备、活化、酸化、温度影响、CNT 类型证据、失败模式、反应器设计、放大风险或安全环保信息，可以进入观察池。
+
+---
+
+## 5. v0.1 数据结构
+
+v0.1 使用 5 张主表：
 
 ```text
 source_run
@@ -108,734 +183,502 @@ yield_quality
 cost_scale_review
 ```
 
-这 5 张表对应 CNT 研发的主链条：
+这 5 张表是当前工作模型，不是最终数据库本体。第一阶段默认不新增主表，不随意扩展字段。
+
+另外设置一个观察池：
 
 ```text
-资料来源 / 实验编号
-        ↓
-催化剂体系
-        ↓
-反应器、温度程序和气体程序
-        ↓
-产率、CNT 类型和产品质量
-        ↓
-工业价值、放大风险和下一步建议
+data/interim/source_observations.jsonl
 ```
 
-设计原则：
-
-- 不为每一个可能出现的细节单独建表；
-- 能稳定抽取、对研发判断有用的信息作为主字段；
-- 细节不完整但有价值的信息，用 `summary`、`note`、`evidence_text` 记录；
-- 酸化、催化剂组合、适应温度、是否单壁 CNT 等信息放入对应主表，不新增表；
-- “最佳条件”“适应温度窗口”“工业推荐”属于分析判断，应与原始实验条件区分记录。
+它不是正式业务表，而是用于保存暂时无法进入主表的有价值信息。
 
 ---
 
-### 1. source_run
+## 6. 五张主表的职责
 
-记录数据来源和实验记录索引，包括论文、专利、报告或内部实验批次。
+### 6.1 `source_run`
 
-关注内容：
+记录资料来源和 run 索引。
 
-- 来源类型；
-- 标题、年份、作者或申请人；
+核心内容：
+
+- source_id；
+- run_id；
+- source_type：paper / patent / review / internal；
+- source_title；
+- year；
+- authors_or_assignee；
 - DOI、专利号或链接；
-- 是否为论文实验、专利实施例、综述或内部记录；
-- 该条记录是否能形成明确的 run_id；
-- 目标路线，如工业 MWCNT、SWCNT、t-MWCNT、VACNT、CNT fiber；
-- 催化剂-碳源-产品类型组合键，用于后续聚合分析；
-- 相关性和抽取置信度。
+- data_type：experiment / patent_example / patent_claim / review_summary；
+- run_label；
+- target_track；
+- relevance_class；
+- extraction_status；
+- extraction_confidence；
+- run_summary；
+- notes。
 
-建议字段：
-
-```text
-source_id
-run_id
-source_type
-source_title
-year
-authors_or_assignee
-doi_or_patent_no
-link
-source_section
-data_type
-run_label
-target_track
-combo_key
-relevance_class
-extraction_status
-extraction_confidence
-run_summary
-notes
-```
-
-其中：
-
-```text
-combo_key = catalyst_key + carbon_source + reactor_type + CNT_type
-```
-
-示例：
-
-```text
-Fe-Mo/MgO | CH4 | fixed-bed CCVD | t-MWCNT
-Ni/Al2O3 | CH4 | fluidized-bed CVD | MWCNT
-Co-Mo/MgO | C2H2 | thermal CVD | SWCNT
-```
-
-`combo_key` 不是新的实验事实，而是便于后续统计“哪些组合更常见、哪些组合更高产、哪些组合更容易得到 SWCNT/MWCNT”的分析索引。
+`combo_key` 可以作为后续分析脚本生成的派生字段，不建议由 LLM 第一轮手动填写。
 
 ---
 
-### 2. catalyst_system
+### 6.2 `catalyst_system`
 
-记录催化剂体系，包括活性金属、载体、助剂、前驱体、制备方法、酸化/络合/活化处理和催化剂基础性质。
+记录催化剂体系。
 
-关注内容：
+核心内容：
 
-- 活性金属，如 Fe、Ni、Co、Mo；
-- 金属比例；
-- 载体，如 MgO、Al2O3、SiO2、CaCO3；
-- 助剂或促进剂；
-- 前驱体；
-- 制备方法；
-- 酸化、络合、浸渍、沉淀、洗涤、干燥、焙烧、还原、破碎等处理；
-- 催化剂粒径、比表面积、孔结构、分散度和寿命；
-- 催化剂是否更倾向于生成 SWCNT、t-MWCNT 或 MWCNT。
+- active_metals：Fe、Co、Ni、Mo 等；
+- support_material：MgO、Al2O3、SiO2、CaCO3 等；
+- promoter；
+- metal_ratio_original；
+- metal_ratio_standardized；
+- precursor_summary；
+- preparation_method；
+- acid_or_complexing_summary；
+- acid_treatment_flag；
+- acid_treatment_type；
+- drying_condition；
+- calcination_condition；
+- reduction_condition；
+- crushing_or_sieving_condition；
+- catalyst_particle_size_nm；
+- BET_surface_area_m2_g；
+- phase_or_state_summary；
+- evidence_text；
+- evidence_location；
+- confidence；
+- notes。
 
-建议字段：
+酸化、络合、浸渍、沉淀、干燥、煅烧、还原、破碎等都归入此表。酸化信息不单独建表。
 
-```text
-run_id
-catalyst_id
-catalyst_label
-catalyst_key
-active_metals
-support_material
-promoter
-metal_ratio_original
-metal_ratio_standardized
-precursor_summary
-preparation_method
-acid_or_complexing_summary
-acid_treatment_flag
-acid_treatment_purpose
-drying_condition
-calcination_condition
-reduction_condition
-crushing_or_sieving_condition
-catalyst_particle_size_nm
-BET_surface_area_m2_g
-pore_diameter_nm
-pore_volume_cm3_g
-phase_or_state_summary
-dispersion_summary
-expected_CNT_type_bias
-catalyst_lifetime_or_reuse
-catalyst_assessment
-evidence_text
-evidence_location
-confidence
-notes
-```
-
-#### 酸化信息如何记录
-
-酸化相关信息放在 `catalyst_system` 中，不单独建表。
-
-需要区分三类情况：
+推荐酸处理类型：
 
 ```text
-support_acidification      载体酸化
-catalyst_acidification     催化剂酸化
-acid_complexing            酸作为络合剂或溶胶-凝胶组分
+support_acidification
+catalyst_acidification
+acid_complexing
+unknown
+not_reported
 ```
 
-若文献只给一句话，例如 “treated with HNO3” 或 “citric acid was used as complexing agent”，不要强行拆成过多字段，直接写入：
-
-```text
-acid_or_complexing_summary
-acid_treatment_flag
-acid_treatment_purpose
-```
-
-示例：
-
-```text
-acid_or_complexing_summary:
-citric acid as complexing agent; metal ion:citric acid = 1:1.2; solution pH≈1.0
-
-acid_treatment_flag:
-yes
-
-acid_treatment_purpose:
-complexing / improve dispersion / prevent precipitation of Mo species
-```
-
-若文献明确给出酸种、浓度、时间、温度、洗涤终点，则可以写进 summary 或 notes，不要求每篇都拆成固定列。
+如果文献只写一句 `treated with HNO3` 或 `citric acid was used as complexing agent`，不要强拆为过多字段，写入 summary 和 evidence 即可。
 
 ---
 
-### 3. reactor_process_gas
+### 6.3 `reactor_process_gas`
 
-记录反应器、温度程序和气体程序。该表是实验复现和工艺窗口分析的核心表。
+记录具体工艺阶段的反应器、温度和气体程序。
 
-关注内容：
+核心内容：
 
-- 反应器类型，如固定床、流化床、旋转炉、浮动催化；
-- 设备尺度，如实验室、中试或工业；
-- 催化剂装填量、床层位置和热电偶位置；
-- 吹扫、升温、还原、预处理、生长、降温等阶段；
-- 温度、时间、压力；
-- CH4、天然气、H2、N2、Ar 等气体流量；
-- 气体比例、空速和停留时间；
-- 对某一催化剂组合报告的适应温度、最佳温度或失败温度。
+- run_id；
+- process_stage_id；
+- stage_order；
+- stage_type；
+- reactor_type；
+- scale_level；
+- catalyst_loading_mass；
+- temperature_setpoint_c；
+- temperature_actual_c；
+- holding_time_min；
+- heating_rate_c_min；
+- cooling_condition；
+- pressure_original；
+- carbon_source；
+- carbon_source_flow_sccm；
+- H2_flow_sccm；
+- N2_flow_sccm；
+- Ar_flow_sccm；
+- other_gas_flow_sccm；
+- total_flow_sccm；
+- gas_ratio_summary；
+- process_note；
+- evidence_text；
+- evidence_location；
+- confidence。
 
-建议字段：
-
-```text
-run_id
-process_stage_id
-stage_order
-stage_type
-reactor_type
-scale_level
-reactor_size_summary
-catalyst_loading_mass
-catalyst_bed_position
-temperature_setpoint_C
-temperature_actual_C
-temperature_range_reported_C
-holding_time_min
-heating_rate_C_min
-cooling_condition
-pressure_original
-carbon_source
-CH4_flow_sccm
-natural_gas_flow_sccm
-H2_flow_sccm
-N2_flow_sccm
-Ar_flow_sccm
-other_gas_flow_sccm
-total_flow_sccm
-gas_ratio_summary
-GHSV_or_residence_time
-reported_suitable_temperature
-reported_optimal_temperature
-temperature_effect_summary
-process_note
-evidence_text
-evidence_location
-confidence
-```
-
-#### 温度信息如何记录
-
-温度信息分三层：
+推荐 `stage_type`：
 
 ```text
-temperature_setpoint_C
+purge
+heating
+drying
+calcination
+reduction
+activation
+growth
+cooling
+post_treatment
+other
 ```
 
-记录该 run 的实际设定生长温度，例如 900 ℃。
+温度处理原则：
 
-```text
-temperature_range_reported_C
-```
-
-记录文献或专利中明确给出的可行温度范围，例如 700–900 ℃。如果只是专利权利要求中的宽泛保护范围，应在 notes 中标注，不直接当作真实实验窗口。
-
-```text
-reported_optimal_temperature / temperature_effect_summary
-```
-
-记录作者明确比较后认为较优的温度，或温度变化对产率、纯度、管径、缺陷的影响。
-
-示例：
-
-```text
-temperature_setpoint_C: 900
-reported_suitable_temperature: not_reported
-reported_optimal_temperature: 900 for this catalyst/process
-temperature_effect_summary: same growth temperature used for SG-1/SG-2/SG-3; catalyst decomposition atmosphere was the main compared variable
-```
-
-这样可以支持后续回答：
-
-- 某催化剂组合常见生长温度是多少？
-- 哪些组合适合高温 CH4-CVD？
-- 哪些组合在高温下容易烧结、积碳或生成碳纤维？
-- SWCNT 与 MWCNT 对温度窗口是否不同？
+- 生长温度、煅烧温度、还原温度必须通过 `stage_type` 区分；
+- 不要把煅烧温度误填为 CNT 生长温度；
+- `reported_optimal_temperature`、`suitable_temperature_range`、`temperature_effect_summary` 暂不作为 v0.1 主字段，优先放入 `process_note` 或观察池。
 
 ---
 
-### 4. yield_quality
+### 6.4 `yield_quality`
 
-记录产率、物料衡算、CNT 类型确认和产品质量。
+记录产率、CNT 类型、产品质量和表征。
 
-关注内容：
+核心内容：
 
-- 原始产率和标准化产率；
-- g CNT / g catalyst；
-- CNT 生产率；
-- 甲烷转化率；
-- CNT 类型确认；
-- 是否为 SWCNT、DWCNT、t-MWCNT、MWCNT、VACNT、CNT fiber 或混合产物；
-- SWCNT 证据，如 Raman RBM、TEM、直径范围、壁数；
-- 管径、管长、壁层数、形貌；
-- Raman ID/IG、纯度、灰分、金属残留；
-- SEM、TEM、Raman、TGA、XPS 等表征方法；
-- 导电率、分散性、浆料黏度等应用相关指标；
-- 后处理和纯化条件。
+- yield_original；
+- yield_value；
+- yield_unit；
+- yield_definition；
+- yield_standardization_status；
+- CNT_productivity；
+- methane_conversion_percent；
+- carbon_efficiency_percent；
+- CNT_type_reported；
+- CNT_type_confirmed；
+- CNT_type_confidence；
+- CNT_type_evidence；
+- RBM_peak_reported；
+- outer_diameter_mean_nm；
+- outer_diameter_range_nm；
+- inner_diameter_or_wall_number；
+- length_summary；
+- morphology；
+- alignment_or_array；
+- Raman_ID_IG；
+- purity_wt_percent；
+- ash_content_wt_percent；
+- metal_residue_wt_percent；
+- amorphous_carbon_level；
+- characterization_methods；
+- post_treatment_or_purification；
+- application_related_properties；
+- image_or_figure_ref；
+- evidence_text；
+- evidence_location；
+- confidence；
+- notes。
 
-建议字段：
-
-```text
-run_id
-yield_original
-yield_definition_original
-yield_value_standardized
-yield_unit_standardized
-CNT_productivity
-methane_conversion_percent
-carbon_efficiency_percent
-CNT_type_reported
-CNT_type_confirmed
-is_SWCNT
-is_DWCNT
-is_t_MWCNT
-is_MWCNT
-CNT_type_evidence
-SWCNT_evidence_summary
-RBM_peak_reported
-outer_diameter_mean_nm
-outer_diameter_range_nm
-inner_diameter_or_wall_number
-length_summary
-morphology
-alignment_or_array
-Raman_ID_IG
-Raman_IG_ID
-purity_wt_percent
-ash_content_wt_percent
-metal_residue_wt_percent
-amorphous_carbon_level
-characterization_methods
-post_treatment_or_purification
-application_related_properties
-image_or_figure_ref
-evidence_text
-evidence_location
-confidence
-notes
-```
-
-#### 是否单壁 CNT 如何记录
-
-是否单壁放在 `yield_quality` 中，因为它是产物结果，不是催化剂字段。
-
-推荐使用：
+CNT 类型建议使用：
 
 ```text
-CNT_type_reported
-CNT_type_confirmed
-is_SWCNT
-SWCNT_evidence_summary
-RBM_peak_reported
+SWCNT
+DWCNT
+t-MWCNT
+MWCNT
+VACNT
+CNT_fiber
+mixed
+unknown
 ```
 
-不要只看作者标题里写了 SWCNT 就直接确认。优先证据包括：
+SWCNT 判断要谨慎。不能只看标题或作者声称。优先证据包括：
 
-- TEM / HRTEM 看到单壁结构；
-- Raman 出现 RBM 峰；
-- 直径分布符合 SWCNT 范围；
-- 文中明确排除了多壁或碳纤维。
+- TEM / HRTEM 直接看到单壁结构；
+- Raman RBM 峰；
+- 直径分布支持单壁；
+- 文中明确排除多壁 CNT 或碳纤维。
 
-如果文献只是声称 SWCNT 但没有足够证据：
+若证据不足：
 
 ```text
 CNT_type_reported: SWCNT
 CNT_type_confirmed: uncertain
-is_SWCNT: unknown
-SWCNT_evidence_summary: claimed by authors, but RBM/TEM evidence not found
-```
-
-`t-MWCNT` 或 few-walled CNT 不应强行归为 SWCNT。它们可以单独记录为：
-
-```text
-CNT_type_confirmed: t-MWCNT
-is_SWCNT: no
-is_t_MWCNT: yes
-inner_diameter_or_wall_number: 4–7 walls
+CNT_type_confidence: low
+CNT_type_evidence: claimed by authors, but RBM/TEM evidence not found
 ```
 
 ---
 
-### 5. cost_scale_review
+### 6.5 `cost_scale_review`
 
-记录工业评价、成本、放大、复现价值和下一步建议。
+记录原文明确给出的放大、成本、安全和工业相关信息，以及人工复核后的缺失项说明。
 
-该表不要求每条 run 都有完整成本数据。公开论文常常不给真实单耗、电耗和连续运行数据，因此本表应分为：
+v0.1 中此表不要做工业评分。第一轮 LLM 不应自动生成“高工业价值”“值得复现”等强判断。
 
-```text
-事实字段：原文明确给出的成本、连续运行、循环次数等
-判断字段：基于现有信息做的工业价值评价和下一步建议
-缺失字段：说明哪些工业关键信息没有给出
+核心内容：
+
+- scale_level_claimed；
+- continuous_operation_time_h；
+- catalyst_reuse_cycles；
+- needs_H2；
+- needs_acid_washing；
+- scale_up_issue；
+- safety_risk；
+- missing_critical_fields；
+- industrial_value_note；
+- recommended_next_action；
+- reviewer_notes；
+- evidence_text；
+- evidence_location；
+- confidence。
+
+其中：
+
+- `scale_level_claimed`、`continuous_operation_time_h`、`catalyst_reuse_cycles`、`safety_risk` 可以来自原文；
+- `industrial_value_note` 和 `recommended_next_action` 更适合人工 review 或二次分析后填写；
+- 如果没有真实成本、电耗、连续运行、催化剂寿命、甲烷转化率等信息，应写入 `missing_critical_fields`，不要让 LLM 推测。
+
+---
+
+## 7. 观察池：`source_observations.jsonl`
+
+观察池用于保存不能稳定进入五张主表，但可能对研发有价值的信息。
+
+适合进入观察池的信息：
+
+- 机制解释；
+- 失败条件；
+- 催化剂失活；
+- 温度影响；
+- 酸处理启发；
+- 反应器设计；
+- 专利装置结构；
+- 安全环保信息；
+- 其他碳源或 CNT 类型的可迁移信息；
+- 图注、讨论段或综述中有价值但不能形成 run 的信息。
+
+建议 JSONL 格式：
+
+```json
+{
+  "observation_id": "OBS_P001_001",
+  "source_id": "P001",
+  "related_run_id": null,
+  "observation_type": "temperature_effect",
+  "related_table": "reactor_process_gas",
+  "related_field": "process_note",
+  "topic_tags": ["CH4-CVD", "Fe-Mo/MgO", "temperature", "deactivation"],
+  "value_summary": "High temperature increased methane decomposition but may accelerate catalyst deactivation.",
+  "original_text": "original sentence from the source",
+  "evidence_location": "Results section, paragraph 3",
+  "why_valuable": "May help define upper temperature limit for Fe-Mo/MgO methane CVD.",
+  "action_status": "keep_for_review",
+  "promotion_decision": "not_promoted_yet",
+  "confidence": "medium",
+  "notes": ""
+}
 ```
 
-关注内容：
+当同类 observation 在 20–30 篇样本中频繁出现，并且确实影响研发分析时，再考虑升级为正式字段。
 
-- 甲烷、天然气、氢气、氮气和电力单耗；
-- 催化剂成本、纯化成本和废弃物处理成本；
-- 催化剂寿命和循环次数；
-- 连续运行时间和批次稳定性；
-- 放大问题，如堵塞、积碳、传热、流化；
-- 安全风险，如 CH4/H2 爆炸、高温、粉尘；
-- 该催化剂-工艺-产品组合是否值得复现；
-- 工业价值评分和下一步建议。
+---
 
-建议字段：
+## 8. 专利处理原则
 
-```text
-run_id
-quantitative_cost_reported
-methane_consumption_per_kg_CNT
-natural_gas_consumption_per_kg_CNT
-H2_consumption_per_kg_CNT
-N2_or_Ar_consumption_per_kg_CNT
-electricity_consumption_per_kg_CNT
-catalyst_cost_signal
-purification_cost_signal
-waste_treatment_signal
-continuous_operation_time_h
-catalyst_reuse_cycles
-batch_stability
-scale_signal_reported
-scale_level_claimed
-scale_up_issue
-safety_risk
-needs_H2
-needs_acid_washing
-major_cost_driver
-missing_critical_fields
-industrial_value_score
-recommended_next_action
-review_note
-evidence_text
-evidence_location
-confidence
-```
+专利资料必须区分不同文本区域。
 
-#### 组合催化剂适应温度和工业推荐如何记录
-
-“某个组合最适合什么条件”不单独建表，先由 `source_run.combo_key` 聚合，再在 `cost_scale_review` 中做轻量判断。
+| 专利内容 | 是否可形成 run |
+|---|---|
+| 实施例 / Example / Embodiment | 可以，若有具体条件和结果 |
+| 具体实施方式 | 可以，若有明确配方、工艺和产物 |
+| 权利要求 / Claim | 不直接形成 run |
+| 背景技术 | 只作为背景或 observation |
+| 宽泛保护范围 | 不当作真实实验数据 |
 
 例如：
-
-```text
-combo_key:
-Fe-Mo/MgO | CH4 | fixed-bed CCVD | t-MWCNT
-
-recommended_next_action:
-prioritize Ar-decomposed Fe-Mo/MgO; reproduce CH4-CVD near 900 ℃; compare lower H2/Ar consumption and catalyst lifetime
-
-review_note:
-high yield and good purity reported, but methane conversion, catalyst lifetime, continuous operation and real cost data are missing
-```
-
-这样可以保留“最合适条件”的判断，但不把它伪装成原始实验事实。
-
----
-
-### 字段优先级
-
-为避免表格过空，每个字段建议分为三类。
-
-#### A 类：必要字段，优先抽取
-
-```text
-run_id
-source_id
-catalyst_key
-active_metals
-support_material
-preparation_method
-calcination_condition
-reactor_type
-carbon_source
-temperature_setpoint_C
-holding_time_min
-gas_ratio_summary
-CNT_type_reported
-CNT_type_confirmed
-yield_original
-purity_wt_percent
-outer_diameter_range_nm
-evidence_text
-evidence_location
-confidence
-```
-
-#### B 类：有就抽取
-
-```text
-metal_ratio_original
-promoter
-precursor_summary
-acid_or_complexing_summary
-catalyst_particle_size_nm
-BET_surface_area_m2_g
-pore_diameter_nm
-reduction_condition
-temperature_range_reported_C
-reported_optimal_temperature
-methane_conversion_percent
-Raman_ID_IG
-RBM_peak_reported
-ash_content_wt_percent
-scale_signal_reported
-recommended_next_action
-```
-
-#### C 类：暂不强求
-
-```text
-GHSV_or_residence_time
-actual_temperature_C
-temperature_sensor_position
-complete_XPS_peak_fitting
-complete_Raman_peak_fitting
-full_pore_size_distribution
-methane_consumption_per_kg_CNT
-electricity_consumption_per_kg_CNT
-catalyst_cost_per_kg_CNT
-SWCNT_chirality
-metallic_semiconducting_ratio
-long_term_continuous_operation_data
-```
-
-A 类字段决定一条数据是否有研发价值；B 类字段用于提高分析深度；C 类字段只在原文明确给出时收集，不因缺失而否定该 run 的可用性。
-
----
-
-## run_id 原则
-
-本项目不以“一篇论文 = 一条记录”为原则，而是以实验或实施例为单位。
-
-推荐定义：
-
-```text
-一个明确的催化剂体系
-+ 一个明确的 CVD 工艺程序
-+ 一个对应的产物 / 产率结果
-= 一个 run_id
-```
-
-如果同一篇论文中比较了多个催化剂、温度、气体比例、反应时间或产物结果，则应拆成多个 run_id。
-
-例如，一篇论文中包含以下催化剂：
-
-```text
-Fe/MgO
-Fe-Mo/MgO
-Co/MgO
-Co-Mo/MgO
-Ni/MgO
-```
-
-这应被视为多条实验记录，而不是一条文献记录。
-
----
-
-## 证据要求
-
-关键字段应尽量保留以下信息：
-
-```text
-value
-unit
-original_value
-evidence_text
-evidence_location
-source_section
-extraction_method
-confidence
-```
-
-其中 `extraction_method` 可以是：
-
-- `explicit`：原文明确给出；
-- `inferred`：根据上下文推断；
-- `calculated`：由原始数据计算得到。
-
-如果字段是推断或计算得到，必须保留说明，不能伪装成原文数据。
-
----
-
-## 专利处理原则
-
-专利资料需要区分不同部分：
-
-| 专利部分 | 是否可作为实验数据 |
-|---|---|
-| 实施例 / Example / Embodiment | 可以，若条件具体 |
-| 具体实施方式 | 可以，若有明确配方和条件 |
-| 权利要求 / Claim | 不直接作为实验数据 |
-| 背景技术 | 只作为背景信息 |
-| 宽泛范围描述 | 只能作为候选或保护范围信息 |
-
-例如，专利中写：
 
 ```text
 催化剂可选 Fe、Co、Ni，温度范围 500–1100 ℃。
 ```
 
-这通常是保护范围或宽泛描述，不能直接当作真实实验记录。
+这通常是保护范围，不是实验结果。可以记录为 observation，但不能直接进入 `reactor_process_gas` 作为真实工艺窗口。
 
 ---
 
-## 数据来源
-
-项目可能使用的数据来源包括：
-
-- OpenAlex；
-- Crossref；
-- Semantic Scholar；
-- CORE；
-- arXiv；
-- Web of Science / SCI / SCIE 导出；
-- Scopus 导出；
-- CNKI、万方、维普等中文数据库导出；
-- Google Patents；
-- Lens；
-- EPO OPS；
-- WIPO PATENTSCOPE；
-- CNIPA 中国专利；
-- 公司或实验室内部数据。
-
-不同数据源的可信度、字段完整度和使用限制不同。公开数据、专利数据和内部实验数据应分开管理。
-
----
-
-## 当前目录结构与规划
+## 9. 推荐目录结构
 
 ```text
 CNT-PatSight/
-  AGENTS.md
   README.md
+  AGENTS.md
 
   skills/
     cnt-patsight/
       SKILL.md
-
-  config/
-    README.md
+      references/
+        schema.md
 
   data/
-    README.md
     raw/
       metadata/
       papers/
       patents/
     interim/
+      parsed_text/
+      extraction_json/
+      source_observations.jsonl
     processed/
+      source_run.csv
+      catalyst_system.csv
+      reactor_process_gas.csv
+      yield_quality.csv
+      cost_scale_review.csv
     dictionaries/
+      synonym_dictionary.csv
+      unit_rules.csv
+      catalyst_terms.csv
     internal/
       README.md
 
   docs/
+    field_definitions.md
+    extraction_rules.md
+    patent_rules.md
+    screening_rules.md
     repository_structure.md
-    field_definitions.md      # 规划：字段定义稳定后创建
-    extraction_rules.md       # 规划：小样本抽取后创建
-    patent_rules.md           # 规划：专利样本验证后创建
-    project_scope.md          # 规划：研究边界配置化时创建
+
+  prompts/
+    01_screening_prompt.md
+    02_extraction_prompt.md
+    03_normalization_prompt.md
 
   scripts/
-    collect_metadata/
-    screening/
-    extraction/
     validation/
     analysis/
 
-  reports/
-    figures/
-
   notebooks/
-
+  reports/
   tests/
-    fixtures/
 ```
 
-当前仓库已按这一骨架初始化。各目录的具体用途和文件放置规则见
-[`docs/repository_structure.md`](docs/repository_structure.md)。尚未创建的配置和规则文档将在小样本闭环验证后逐步补充，避免用未经验证的占位值固化流程。
-
 ---
 
-## 阶段性成果
+## 10. 建议的第一轮操作
 
-本项目可逐步形成以下成果：
+### Step 1：建立候选池
 
-1. metadata 候选资料池；
-2. 结构化的 CNT 文献/专利数据库；
-3. 字段定义文档；
-4. 抽取规则文档；
-5. 同义词和单位标准化字典；
-6. 催化剂、载体、助剂、温度和产率统计图；
-7. 工业评分和路线推荐；
-8. 面向研发组的实验建议报告；
-9. 后续可选的数据看板或模型辅助抽取系统。
+先找 10 篇高质量论文或专利，优先选择：
 
----
+- 有催化剂制备；
+- 有 CVD 条件；
+- 有气体流量；
+- 有温度和时间；
+- 有产率或产品质量；
+- 有 SEM/TEM/Raman/TGA 等表征；
+- 有多组对比实验。
 
-## 使用方式
+### Step 2：复制关键文本
 
-建议先完成小样本闭环：
+每篇优先复制：
 
 ```text
-少量高相关论文/专利
-        ↓
-手工或半自动抽取
-        ↓
-填入 5 张主表
-        ↓
-人工校正
-        ↓
-验证字段是否够用
-        ↓
-再扩大 metadata 搜集和自动化抽取
+Abstract
+Experimental / Materials and methods
+Catalyst preparation
+CNT synthesis / CVD growth
+Characterization
+Results 中的关键段落
+表格
+图注
+Supplementary information 中的实验条件
 ```
 
-不建议一开始就追求海量全文抽取或复杂网页系统。数据结构和抽取规则稳定之后，再扩大自动化程度。
+### Step 3：LLM 抽取
+
+LLM 第一轮只做：
+
+- 判断文献等级；
+- 拆分 run_id；
+- 抽取 reported facts；
+- 保留 evidence；
+- 标记 uncertainty；
+- 把非 run 但有价值的信息放入 observation。
+
+不要让 LLM 第一轮做工业评分或推荐实验。
+
+### Step 4：人工复核
+
+人工重点核对：
+
+- 催化剂成分和比例；
+- 煅烧 / 还原 / 生长温度是否混淆；
+- CH4 / H2 / N2 / Ar 流量是否分清；
+- 反应时间是否对应 CNT 生长阶段；
+- 产率定义和单位；
+- CNT 类型，尤其是否真的支持 SWCNT；
+- 专利 claim 是否被误当成实验数据。
+
+### Step 5：小样本分析
+
+完成 30 条左右记录后再分析：
+
+- 哪些催化剂体系出现频率高；
+- CH4-CVD 温度和气体窗口；
+- 高产率路线的共同条件；
+- 产品质量和产率是否冲突；
+- 哪些字段经常缺失；
+- 哪些 observation 值得升级为正式字段。
 
 ---
 
-## 保密说明
+## 11. 保密说明
 
 如果后续加入公司或实验室内部实验数据，应默认视为敏感数据。
 
 建议原则：
 
 - 公开文献和专利数据可以进入公开数据区；
-- 内部实验数据单独存放；
-- 不将内部实验数据默认发送到外部 API；
-- 不提交包含商业敏感信息、供应商报价、未公开配方或内部实验结果的文件到公开仓库；
-- 模型调用、数据上传和报告分享应遵守所在机构或公司的保密要求。
+- 内部实验数据单独存放在 `data/internal/`；
+- 不将内部配方、供应商报价、未公开实验结果发送到外部 API；
+- 不把内部数据提交到公开仓库；
+- 模型调用和报告分享应遵守所在机构或公司的保密要求。
 
 ---
 
-## 项目成功标准
+## 12. 路线图
 
-CNT-PatSight 的成功不只是收集很多 PDF，也不是生成很多摘要。
+### v0.1：小样本验证
 
-更重要的是形成一个能帮助研发人员回答实际问题的数据资产：
+- 10 篇论文/专利；
+- 约 30 条 run；
+- 5 张主表；
+- 观察池；
+- 人工复核；
+- 初步统计。
 
-- 已经有哪些催化剂体系被尝试过？
-- 它们对应什么 CVD 条件？
-- 产率和产品质量如何？
-- 哪些结果有原文证据支持？
-- 哪些数据适合复现？
-- 哪些路线更可能工业化？
-- 下一步实验应该优先尝试什么？
+### v0.2：字段稳定与规则文档
 
-最终目标是帮助 CNT 研发从零散经验和文献阅读，逐步走向系统化、数据化和可复现的研发决策。
+- 完善 `field_definitions.md`；
+- 完善 `extraction_rules.md`；
+- 建立同义词和单位规则；
+- 形成稳定 prompt；
+- 输出第一份小样本分析报告。
+
+### v0.3：半自动抽取
+
+- 批量处理 metadata；
+- 半自动筛选；
+- LLM JSON 输出校验；
+- 表格验证脚本；
+- 统计图表。
+
+### Future
+
+- 扩展专利样本；
+- 融合内部实验数据；
+- 成本和放大模型；
+- 工艺窗口分析；
+- 机器学习或贝叶斯优化；
+- 面向研发组的实验建议报告。
+
+---
+
+## 13. 成功定义
+
+CNT-PatSight 的成功不是收集很多 PDF，也不是生成很多摘要。
+
+真正有价值的结果是：
+
+- 能看出哪些催化剂体系被尝试过；
+- 能知道它们对应什么 CVD 条件；
+- 能比较产率、纯度、管径、缺陷和后处理负担；
+- 能追溯每个关键值来自哪一句原文；
+- 能区分真实实验、专利保护范围和作者推测；
+- 能发现值得研发组复现、改造或避开的路线。
+
+一句话概括：
+
+> CNT-PatSight 不是论文摘要项目，而是 CNT-CVD 研发数据资产的构建项目。

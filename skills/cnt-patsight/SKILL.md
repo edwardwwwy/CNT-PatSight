@@ -9,7 +9,7 @@ description: Structure, screen, extract, validate, and analyze CNT papers, paten
 
 Act as an industrial CNT R&D data engineer. Convert papers, patents, reports, and later internal experiments into structured, evidence-backed records that help researchers reproduce, compare, and prioritize CNT synthesis routes.
 
-Prefer the following five main tables as the common working model:
+Use the following five main tables as the stable v0.1 formal schema:
 
 ```text
 source_run
@@ -19,23 +19,35 @@ yield_quality
 cost_scale_review
 ```
 
-Treat them as a practical organization framework, not a closed ontology. Do not discard technically valuable information merely because it is outside a preset column, incomplete, outside the current priority, or unable to form a full run. Preserve it through a suitable existing field, an explicit extension field, `summary`/`notes`, an evidence object, or a clearly labeled auxiliary artifact when justified.
+Do not add fields to these five tables by default unless the user explicitly requests a schema change. This schema stability is not a content filter: preserve technically valuable information that cannot map stably to the tables or cannot form a complete run through `source_level_observations`, `valuable_unmapped_information`, and `data/interim/source_observations.jsonl`.
 
 ## Operating principles
 
 - Prioritize methane/natural-gas CVD/CCVD routes and industrial MWCNT questions without treating that priority as a permanent boundary.
+- Follow the rule: **schema strict, capture broad.**
 - Preserve the relationship between source, catalyst, process, product result, evidence, and industrial interpretation.
 - Distinguish `reported`, `inferred`, `calculated`, and `review_assessment` information.
 - Preserve uncertainty. Do not invent missing values or present broad claims as completed experiments.
-- Prefer reusable, comparable fields, but retain unusual observations that may influence mechanism, reproducibility, product type, scale-up, cost, or future experiments.
+- Keep the v0.1 main-table fields stable unless the user explicitly requests a change.
+- Retain unusual observations that may influence mechanism, reproducibility, product type, scale-up, cost, or future experiments without forcing new formal fields.
 - Treat controls, failed conditions, deactivation, low-yield runs, and contradictory observations as useful R&D evidence rather than noise.
 - Keep public sources and confidential internal records separable. Do not send internal data to external services without authorization.
 
-## Flexible capture
+## Schema-stable broad capture
 
-Use the five tables and recommended fields as guidance, not a required sequence. Reuse an existing field when it fits naturally, use `summary` or `notes` for unusual details, and add a field or auxiliary structure when it will clearly help later work. A brief note about the meaning and destination of a new field is usually enough.
+Use an existing v0.1 field when information fits it naturally. Do not add, rename, split, or repurpose a main-table field merely to capture one unusual source. Only change formal fields when the user explicitly requests it.
 
-Do not delay or discard valuable information while waiting for a perfect schema. Avoid obvious duplicate fields, but allow the structure to evolve with real sources and R&D needs.
+When information does not fit stably or cannot support a complete `run_id`:
+
+- Put source-level material in `source_level_observations`.
+- Put useful but currently unmapped material in `valuable_unmapped_information`.
+- When saving extraction results, append the observation records to `data/interim/source_observations.jsonl`.
+
+Treat `source_observations.jsonl` as a temporary information inbox, not as a sixth formal business table. Keep each observation traceable to its source and evidence location when practical, but do not impose a rigid observation schema that would recreate the same capture problem.
+
+Use the inbox for mechanism explanations, failed conditions, deactivation causes, temperature effects, catalyst-preparation ideas, patent apparatus designs, scale-up risks, safety or environmental information, transferable information from other carbon sources or CNT types, and any potentially useful information that cannot yet form a run.
+
+After approximately 20–30 representative sources have been extracted and reviewed, summarize recurring observation types. Ask the user before promoting any recurring type into a new or changed formal field.
 
 ## Workflow
 
@@ -49,17 +61,23 @@ Useful metadata commonly includes title, year, authors or assignee, DOI or paten
 
 Evaluate whether the source contains CNT synthesis, CVD/CCVD or catalytic decomposition, methane or natural gas, catalyst information, process conditions, product type, result metrics, or industrially useful observations.
 
-Use flexible classes such as:
+Assign one of these screening classes:
 
 ```text
 formal_extract
-candidate
-background
-comparison
-out_of_current_scope
+candidate_extract
+source_observation_only
+background_reference
+reject
 ```
 
-A source outside the current priority can still be retained when it provides valuable catalyst chemistry, activation logic, temperature effects, CNT-type evidence, failure modes, reactor knowledge, scale-up insight, or a useful comparison route.
+- `formal_extract`: extract evidence-supported runs into the five main tables and retain extra observations where useful.
+- `candidate_extract`: keep the source for human review before formal extraction.
+- `source_observation_only`: do not force a formal run; capture useful observations.
+- `background_reference`: retain the source as background without detailed formal extraction.
+- `reject`: use only when the source is clearly irrelevant.
+
+Do not reject a paper or patent merely because it is not methane-based MWCNT work. Preserve it as an observation when it contains transferable catalyst design, activation, temperature-window, CNT-type evidence, reactor, failure-mode, scale-up, safety, environmental, or industrial insight.
 
 ### 3. Extract at run level when the evidence supports it
 
@@ -71,7 +89,7 @@ one identifiable catalyst system
 + one corresponding product or yield result
 ```
 
-Split runs when a change in catalyst, temperature, gas program, pressure, time, reactor, purification, or result represents a distinct experiment. This is the default analytical unit, not a reason to discard fragmentary evidence. If a valuable statement cannot be linked safely to a complete run, store it as source-level context or a candidate observation and explain the limitation.
+Split runs when a change in catalyst, temperature, gas program, pressure, time, reactor, purification, or result represents a distinct experiment. This is the default analytical unit, not a reason to discard fragmentary evidence. If a valuable statement cannot be linked safely to a complete run, route it to observations and explain the limitation; do not fabricate a `run_id`.
 
 ### 4. Preserve field-level evidence
 
@@ -89,7 +107,7 @@ value_status: reported / inferred / calculated / review_assessment
 confidence: high / medium / low
 ```
 
-Use evidence type, scope, or a `high`/`medium`/`low` confidence label when they help interpretation; they are not required for every minor field. Use `unknown`, `not_reported`, `not_applicable`, or a short note when appropriate. Do not turn missing information into a guessed fact.
+Use evidence type, scope, or a `high`/`medium`/`low` confidence label when they help interpretation; they are not required for every minor field. Keep missing information as `null`, `not_reported`, or `not_applicable` as appropriate. Do not turn missing information into a guessed fact.
 
 When important sources or sections disagree, keep the conflict visible where practical rather than silently overwriting it. Minor wording differences do not need elaborate conflict records.
 
@@ -99,13 +117,20 @@ Preserve the original term, value, unit, and calculation basis. Add normalized v
 
 For yield and productivity, always preserve the reported definition. Do not compare mass gain, g CNT/g catalyst, conversion, selectivity, array height, deposition rate, and percentage yield as though they were the same metric.
 
-### 6. Review for R&D usefulness
+### 6. Complete the first-round LLM extraction
+
+- Put evidence-supported formal run data into the five main tables.
+- Put valuable non-run information into observations.
+- Keep missing values as `null` or `not_reported`.
+- Do not assign industrial scores, rankings, or recommendations without supporting evidence.
+
+### 7. Review for R&D usefulness
 
 Assess whether the record helps explain what was tried, why it worked or failed, which evidence supports the product assignment, which conditions may be reproducible, and what remains unknown for industrial adoption.
 
 ## Five-table routing guidance
 
-Read [references/schema.md](references/schema.md) when designing schemas, extracting records, validating fields, or preparing table outputs. Its field lists are recommended starting points, not mandatory completeness requirements.
+Read [references/schema.md](references/schema.md) when mapping records, validating fields, or preparing table outputs. Treat its v0.1 fields as stable defaults and do not modify them unless the user explicitly requests a schema change. Incomplete fields are acceptable; route useful unmapped information to observations.
 
 ### `source_run`
 
@@ -146,7 +171,7 @@ Keep reported facts separate from review assessments. Explain the basis for rank
 - Treat examples and embodiments with concrete catalyst, process, and result information as potential runs.
 - Record claims, description ranges, and background statements when useful, but label their evidence type.
 - Do not present a protection range or list of alternatives as a verified experiment.
-- Preserve valuable apparatus, catalyst-recovery, continuous-operation, safety, and scale-up disclosures even when they do not form a complete run.
+- Preserve valuable apparatus, catalyst-recovery, continuous-operation, safety, and scale-up disclosures as observations when they do not form a complete run.
 
 ## Output pattern
 
@@ -166,7 +191,7 @@ Prefer an object containing a document decision, zero or more runs, five-table r
 }
 ```
 
-An empty table or missing field is acceptable. Do not create filler values merely to make an output appear complete.
+An empty table or missing field is acceptable. Do not create filler values merely to make an output appear complete. When persisting a result, append items from `source_level_observations` and `valuable_unmapped_information` to `data/interim/source_observations.jsonl` with enough source and evidence context for later review. Do not treat that JSONL file as a formal main table.
 
 ## Quality review
 
@@ -179,15 +204,19 @@ Before saving or reporting, use these as practical checks:
 - Are original units and yield definitions preserved?
 - Are important `reported`, `inferred`, `calculated`, and `review_assessment` values distinguishable?
 - Are useful conflicts, controls, failures, and negative results retained?
-- Has valuable information outside the recommended fields been retained with context?
+- Has valuable information outside the stable v0.1 fields been retained in observations with context?
+- Were main-table fields left unchanged unless the user explicitly requested a schema change?
 - Are industrial recommendations evidence-based and explicit about missing information?
 
 ## Common failure modes
 
 - Treating one paper as one experiment.
 - Extracting only the best result and losing controls, failures, or temperature series.
+- Hard-rejecting a source solely because it is not methane-based MWCNT work.
 - Rejecting valuable evidence solely because it is outside the current priority or schema.
+- Adding a main-table field for every unusual observation instead of using the observation inbox.
 - Forcing incomplete information into a misleading run.
+- Treating `source_observations.jsonl` as a sixth formal business table.
 - Treating patent claims as experimental proof.
 - Filling missing fields without evidence.
 - Comparing incompatible yield definitions.

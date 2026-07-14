@@ -40,7 +40,7 @@ source_run.run_id
 
 - 字段清单：`config/schema.json`
 - CSV 模板：`data/processed/templates/`
-- Excel 模板：`outputs/cnt-patsight-foundation/cnt_patsight_collection_template.xlsx`
+- Excel 模板：`data/processed/templates/cnt_patsight_collection_template.xlsx`
 - 校验脚本：`scripts/validation/validate_tables.py`
 
 运行基础校验：

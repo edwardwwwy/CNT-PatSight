@@ -115,17 +115,58 @@ The project should avoid treating vague claims, broad patent ranges, or unsuppor
 
 The project should preserve uncertainty where information is incomplete. Missing information should remain missing rather than being invented.
 
-The current five-table structure is a preferred working model, not a closed ontology or a reason to discard useful evidence. Stable and comparable information should use standard fields where practical. Valuable exceptions, incomplete observations, unusual catalyst chemistry, negative results, or information outside the current priority may be retained in extension fields, summaries, notes, evidence records, or clearly labeled auxiliary artifacts.
+The v0.1 five-table structure is the stable formal schema. By default, do not add fields to the five main tables unless the user explicitly requests a schema change. Stable and comparable run-level information should use the existing standard fields where practical.
 
-Keep the structure understandable without making field creation burdensome. Reuse existing fields when convenient, use summaries or notes for unusual details, and add fields when they clearly help future extraction or analysis. A brief explanation is normally sufficient. Preserve important conflicting values when they affect interpretation.
+Schema stability must not narrow information capture. Valuable exceptions, incomplete observations, unusual catalyst chemistry, negative results, and information outside the current priority should be preserved as source observations instead of forcing new main-table fields or fabricating a complete run. Preserve important conflicting values when they affect interpretation.
 
 Screening should normally assign priority and relevance rather than permanently delete potentially useful sources. A source that cannot form a complete experimental run may still be useful for field design, mechanism comparison, catalyst preparation, CNT-type verification, failure analysis, scale-up, safety, or future experimental planning.
 
 ---
 
+## v0.1 Schema Stability and Broad Capture
+
+Use the following five tables as the stable v0.1 formal data model:
+
+- `source_run`
+- `catalyst_system`
+- `reactor_process_gas`
+- `yield_quality`
+- `cost_scale_review`
+
+Follow the principle: **schema strict, capture broad.**
+
+- Do not add fields to the five main tables by default. Add or change a formal field only when the user explicitly requests it.
+- Do not discard potentially useful R&D information merely because it does not fit the current schema or cannot form a complete `run_id`.
+- Route source-level material to `source_level_observations` and information that does not map stably to the five tables to `valuable_unmapped_information`.
+- Persist these observations in `data/interim/source_observations.jsonl` when saving extraction results.
+- Treat `source_observations.jsonl` as a temporary information inbox, not as a sixth formal business table.
+
+The observation inbox may retain mechanism explanations, failed conditions, deactivation causes, temperature effects, catalyst-preparation ideas, patent apparatus designs, scale-up risks, safety or environmental information, transferable information from other carbon sources or CNT types, and other useful evidence that cannot yet support a complete `run_id`.
+
+Do not create main-table fields merely to avoid using observations. After approximately 20–30 representative sources have been extracted and reviewed, summarize recurring observation types and decide with the user whether any should be promoted into the formal schema.
+
+Use screening as classification rather than deletion:
+
+- `formal_extract`: extract evidence-supported runs into the five main tables; retain additional observations where useful.
+- `candidate_extract`: keep as a candidate pending human review.
+- `source_observation_only`: do not force formal runs; retain useful information as observations.
+- `background_reference`: retain as background without detailed formal extraction.
+- `reject`: use only for clearly irrelevant material.
+
+Do not reject a source simply because it is not methane-based MWCNT work. Preserve it as an observation when it offers transferable catalyst design, activation, temperature-window, CNT-type evidence, reactor, failure-mode, or industrial insight.
+
+For the first-round LLM extraction:
+
+- Send evidence-supported formal run data to the five main tables.
+- Send valuable non-run information to observations.
+- Keep missing information as `null` or `not_reported` rather than guessing.
+- Do not assign industrial scores or rankings without supporting evidence.
+
+---
+
 ## Recommended Information Routing
 
-Use these five main tables as the default organization while allowing justified extensions:
+Use these five main tables as the stable v0.1 organization for formal run data:
 
 - `source_run`: source and run identity, route classification, extraction status, and derived aggregation keys such as `combo_key`.
 - `catalyst_system`: catalyst composition, support, promoter, precursor, preparation, acidification, complexation, calcination, reduction, activation, and catalyst properties.
