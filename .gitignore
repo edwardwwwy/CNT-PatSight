@@ -1,0 +1,28 @@
+# Python and notebook caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Temporary files and logs
+tmp/
+*.log
+~$*
+
+# Confidential internal R&D data: keep only the policy README in Git.
+/data/internal/*
+!/data/internal/README.md
+
+# Downloaded source documents are reproducible inputs and may be large or licensed.
+/data/raw/papers/*
+!/data/raw/papers/.gitkeep
+/data/raw/patents/*
+!/data/raw/patents/.gitkeep
+

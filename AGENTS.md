@@ -10,6 +10,24 @@ It is not primarily a web app, dashboard, or software product at the current sta
 
 ---
 
+## Project Skill Trigger
+
+Before performing CNT-PatSight work involving literature or patent screening, metadata collection, PDF or full-text extraction, `run_id` construction, structured data extraction, schema design, table validation, catalyst/process/product comparison, CNT-type verification, industrial scale-up review, or R&D recommendations, read and use as project guidance:
+
+```text
+skills/cnt-patsight/SKILL.md
+```
+
+For schema design, field mapping, extraction outputs, or validation of the five main tables, consult when useful:
+
+```text
+skills/cnt-patsight/references/schema.md
+```
+
+Do not load the detailed schema reference for unrelated repository maintenance, general file organization, or tasks that do not operate on CNT research data. Treat the Skill as project-specific operating guidance: apply its evidence and uncertainty safeguards consistently while adapting its recommended fields and workflow to the value and completeness of each source.
+
+---
+
 ## Core Motivation
 
 Carbon nanotube research contains a large amount of useful information across papers, patents, theses, reports, and internal experiments. However, most of this information is scattered, inconsistent, and difficult for an R&D team to directly compare.
@@ -96,6 +114,28 @@ A useful data record should preserve the connection between:
 The project should avoid treating vague claims, broad patent ranges, or unsupported assumptions as concrete experimental facts.
 
 The project should preserve uncertainty where information is incomplete. Missing information should remain missing rather than being invented.
+
+The current five-table structure is a preferred working model, not a closed ontology or a reason to discard useful evidence. Stable and comparable information should use standard fields where practical. Valuable exceptions, incomplete observations, unusual catalyst chemistry, negative results, or information outside the current priority may be retained in extension fields, summaries, notes, evidence records, or clearly labeled auxiliary artifacts.
+
+Keep the structure understandable without making field creation burdensome. Reuse existing fields when convenient, use summaries or notes for unusual details, and add fields when they clearly help future extraction or analysis. A brief explanation is normally sufficient. Preserve important conflicting values when they affect interpretation.
+
+Screening should normally assign priority and relevance rather than permanently delete potentially useful sources. A source that cannot form a complete experimental run may still be useful for field design, mechanism comparison, catalyst preparation, CNT-type verification, failure analysis, scale-up, safety, or future experimental planning.
+
+---
+
+## Recommended Information Routing
+
+Use these five main tables as the default organization while allowing justified extensions:
+
+- `source_run`: source and run identity, route classification, extraction status, and derived aggregation keys such as `combo_key`.
+- `catalyst_system`: catalyst composition, support, promoter, precursor, preparation, acidification, complexation, calcination, reduction, activation, and catalyst properties.
+- `reactor_process_gas`: reactor and scale, process stages, gas program, actual run temperature, reported suitable or optimal temperature, failed temperature, and temperature effects.
+- `yield_quality`: yield definition, conversion, CNT type, morphology and quality, including whether SWCNT is reported or supported by TEM/HRTEM, Raman RBM, diameter, or wall-count evidence.
+- `cost_scale_review`: reported cost and scale facts, suitable-condition synthesis, reproduction value, industrial assessment, missing critical information, and recommended next action.
+
+Use `combo_key` to support aggregation across catalyst, carbon source, reactor, and CNT type. Treat it as a derived analysis key, retain its components separately, and do not present it as an experimental fact.
+
+Keep source-reported optimum conditions separate from reviewer-selected conditions. Keep reported facts separate from inferred, calculated, and review-assessment values. These distinctions are more important than forcing every record into identical completeness.
 
 ---
 

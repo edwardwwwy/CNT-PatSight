@@ -1,0 +1,117 @@
+version: "1.0"
+name: "CNT-PatSight first collection scope"
+status: "advisory"
+
+mission: >-
+  服务 CNT 研发组，在 run 级别比较不同催化剂组合与 CVD 工艺条件对 CNT
+  产率、质量和类型的影响；不以构建 CNT 百科为目标。
+
+source_types:
+  in_scope:
+    - paper
+    - patent
+  patent_rule: >-
+    具体实施例或明确实施方式可形成 run；claim、背景和宽泛保护范围只能作为候选或背景证据。
+
+route_scope:
+  recommended_priority:
+    - methane_CVD
+    - methane_CCVD
+    - methane_catalytic_decomposition
+  useful_comparison:
+    - natural_gas_CVD
+    - other_carbon_source_CVD
+  other_relevant_routes:
+    - non_CVD_CNT_synthesis
+    - CNT_application_only
+    - general_review_without_run_level_conditions
+
+product_scope:
+  target: CNT
+  types_of_interest:
+    - SWCNT
+    - MWCNT
+    - DWCNT
+    - t-MWCNT
+    - mixed_or_uncertain_CNT
+  verification_rule: >-
+    CNT 类型必须区分作者声称与证据确认；SWCNT 优先依据 TEM/HRTEM、Raman RBM、
+    直径和壁数，证据不足时保留 uncertain/unknown。
+
+v1_research_questions:
+  - "哪些催化剂组合效果好？"
+  - "适合什么温度区间？"
+  - "对应什么碳源和气氛？"
+  - "产物是 SWCNT 还是 MWCNT？"
+  - "产率、纯度、直径、长度、残留金属如何？"
+  - "是否有酸洗、氧化等后处理？"
+
+v1_collection_priorities:
+  catalyst:
+    - active_metals
+    - support_material
+    - promoter
+    - metal_ratio_original
+    - precursor_summary
+    - preparation_method
+  process:
+    - reactor_type
+    - temperature_setpoint_C
+    - temperature_actual_C
+    - temperature_range_reported_C
+    - reported_optimal_temperature
+    - holding_time_min
+    - pressure_original
+    - carbon_source
+    - gas_flows
+    - gas_ratio_summary
+  product:
+    - yield_original
+    - yield_definition_original
+    - CNT_type_reported
+    - CNT_type_confirmed
+    - CNT_type_evidence
+    - purity_wt_percent
+    - outer_diameter_range_nm
+    - length_summary
+    - metal_residue_wt_percent
+    - post_treatment_or_purification
+  traceability:
+    - evidence_text
+    - evidence_location
+    - confidence
+
+screening:
+  policy: >-
+    仅用于排序与安排抽取顺序，不作为永久删除或拒绝收录的硬性门槛。
+  formal_extract: >-
+    论文或专利实施例提供可识别的催化剂、CVD 条件和对应 CNT 结果，足以形成 run。
+  candidate: >-
+    与甲烷 CVD 或催化剂/温度/气氛/CNT 类型相关，但关键 run 信息不完整，或属于有价值的对比碳源。
+  background: >-
+    提供机制、表征、后处理或行业背景，但不能安全关联为具体 run。
+  comparison: >-
+    非优先路线，但可解释催化剂、温度窗口、CNT 类型或失败模式。
+  out_of_current_scope: >-
+    与当前建议重点距离较远；仍可保留元数据、背景证据或有价值观察，并可在需要时升级抽取。
+
+optional_in_v1:
+  - full_cost_model
+  - exhaustive_surface_characterization
+  - complete_pore_size_distribution
+  - SWCNT_chirality
+  - metallic_semiconducting_ratio
+  - long_term_industrial_operation_dataset
+
+guardrails:
+  - "不把一篇文献等同于一个 run。"
+  - "不把专利权利要求范围当作已完成实验。"
+  - "不猜测缺失值。"
+  - "不直接比较定义不同的 yield。"
+  - "不因超出 v1 优先级而永久删除有价值来源。"
+
+flexibility:
+  - "建议字段不是完成一条记录的硬性必填清单。"
+  - "非甲烷碳源、非主流 CNT 类型、失败条件和不完整观察均可保留。"
+  - "来源出现有价值的新字段时，可扩展 schema 或先写入 notes。"
+  - "相关性分类可以随研发问题变化而调整。"
