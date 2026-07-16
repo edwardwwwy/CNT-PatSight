@@ -1,0 +1,184 @@
+﻿table_name,field_name,description_cn,data_type,unit,required_level,population_expectation,controlled_values_or_format,null_policy,inclusion_rationale
+source_master,source_id,文献/专利主表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_master,source_type,文献/专利主表：来源类型。,categorical,not_applicable,core,always,paper|patent|review|internal_record,non_null,主键、外键或解释记录所需的核心字段。
+source_master,source_title,文献/专利主表：来源标题。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_master,publication_year,文献/专利主表：发表或公开年份。,number,year,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_master,authors_or_assignee,文献/专利主表：作者或专利受让人。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,publication_venue,文献/专利主表：期刊、会议或公开机构。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,doi_or_patent_no,文献/专利主表：DOI 或专利号。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_master,source_link,文献/专利主表：来源链接。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,source_database,文献/专利主表：来源数据库。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,source_language,文献/专利主表：来源语言。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,local_file_path,文献/专利主表：本地原始文件路径。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,pdf_status,文献/专利主表：PDF 获取状态。,categorical,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,screening_class,文献/专利主表：筛选分类。,categorical,not_applicable,core,always,formal_extract|candidate_extract|source_observation_only|background_reference|reject,non_null,主键、外键或解释记录所需的核心字段。
+source_master,source_section_scope,文献/专利主表：已覆盖的来源章节范围。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_master,extraction_status,文献/专利主表：提取状态。,categorical,not_applicable,core,always,needs_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
+source_master,review_status,文献/专利主表：复核状态。,categorical,not_applicable,core,always,pending_human_review|in_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
+source_master,notes,文献/专利主表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_run,run_id,实验运行主表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,source_id,实验运行主表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,run_label,实验运行主表：来源内运行标签。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,data_type,实验运行主表：数据类型。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,target_track,实验运行主表：目标技术路线。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,relevance_class,实验运行主表：相关性类别。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,extraction_status,实验运行主表：提取状态。,categorical,not_applicable,core,always,needs_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
+source_run,extraction_confidence,实验运行主表：提取总体置信度。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+source_run,run_summary,实验运行主表：运行摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+source_run,notes,实验运行主表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,run_id,催化剂体系表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,catalyst_id,催化剂体系表：催化剂记录标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,catalyst_label,催化剂体系表：来源中的催化剂标签。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,active_metals,催化剂体系表：核心活性金属。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,support_material,催化剂体系表：载体材料。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,promoter,催化剂体系表：助剂。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,metal_ratio_original,催化剂体系表：金属配比原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,metal_ratio_standardized,催化剂体系表：金属配比标准化表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,precursor_summary,催化剂体系表：前驱体摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,preparation_method,催化剂体系表：催化剂制备方法。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+catalyst_system,preparation_modifier,催化剂体系表：制备修饰类别。,categorical,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,preparation_detail,催化剂体系表：制备修饰与条件详情。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,drying_condition,催化剂体系表：干燥条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,calcination_condition,催化剂体系表：焙烧或热分解条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,reduction_condition,催化剂体系表：还原条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,activation_condition,催化剂体系表：活化条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,post_preparation_condition,催化剂体系表：洗涤、粉碎或筛分等后处理。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,catalyst_particle_size_mean_nm,催化剂体系表：催化剂颗粒平均尺寸。,number,nm,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+catalyst_system,catalyst_particle_size_range_nm,催化剂体系表：催化剂颗粒尺寸范围。,number,nm,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+catalyst_system,catalyst_particle_size_qualifier,催化剂体系表：颗粒尺寸证据状态。,categorical,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,BET_surface_area_m2_g,催化剂体系表：催化剂 BET 比表面积。,number,m2/g,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+catalyst_system,pore_diameter_nm,催化剂体系表：催化剂孔径。,number,nm,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+catalyst_system,pore_volume_cm3_g,催化剂体系表：催化剂孔容。,number,cm3/g,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+catalyst_system,phase_or_state_summary,催化剂体系表：催化剂物相或化学态摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,dispersion_summary,催化剂体系表：活性相分散摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,deactivation_summary,催化剂体系表：催化剂失活摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+catalyst_system,notes,催化剂体系表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,run_id,反应器、工艺与气体程序表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+reactor_process_gas,process_stage_id,反应器、工艺与气体程序表：工艺阶段标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+reactor_process_gas,stage_order,反应器、工艺与气体程序表：阶段顺序。,number,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+reactor_process_gas,stage_type,反应器、工艺与气体程序表：阶段类型。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+reactor_process_gas,reactor_type,反应器、工艺与气体程序表：反应器类型。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+reactor_process_gas,scale_level,反应器、工艺与气体程序表：阶段实验规模。,categorical,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reactor_material,反应器、工艺与气体程序表：反应器材料。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reactor_size_summary,反应器、工艺与气体程序表：反应器尺寸摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reactor_setup_summary,反应器、工艺与气体程序表：床层、舟皿和测温位置摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,catalyst_loading_mass_g,反应器、工艺与气体程序表：催化剂装载质量。,number,g,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,temperature_setpoint_C,反应器、工艺与气体程序表：温度设定值。,number,degC,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,temperature_range_reported_C,反应器、工艺与气体程序表：来源报告的温度范围。,number,degC,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,temperature_program_summary,反应器、工艺与气体程序表：升温、实测或温度程序摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,holding_time_min,反应器、工艺与气体程序表：保温时间。,number,min,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,heating_rate_C_min,反应器、工艺与气体程序表：升温速率。,number,degC/min,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,cooling_condition,反应器、工艺与气体程序表：冷却条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,pressure_original,反应器、工艺与气体程序表：压力原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,pressure_kPa,反应器、工艺与气体程序表：标准化压力。,number,kPa,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,carbon_source,反应器、工艺与气体程序表：主要碳源。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,carbon_source_flow_original,反应器、工艺与气体程序表：碳源流量原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,carbon_source_flow_sccm,反应器、工艺与气体程序表：碳源标准流量。,number,sccm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reducing_gas,反应器、工艺与气体程序表：还原气体。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reducing_gas_flow_original,反应器、工艺与气体程序表：还原气流量原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,reducing_gas_flow_sccm,反应器、工艺与气体程序表：还原气标准流量。,number,sccm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,inert_gas,反应器、工艺与气体程序表：惰性或载气。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,inert_gas_flow_original,反应器、工艺与气体程序表：惰性气流量原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,inert_gas_flow_sccm,反应器、工艺与气体程序表：惰性气标准流量。,number,sccm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,cofeed_or_reactive_gas,反应器、工艺与气体程序表：共进料或反应性气体。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,cofeed_flow_original,反应器、工艺与气体程序表：共进料流量原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,cofeed_flow_sccm,反应器、工艺与气体程序表：共进料标准流量。,number,sccm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,total_flow_original,反应器、工艺与气体程序表：总流量原始表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,total_flow_sccm,反应器、工艺与气体程序表：标准化总流量。,number,sccm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,gas_composition_summary,反应器、工艺与气体程序表：完整气体组成和比例摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+reactor_process_gas,GHSV_or_residence_time,反应器、工艺与气体程序表：空速或停留时间。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+reactor_process_gas,process_note,反应器、工艺与气体程序表：工艺补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,run_id,产率与产品品质表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,product_id,产率与产品品质表：产品结果标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,primary_yield_metric,产率与产品品质表：主要产率指标类型。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,yield_original,产率与产品品质表：产率原始表述。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,yield_definition_original,产率与产品品质表：产率原始定义。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,yield_calculation_method,产率与产品品质表：产率计算公式或方法。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,yield_value_standardized,产率与产品品质表：产率标准化数值。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,yield_unit_standardized,产率与产品品质表：产率标准化单位。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,yield_standardization_note,产率与产品品质表：产率标准化说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,CNT_yield_per_catalyst_g_gcat,产率与产品品质表：单位催化剂 CNT 产量。,number,g/gcat,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,CNT_productivity_g_gcat_h,产率与产品品质表：单位催化剂单位时间 CNT 生产率。,number,g/gcat/h,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,carbon_source_conversion_percent,产率与产品品质表：主要碳源转化率。,number,%,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,carbon_conversion_to_solid_percent,产率与产品品质表：碳向固体产物转化率。,number,%,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,secondary_result_summary,产率与产品品质表：其他转化率、效率或选择性摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,CNT_type_reported,产率与产品品质表：作者报告的 CNT 类型。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,CNT_type_confirmed,产率与产品品质表：证据支持的 CNT 类型。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,product_mixture_summary,产率与产品品质表：混合产物和杂质组成摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,CNT_type_evidence,产率与产品品质表：CNT 类型判定依据。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+yield_quality,SWCNT_or_few_wall_evidence_summary,产率与产品品质表：单壁或少壁 CNT 证据摘要。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+yield_quality,RBM_peak_reported,产率与产品品质表：RBM 峰报告情况。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+yield_quality,outer_diameter_mean_nm,产率与产品品质表：外径平均值。,number,nm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,outer_diameter_range_nm,产率与产品品质表：外径范围。,number,nm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,inner_diameter_mean_nm,产率与产品品质表：内径平均值。,number,nm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,wall_number_summary,产率与产品品质表：壁数或内径/壁数摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,length_summary,产率与产品品质表：长度摘要。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+yield_quality,morphology,产率与产品品质表：形貌。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,alignment_or_array,产率与产品品质表：取向或阵列形态。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,Raman_ratio_type,产率与产品品质表：拉曼比值方向。,categorical,not_applicable,conditional,common,ID/IG|IG/ID|not_reported,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,Raman_ratio_value,产率与产品品质表：拉曼比值。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,Raman_laser_wavelength_nm,产率与产品品质表：拉曼激光波长。,number,nm,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,TGA_carbon_content_wt_percent,产率与产品品质表：合成后样品的 TGA 碳含量。,number,wt%,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,purified_product_purity_wt_percent,产率与产品品质表：纯化后产品纯度。,number,wt%,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+yield_quality,purity_basis,产率与产品品质表：纯度或碳含量口径。,categorical,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,residue_summary,产率与产品品质表：灰分、金属或其他残留摘要。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+yield_quality,amorphous_carbon_level,产率与产品品质表：无定形碳水平。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,BET_surface_area_product_m2_g,产率与产品品质表：CNT 产品 BET 比表面积。,number,m2/g,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+yield_quality,characterization_methods,产率与产品品质表：表征方法。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,post_treatment_or_purification,产率与产品品质表：产品后处理或纯化状态。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,purification_condition,产率与产品品质表：纯化条件。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+yield_quality,application_property_summary,产率与产品品质表：应用相关性能摘要。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+yield_quality,notes,产率与产品品质表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+cost_scale_review,run_id,成本、规模与工业适配表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+cost_scale_review,scale_level_demonstrated,成本、规模与工业适配表：实际证据支持的规模。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+cost_scale_review,scale_level_claimed,成本、规模与工业适配表：作者或专利声称的规模。,text,not_applicable,core,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+cost_scale_review,scale_evidence_summary,成本、规模与工业适配表：规模证据摘要。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+cost_scale_review,reactor_capacity_or_throughput,成本、规模与工业适配表：反应器能力或吞吐量。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,continuous_operation_time_h,成本、规模与工业适配表：连续运行时间。,number,h,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+cost_scale_review,catalyst_lifetime_or_reuse,成本、规模与工业适配表：催化剂寿命或复用表述。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+cost_scale_review,catalyst_reuse_cycles,成本、规模与工业适配表：催化剂复用次数。,number,count,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,batch_stability,成本、规模与工业适配表：批次或运行稳定性。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+cost_scale_review,scale_up_issue,成本、规模与工业适配表：放大问题。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+cost_scale_review,quantitative_cost_reported,成本、规模与工业适配表：是否报告量化成本。,categorical,not_applicable,core,rare_but_critical,yes|no|not_reported,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,quantitative_cost_summary,成本、规模与工业适配表：量化成本或消耗摘要。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,cost_driver_summary,成本、规模与工业适配表：成本驱动因素摘要。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,safety_risk,成本、规模与工业适配表：安全风险。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,emission_or_waste,成本、规模与工业适配表：排放或废物。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
+cost_scale_review,industrial_readiness_assessment,成本、规模与工业适配表：工业成熟度人工评估。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,reproduction_value,成本、规模与工业适配表：复现实验价值。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,reproduction_priority,成本、规模与工业适配表：复现优先级。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,industrial_value_score,成本、规模与工业适配表：工业价值评分。,number,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,recommended_next_action,成本、规模与工业适配表：建议后续动作。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,review_note,成本、规模与工业适配表：工业适配复核说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+evidence_index,evidence_id,证据索引表：证据唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,source_id,证据索引表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,run_id,证据索引表：运行唯一标识。,identifier,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+evidence_index,target_table,证据索引表：证据指向的目标表。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,target_record_id,证据索引表：证据指向的记录标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,target_fields,证据索引表：证据支持的目标字段。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,evidence_type,证据索引表：证据类型。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,value_status,证据索引表：值的来源状态。,categorical,not_applicable,core,always,reported|calculated|inferred|review_assessment,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,source_section,证据索引表：来源章节。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+evidence_index,source_locator,证据索引表：页码、段落或其他位置。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,source_object_ref,证据索引表：表、图、公式、实施例或权利要求引用。,text,not_applicable,conditional,class_conditional_common,free_text_or_reported_value,not_applicable_or_not_reported,在主要论文、专利或技术路线子集中高概率出现且具有稳定分析价值。
+evidence_index,evidence_text,证据索引表：简短原文摘录。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+evidence_index,evidence_summary,证据索引表：证据内容摘要。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,confidence,证据索引表：证据置信度。,categorical,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+evidence_index,linked_issue_id,证据索引表：关联复核问题标识。,identifier,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+evidence_index,notes,证据索引表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+review_issue_log,issue_id,复核与问题记录表：复核问题唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,source_id,复核与问题记录表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,run_id,复核与问题记录表：运行唯一标识。,identifier,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+review_issue_log,issue_type,复核与问题记录表：问题类型。,categorical,not_applicable,core,always,source_conflict|definition_ambiguity|run_split_uncertainty|CNT_type_uncertainty|calculation_check|critical_data_gap|quality_warning|schema_mapping_question,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,target_table,复核与问题记录表：证据指向的目标表。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,target_record_id,复核与问题记录表：证据指向的记录标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,target_field,复核与问题记录表：需要复核的目标字段。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,issue_summary,复核与问题记录表：问题摘要。,text,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,conflicting_values,复核与问题记录表：冲突值或相互矛盾表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
+review_issue_log,evidence_ids,复核与问题记录表：支持该问题的证据标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,severity,复核与问题记录表：问题严重度。,categorical,not_applicable,core,always,low|medium|high|critical,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,review_status,复核与问题记录表：复核状态。,categorical,not_applicable,core,always,pending_human_review|in_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
+review_issue_log,reviewer,复核与问题记录表：复核人。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+review_issue_log,reviewed_at,复核与问题记录表：复核时间。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+review_issue_log,resolution,复核与问题记录表：复核结论。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+review_issue_log,notes,复核与问题记录表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。

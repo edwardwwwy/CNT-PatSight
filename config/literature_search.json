@@ -1,0 +1,70 @@
+{
+  "version": "1.0",
+  "description": "Reusable paper-discovery queries for CNT synthesis by CVD and related catalytic routes.",
+  "queries": [
+    {
+      "query_id": "cnt_cvd_catalyst",
+      "query": "carbon nanotube chemical vapor deposition catalyst"
+    },
+    {
+      "query_id": "cnt_methane_cvd",
+      "query": "carbon nanotube methane CVD catalyst"
+    },
+    {
+      "query_id": "mwcnt_methane_metals",
+      "query": "MWCNT methane CVD Fe Co Ni catalyst"
+    },
+    {
+      "query_id": "swcnt_methane_cvd",
+      "query": "SWCNT methane CVD catalyst"
+    },
+    {
+      "query_id": "cnt_ch4_growth_conditions",
+      "query": "CNT CH4 CVD catalyst growth temperature growth rate yield"
+    },
+    {
+      "query_id": "cnt_fluidized_bed",
+      "query": "carbon nanotube fluidized bed CVD yield"
+    },
+    {
+      "query_id": "cnt_floating_catalyst",
+      "query": "carbon nanotube floating catalyst CVD growth rate"
+    },
+    {
+      "query_id": "cnt_catalytic_methane_decomposition",
+      "query": "carbon nanotube catalytic methane decomposition catalyst synthesis"
+    },
+    {
+      "query_id": "vacnt_cvd_growth",
+      "query": "VACNT carbon nanotube array chemical vapor deposition growth catalyst"
+    },
+    {
+      "query_id": "mwnt_swnt_cvd",
+      "query": "MWNT SWNT chemical vapor deposition catalyst synthesis"
+    }
+  ],
+  "defaults": {
+    "max_results_per_query": 200,
+    "max_enrich_records": 500,
+    "title_similarity_threshold": 0.97,
+    "title_review_threshold": 0.92,
+    "title_min_length": 30,
+    "crossref_request_interval_seconds": 0.1,
+    "unpaywall_request_interval_seconds": 0.1
+  },
+  "enabled_sources": [
+    "openalex",
+    "semantic_scholar",
+    "crossref",
+    "unpaywall"
+  ],
+  "patent_sources": {
+    "enabled": false,
+    "reserved": [
+      "lens_patent_api",
+      "epo_ops",
+      "uspto_open_data_portal",
+      "wipo_patentscope"
+    ]
+  }
+}

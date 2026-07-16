@@ -1,137 +1,173 @@
 {
-  "version": "0.3",
-  "description": "Evidence-aware starter schema for the five CNT-PatSight collection tables. Columns may be extended when real sources require it.",
+  "version": "0.4",
+  "description": "Normalized eight-table schema for several hundred CNT papers and patents. Dedicated columns are retained for corpus-common facts or stable high-value conditional facts; rare detail is routed to summaries and evidence rows.",
   "tables": {
+    "source_master": {
+      "filename": "source_master.csv",
+      "row_identity": ["source_id"],
+      "foreign_keys": [],
+      "required_fields": [
+        "source_id", "source_type", "source_title", "publication_year",
+        "doi_or_patent_no", "screening_class", "extraction_status", "review_status"
+      ],
+      "columns": [
+        "source_id", "source_type", "source_title", "publication_year",
+        "authors_or_assignee", "publication_venue", "doi_or_patent_no",
+        "source_link", "source_database", "source_language", "local_file_path",
+        "pdf_status", "screening_class", "source_section_scope",
+        "extraction_status", "review_status", "notes"
+      ]
+    },
     "source_run": {
       "filename": "source_run.csv",
       "row_identity": ["run_id"],
-      "foreign_keys": [],
-      "v1_recommended_fields": [
-        "run_id", "source_id", "source_type", "source_title", "doi_or_patent_no",
-        "source_link", "source_section", "data_type", "catalyst_key", "carbon_source_main",
-        "reactor_type_main", "CNT_type_main", "combo_key", "relevance_class",
-        "extraction_status", "extraction_confidence"
+      "foreign_keys": [
+        {"column": "source_id", "references": "source_master.source_id"}
+      ],
+      "required_fields": [
+        "run_id", "source_id", "run_label", "data_type", "target_track",
+        "relevance_class", "extraction_status", "extraction_confidence"
       ],
       "columns": [
-        "run_id", "source_id", "source_type", "source_title", "year",
-        "authors_or_assignee", "doi_or_patent_no", "source_link", "source_database",
-        "source_section", "data_type", "run_label", "target_track", "catalyst_key",
-        "carbon_source_main", "reactor_type_main", "CNT_type_main", "combo_key",
-        "relevance_class", "relevance_score", "extraction_status",
-        "extraction_confidence", "run_summary", "notes"
+        "run_id", "source_id", "run_label", "data_type", "target_track",
+        "relevance_class", "extraction_status", "extraction_confidence",
+        "run_summary", "notes"
       ]
     },
     "catalyst_system": {
       "filename": "catalyst_system.csv",
       "row_identity": ["run_id", "catalyst_id"],
-      "foreign_keys": [{"column": "run_id", "references": "source_run.run_id"}],
-      "v1_recommended_fields": [
-        "run_id", "catalyst_id", "catalyst_label", "catalyst_key", "active_metals",
-        "support_material", "promoter", "metal_ratio_original", "precursor_summary",
-        "preparation_method", "acid_or_complexing_summary", "calcination_condition",
-        "reduction_condition", "activation_summary", "evidence_text", "evidence_location",
-        "confidence"
+      "foreign_keys": [
+        {"column": "run_id", "references": "source_run.run_id"}
+      ],
+      "required_fields": [
+        "run_id", "catalyst_id", "catalyst_label", "active_metals",
+        "support_material", "preparation_method"
       ],
       "columns": [
-        "run_id", "catalyst_id", "catalyst_label", "catalyst_key", "active_metals",
-        "support_material", "promoter", "metal_ratio_original", "metal_ratio_standardized",
-        "precursor_summary", "preparation_method", "acid_or_complexing_summary",
-        "acid_treatment_flag", "acid_treatment_type", "acid_treatment_purpose",
-        "complexing_agent", "complexing_ratio_original", "solution_pH", "washing_condition",
-        "drying_condition", "calcination_condition", "reduction_condition", "activation_summary",
-        "crushing_or_sieving_condition", "catalyst_particle_size_nm", "BET_surface_area_m2_g",
-        "pore_diameter_nm", "pore_volume_cm3_g", "phase_or_state_summary", "dispersion_summary",
-        "expected_CNT_type_bias", "catalyst_lifetime_or_reuse", "deactivation_reason",
-        "catalyst_assessment", "evidence_text", "evidence_location", "confidence", "notes"
+        "run_id", "catalyst_id", "catalyst_label", "active_metals",
+        "support_material", "promoter", "metal_ratio_original",
+        "metal_ratio_standardized", "precursor_summary", "preparation_method",
+        "preparation_modifier", "preparation_detail", "drying_condition",
+        "calcination_condition", "reduction_condition", "activation_condition",
+        "post_preparation_condition", "catalyst_particle_size_mean_nm",
+        "catalyst_particle_size_range_nm", "catalyst_particle_size_qualifier",
+        "BET_surface_area_m2_g", "pore_diameter_nm", "pore_volume_cm3_g",
+        "phase_or_state_summary", "dispersion_summary", "deactivation_summary", "notes"
       ]
     },
     "reactor_process_gas": {
       "filename": "reactor_process_gas.csv",
       "row_identity": ["run_id", "process_stage_id"],
-      "foreign_keys": [{"column": "run_id", "references": "source_run.run_id"}],
-      "v1_recommended_fields": [
-        "run_id", "process_stage_id", "stage_order", "stage_type", "reactor_type",
-        "temperature_setpoint_C", "temperature_actual_C", "temperature_range_reported_C",
-        "reported_optimal_temperature", "temperature_effect_summary", "holding_time_min",
-        "pressure_original", "carbon_source", "CH4_flow_original", "CH4_flow_sccm",
-        "natural_gas_flow_original", "natural_gas_flow_sccm", "natural_gas_composition",
-        "H2_flow_original", "H2_flow_sccm", "N2_flow_original", "N2_flow_sccm",
-        "Ar_flow_original", "Ar_flow_sccm", "total_flow_original", "total_flow_sccm",
-        "gas_ratio_summary", "process_note", "evidence_text", "evidence_location", "confidence"
+      "foreign_keys": [
+        {"column": "run_id", "references": "source_run.run_id"}
+      ],
+      "required_fields": [
+        "run_id", "process_stage_id", "stage_order", "stage_type", "reactor_type"
       ],
       "columns": [
-        "run_id", "process_stage_id", "stage_order", "stage_type", "reactor_type", "scale_level",
-        "reactor_material", "reactor_size_summary", "catalyst_loading_mass_g", "catalyst_bed_position",
-        "temperature_sensor_position", "start_temperature_C", "temperature_setpoint_C",
-        "temperature_actual_C", "temperature_range_reported_C", "reported_suitable_temperature",
-        "reported_optimal_temperature", "reported_failed_temperature", "temperature_effect_summary",
-        "holding_time_min", "heating_rate_C_min", "cooling_condition", "pressure_original",
-        "pressure_kPa", "carbon_source", "CH4_flow_original", "CH4_flow_sccm",
-        "natural_gas_flow_original", "natural_gas_flow_sccm", "natural_gas_composition",
-        "H2_flow_original", "H2_flow_sccm", "N2_flow_original", "N2_flow_sccm",
-        "Ar_flow_original", "Ar_flow_sccm", "other_gas_flow_original", "other_gas_flow_sccm",
-        "total_flow_original", "total_flow_sccm", "gas_ratio_summary",
-        "CH4_volume_fraction_percent", "GHSV_or_residence_time", "process_note",
-        "evidence_text", "evidence_location", "confidence"
+        "run_id", "process_stage_id", "stage_order", "stage_type", "reactor_type",
+        "scale_level", "reactor_material", "reactor_size_summary",
+        "reactor_setup_summary", "catalyst_loading_mass_g", "temperature_setpoint_C",
+        "temperature_range_reported_C", "temperature_program_summary",
+        "holding_time_min", "heating_rate_C_min", "cooling_condition",
+        "pressure_original", "pressure_kPa", "carbon_source",
+        "carbon_source_flow_original", "carbon_source_flow_sccm",
+        "reducing_gas", "reducing_gas_flow_original", "reducing_gas_flow_sccm",
+        "inert_gas", "inert_gas_flow_original", "inert_gas_flow_sccm",
+        "cofeed_or_reactive_gas", "cofeed_flow_original", "cofeed_flow_sccm",
+        "total_flow_original", "total_flow_sccm", "gas_composition_summary",
+        "GHSV_or_residence_time", "process_note"
       ]
     },
     "yield_quality": {
       "filename": "yield_quality.csv",
       "row_identity": ["run_id", "product_id"],
-      "foreign_keys": [{"column": "run_id", "references": "source_run.run_id"}],
-      "v1_recommended_fields": [
-        "run_id", "product_id", "yield_original", "yield_definition_original",
-        "yield_calculation_method", "yield_value_standardized", "yield_unit_standardized",
-        "yield_standardization_note", "CNT_yield_per_catalyst_g_gcat",
-        "CNT_productivity_g_gcat_h", "methane_conversion_percent", "carbon_efficiency_percent",
-        "CNT_type_reported", "CNT_type_confirmed", "is_SWCNT", "is_MWCNT",
-        "CNT_type_evidence", "SWCNT_evidence_summary", "RBM_peak_reported",
-        "outer_diameter_mean_nm", "outer_diameter_range_nm", "inner_diameter_or_wall_number",
-        "wall_number_mean", "length_summary", "length_mean_um", "morphology", "Raman_ID_IG",
-        "purity_wt_percent", "metal_residue_wt_percent", "characterization_methods",
-        "post_treatment_or_purification", "purification_condition", "evidence_text",
-        "evidence_location", "confidence"
+      "foreign_keys": [
+        {"column": "run_id", "references": "source_run.run_id"}
+      ],
+      "required_fields": [
+        "run_id", "product_id", "primary_yield_metric", "yield_original",
+        "yield_definition_original", "CNT_type_reported", "CNT_type_confirmed",
+        "CNT_type_evidence"
       ],
       "columns": [
-        "run_id", "product_id", "catalyst_mass_before_g", "product_mass_raw_g",
-        "product_mass_after_purification_g", "yield_original", "yield_definition_original",
-        "yield_calculation_method", "yield_value_standardized", "yield_unit_standardized",
+        "run_id", "product_id", "primary_yield_metric", "yield_original",
+        "yield_definition_original", "yield_calculation_method",
+        "yield_value_standardized", "yield_unit_standardized",
         "yield_standardization_note", "CNT_yield_per_catalyst_g_gcat",
-        "CNT_productivity_g_gcat_h", "space_time_yield_kg_m3_h", "methane_conversion_percent",
-        "carbon_efficiency_percent", "carbon_conversion_to_solid_percent",
-        "CNT_selectivity_in_solid_carbon_percent", "CNT_type_reported", "CNT_type_confirmed",
-        "is_SWCNT", "is_DWCNT", "is_t_MWCNT", "is_MWCNT", "CNT_type_evidence",
-        "SWCNT_evidence_summary", "RBM_peak_reported", "outer_diameter_mean_nm",
-        "outer_diameter_range_nm", "inner_diameter_mean_nm", "inner_diameter_or_wall_number",
-        "wall_number_mean", "length_summary", "length_mean_um", "aspect_ratio", "morphology",
-        "alignment_or_array", "Raman_ID_IG", "Raman_IG_ID", "Raman_laser_wavelength_nm",
-        "purity_wt_percent", "ash_content_wt_percent", "metal_residue_wt_percent",
-        "amorphous_carbon_level", "BET_surface_area_product_m2_g", "tap_density_g_cm3",
-        "bulk_density_g_cm3", "conductivity", "slurry_viscosity", "characterization_methods",
-        "post_treatment_or_purification", "purification_condition", "application_related_properties",
-        "image_or_figure_ref", "evidence_text", "evidence_location", "confidence", "notes"
+        "CNT_productivity_g_gcat_h", "carbon_source_conversion_percent",
+        "carbon_conversion_to_solid_percent", "secondary_result_summary",
+        "CNT_type_reported", "CNT_type_confirmed", "product_mixture_summary",
+        "CNT_type_evidence", "SWCNT_or_few_wall_evidence_summary",
+        "RBM_peak_reported", "outer_diameter_mean_nm", "outer_diameter_range_nm",
+        "inner_diameter_mean_nm", "wall_number_summary", "length_summary",
+        "morphology", "alignment_or_array", "Raman_ratio_type",
+        "Raman_ratio_value", "Raman_laser_wavelength_nm",
+        "TGA_carbon_content_wt_percent", "purified_product_purity_wt_percent",
+        "purity_basis", "residue_summary", "amorphous_carbon_level",
+        "BET_surface_area_product_m2_g", "characterization_methods",
+        "post_treatment_or_purification", "purification_condition",
+        "application_property_summary", "notes"
       ]
     },
     "cost_scale_review": {
       "filename": "cost_scale_review.csv",
       "row_identity": ["run_id"],
-      "foreign_keys": [{"column": "run_id", "references": "source_run.run_id"}],
-      "v1_recommended_fields": [
-        "run_id", "reproduction_value", "reproduction_priority", "recommended_next_action",
-        "missing_critical_fields", "review_note", "evidence_text", "evidence_location", "confidence"
+      "foreign_keys": [
+        {"column": "run_id", "references": "source_run.run_id"}
+      ],
+      "required_fields": [
+        "run_id", "scale_level_demonstrated", "scale_level_claimed",
+        "quantitative_cost_reported"
       ],
       "columns": [
-        "run_id", "quantitative_cost_reported", "methane_consumption_per_kg_CNT",
-        "natural_gas_consumption_per_kg_CNT", "H2_consumption_per_kg_CNT",
-        "N2_or_Ar_consumption_per_kg_CNT", "electricity_consumption_per_kg_CNT",
-        "catalyst_cost_signal", "purification_cost_signal", "waste_treatment_signal",
-        "total_variable_cost_per_kg_CNT", "continuous_operation_time_h", "catalyst_reuse_cycles",
-        "batch_success_rate_percent", "batch_stability", "scale_signal_reported",
-        "scale_level_claimed", "scale_up_issue", "safety_risk", "emission_or_waste",
-        "contains_expensive_metal", "needs_H2", "needs_acid_washing", "major_cost_driver",
-        "reported_best_condition_summary", "reviewed_suitable_condition", "reproduction_value",
-        "reproduction_priority", "industrial_value_score", "recommended_next_action",
-        "missing_critical_fields", "review_note", "evidence_text", "evidence_location", "confidence"
+        "run_id", "scale_level_demonstrated", "scale_level_claimed",
+        "scale_evidence_summary", "reactor_capacity_or_throughput",
+        "continuous_operation_time_h", "catalyst_lifetime_or_reuse",
+        "catalyst_reuse_cycles", "batch_stability", "scale_up_issue",
+        "quantitative_cost_reported", "quantitative_cost_summary",
+        "cost_driver_summary", "safety_risk", "emission_or_waste",
+        "industrial_readiness_assessment", "reproduction_value",
+        "reproduction_priority", "industrial_value_score",
+        "recommended_next_action", "review_note"
+      ]
+    },
+    "evidence_index": {
+      "filename": "evidence_index.csv",
+      "row_identity": ["evidence_id"],
+      "foreign_keys": [
+        {"column": "source_id", "references": "source_master.source_id"},
+        {"column": "run_id", "references": "source_run.run_id", "nullable": true}
+      ],
+      "required_fields": [
+        "evidence_id", "source_id", "target_table", "target_record_id",
+        "target_fields", "evidence_type", "value_status", "source_locator",
+        "evidence_summary", "confidence"
+      ],
+      "columns": [
+        "evidence_id", "source_id", "run_id", "target_table", "target_record_id",
+        "target_fields", "evidence_type", "value_status", "source_section",
+        "source_locator", "source_object_ref", "evidence_text", "evidence_summary",
+        "confidence", "linked_issue_id", "notes"
+      ]
+    },
+    "review_issue_log": {
+      "filename": "review_issue_log.csv",
+      "row_identity": ["issue_id"],
+      "foreign_keys": [
+        {"column": "source_id", "references": "source_master.source_id"},
+        {"column": "run_id", "references": "source_run.run_id", "nullable": true}
+      ],
+      "required_fields": [
+        "issue_id", "source_id", "issue_type", "target_table", "target_record_id",
+        "target_field", "issue_summary", "evidence_ids", "severity", "review_status"
+      ],
+      "columns": [
+        "issue_id", "source_id", "run_id", "issue_type", "target_table",
+        "target_record_id", "target_field", "issue_summary", "conflicting_values",
+        "evidence_ids", "severity", "review_status", "reviewer", "reviewed_at",
+        "resolution", "notes"
       ]
     }
   }

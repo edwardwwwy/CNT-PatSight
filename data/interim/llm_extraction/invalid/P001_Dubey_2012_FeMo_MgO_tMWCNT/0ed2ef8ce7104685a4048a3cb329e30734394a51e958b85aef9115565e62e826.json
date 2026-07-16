@@ -1,0 +1,1815 @@
+{
+  "validation": {
+    "validation_status": "failed",
+    "needs_review": true,
+    "error_count": 237,
+    "warning_count": 0,
+    "valid_evidence_claims": 0,
+    "uncovered_populated_fields": 0,
+    "record_counts": {
+      "run_candidates": 1,
+      "catalyst_candidates": 1,
+      "process_stage_candidates": 1,
+      "product_candidates": 1,
+      "cost_scale_candidates": 1,
+      "source_observations": 1,
+      "review_issues": 3
+    },
+    "source_id": "P001_Dubey_2012_FeMo_MgO_tMWCNT",
+    "request_hash": "0ed2ef8ce7104685a4048a3cb329e30734394a51e958b85aef9115565e62e826",
+    "cache_hit": false,
+    "elapsed_seconds": 180.874,
+    "finish_reason": "stop",
+    "prompt_tokens": 9998,
+    "completion_tokens": 4245
+  },
+  "issues": [
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "Additional properties are not allowed ('catalyst_id', 'eds_analysis', 'evidence_claims', 'pore_diameter', 'pore_volume', 'support', 'surface_area', 'thermal_decomposition_atmosphere', 'thermal_decomposition_temperature', 'thermal_decomposition_time', 'xps_analysis', 'xrd_analysis' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'candidate_catalyst_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'catalyst_label' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'support_material' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'promoter' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'metal_ratio_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'precursor_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'preparation_detail' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'drying_condition' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'calcination_condition' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'reduction_condition' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'activation_condition' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'catalyst_particle_size_range_nm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'BET_surface_area_m2_g' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'phase_or_state_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "catalyst_candidates/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "Additional properties are not allowed ('catalyst_amount', 'cost_scale_id', 'evidence_claims', 'product_yield', 'reactor_size', 'scale_type', 'unit' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'candidate_cost_scale_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'scale_level_demonstrated' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'scale_level_claimed' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'scale_evidence_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'reactor_capacity_or_throughput' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'continuous_operation_time_h' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'catalyst_lifetime_or_reuse' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'batch_stability' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'scale_up_issue' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'quantitative_cost_reported' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'quantitative_cost_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'cost_driver_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'safety_risk' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'emission_or_waste' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "cost_scale_candidates/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "Additional properties are not allowed ('quote' was unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'claim_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'evidence_quote' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "'notes' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "Additional properties are not allowed ('cooling_flow_rate', 'cooling_gas', 'evidence_claims', 'gas_program', 'process_stage_id', 'reactor_dimensions', 'temperature', 'time', 'unit' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'candidate_stage_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'stage_order' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'scale_level' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'reactor_material' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'reactor_size_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'catalyst_loading_mass_g' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'temperature_setpoint_C' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'temperature_range_reported_C' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'holding_time_min' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'pressure_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'pressure_kPa' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'carbon_source' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'carbon_source_flow_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'carbon_source_flow_sccm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'reducing_gas' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'reducing_gas_flow_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'reducing_gas_flow_sccm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'inert_gas' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'inert_gas_flow_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'inert_gas_flow_sccm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'cofeed_or_reactive_gas' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'cofeed_flow_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'cofeed_flow_sccm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'total_flow_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'total_flow_sccm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'gas_composition_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'GHSV_or_residence_time' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'process_note' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "process_stage_candidates/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "Additional properties are not allowed ('carbon_weight_gain', 'diameter_range', 'evidence_claims', 'graphene_wall_count', 'product_id', 'product_type', 'purity', 'raman_id_ig', 'raman_ig_id', 'tga_carbon_content' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'candidate_product_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'primary_yield_metric' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'yield_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'yield_definition_original' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'yield_calculation_method' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'yield_value_standardized' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'yield_unit_standardized' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'CNT_yield_per_catalyst_g_gcat' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'CNT_productivity_g_gcat_h' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'carbon_source_conversion_percent' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'carbon_conversion_to_solid_percent' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'CNT_type_reported' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'CNT_type_confirmed' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'product_mixture_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'CNT_type_evidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'outer_diameter_range_nm' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'wall_number_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'morphology' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'Raman_ratio_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'Raman_ratio_value' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'TGA_carbon_content_wt_percent' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'purified_product_purity_wt_percent' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'purity_basis' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'amorphous_carbon_level' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'characterization_methods' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'post_treatment_or_purification' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "product_candidates/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "Additional properties are not allowed ('description', 'issue_id' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'candidate_issue_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'target_field' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'issue_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'conflicting_values' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'evidence_span_ids' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'severity' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/0",
+      "message": "'review_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "Additional properties are not allowed ('description', 'issue_id' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'candidate_issue_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'target_field' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'issue_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'conflicting_values' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'evidence_span_ids' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'severity' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1",
+      "message": "'review_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/1/issue_type",
+      "message": "'critical_gap' is not one of ['source_conflict', 'definition_ambiguity', 'run_split_uncertainty', 'CNT_type_uncertainty', 'calculation_check', 'critical_data_gap', 'quality_warning', 'schema_mapping_question']"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "Additional properties are not allowed ('description', 'issue_id' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'candidate_issue_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'target_type' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'target_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'target_field' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'issue_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'conflicting_values' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'evidence_span_ids' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'severity' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "review_issues/2",
+      "message": "'review_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "Additional properties are not allowed ('catalyst_id', 'process_stage_id', 'product_id', 'run_id' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'candidate_run_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'run_label' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'run_summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'run_split_basis' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'relevance_class' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "run_candidates/0",
+      "message": "'evidence_span_ids' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "Additional properties are not allowed ('evidence_claims', 'method', 'observation_id', 'result' were unexpected)"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "'candidate_observation_id' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "'summary' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "'evidence_span_ids' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "'value_status' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0",
+      "message": "'confidence' is a required property"
+    },
+    {
+      "code": "schema_error",
+      "severity": "error",
+      "location": "source_observations/0/observation_type",
+      "message": "'characterization' is not one of ['mechanism', 'failure', 'preparation_hint', 'temperature_effect', 'scale_signal', 'safety_environment', 'transferable_route', 'other']"
+    },
+    {
+      "code": "invalid_run_reference",
+      "severity": "error",
+      "location": "catalyst_candidates/0/candidate_run_id",
+      "message": "Unknown candidate_run_id None"
+    },
+    {
+      "code": "invalid_run_reference",
+      "severity": "error",
+      "location": "process_stage_candidates/0/candidate_run_id",
+      "message": "Unknown candidate_run_id None"
+    },
+    {
+      "code": "invalid_run_reference",
+      "severity": "error",
+      "location": "product_candidates/0/candidate_run_id",
+      "message": "Unknown candidate_run_id None"
+    },
+    {
+      "code": "invalid_run_reference",
+      "severity": "error",
+      "location": "cost_scale_candidates/0/candidate_run_id",
+      "message": "Unknown candidate_run_id None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/0",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/1",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/2",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/3",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/4",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/5",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/6",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/7",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/8",
+      "message": "Unknown evidence target None:None"
+    },
+    {
+      "code": "unknown_claim_target",
+      "severity": "error",
+      "location": "evidence_claims/9",
+      "message": "Unknown evidence target None:None"
+    }
+  ],
+  "extraction": {
+    "schema_version": "0.1",
+    "source_id": "P001_Dubey_2012_FeMo_MgO_tMWCNT",
+    "source_title": "Synthesis of thin-multiwalled carbon nanotubes by Fe-Mo/MgO catalyst using sol-gel method",
+    "input_content_hash": "6e9cdd4406f7d8c71631e6ba62b01b35309c34654d3fbf37447c05c03b94c0eb",
+    "extraction_scope": "candidate_spans_only",
+    "run_candidates": [
+      {
+        "run_id": "RUN_CAND_001",
+        "catalyst_id": "CAT_CAND_001",
+        "process_stage_id": "STAGE_CAND_001",
+        "product_id": "PROD_CAND_001"
+      }
+    ],
+    "catalyst_candidates": [
+      {
+        "catalyst_id": "CAT_CAND_001",
+        "active_metals": [
+          "Fe",
+          "Mo"
+        ],
+        "support": "MgO",
+        "preparation_method": "sol_gel",
+        "preparation_modifier": "acid_complexing",
+        "thermal_decomposition_atmosphere": "Ar",
+        "thermal_decomposition_temperature": 700,
+        "thermal_decomposition_time": 120,
+        "surface_area": 210,
+        "pore_volume": 0.37,
+        "pore_diameter": 261,
+        "xrd_analysis": "MgO rock-salt lattice",
+        "xps_analysis": "Mo6+ in citratomolybdate complex",
+        "eds_analysis": "Fe:Mo ratio ~3.1:10.5",
+        "evidence_claims": [
+          {
+            "target_fields": [
+              "active_metals",
+              "support",
+              "preparation_method",
+              "preparation_modifier"
+            ],
+            "span_ids": [
+              "SPAN_155FC44ACDBA623ED3F7",
+              "SPAN_5AF7B18B74DF201E02C3"
+            ],
+            "quote": "Fe-Mo/MgO catalysts prepared by a citrate precursor based on the sol-gel technique using MgO as catalyst support. Citric acid was added as a complexing agent."
+          },
+          {
+            "target_fields": [
+              "thermal_decomposition_atmosphere",
+              "thermal_decomposition_temperature",
+              "thermal_decomposition_time"
+            ],
+            "span_ids": [
+              "SPAN_30C659068E9D39856040"
+            ],
+            "quote": "thermally decomposed under air, Ar (500 sccm), and H2 (500 sccm) atmosphere at 700ºC for 2 h."
+          },
+          {
+            "target_fields": [
+              "surface_area",
+              "pore_volume",
+              "pore_diameter"
+            ],
+            "span_ids": [
+              "SPAN_3DF0C52F0761EBAE7D54"
+            ],
+            "quote": "surface area (m2/g) Product yield (%) Carbon % yield @TGA 60 (261) 452 85 210 (253) 370 82"
+          },
+          {
+            "target_fields": [
+              "xrd_analysis"
+            ],
+            "span_ids": [
+              "SPAN_00295F5DEAC53E7ADB0D"
+            ],
+            "quote": "XRD patterns of the Fe-Mo/MgO catalyst synthesized by thermal decomposition of the citrate precursor at 700ºC for 2 h: the five well-resolved characteristic peaks of the MgO rock-salt lattice."
+          },
+          {
+            "target_fields": [
+              "xps_analysis"
+            ],
+            "span_ids": [
+              "SPAN_332E3979FA5AB47A481B"
+            ],
+            "quote": "XPS exhibits a pair of spin-orbit binding energies (BEs) at 231.0 and 234.0 eV. The Mo 3d BE at 231.0 eV is attributed to Mo6+ in the citratomolybdate complex."
+          },
+          {
+            "target_fields": [
+              "eds_analysis"
+            ],
+            "span_ids": [
+              "SPAN_34B0E599F6E7326B4EDE"
+            ],
+            "quote": "higher atomic % of Mo compared with that of Fe in the cases of SG-2 (at% Fe:Mo ~ 3.1:10.5) and SG-3 catalysts."
+          }
+        ]
+      }
+    ],
+    "process_stage_candidates": [
+      {
+        "process_stage_id": "STAGE_CAND_001",
+        "stage_type": "cnt_growth",
+        "reactor_type": "quartz_tube",
+        "reactor_dimensions": "10 cm i.d. and 120 cm length",
+        "gas_program": [
+          {
+            "gas": "Ar",
+            "flow_rate": 1000,
+            "unit": "sccm"
+          },
+          {
+            "gas": "H2",
+            "flow_rate": 200,
+            "unit": "sccm"
+          },
+          {
+            "gas": "CH4",
+            "flow_rate": 1000,
+            "unit": "sccm"
+          }
+        ],
+        "temperature": 900,
+        "time": 30,
+        "unit": "sccm",
+        "cooling_gas": "Ar",
+        "cooling_flow_rate": 500,
+        "evidence_claims": [
+          {
+            "target_fields": [
+              "stage_type",
+              "reactor_type",
+              "reactor_dimensions",
+              "gas_program",
+              "temperature",
+              "time",
+              "cooling_gas",
+              "cooling_flow_rate"
+            ],
+            "span_ids": [
+              "SPAN_1D2AE8601EC76CD2C836"
+            ],
+            "quote": "The synthesis of t-MWCNTs was carried out in a quartz tube reactor (10 cm i.d. and 120 cm length) mounted in a tube furnace. An amount of 0.1 g of calcined catalyst was placed into a quartz boat at the center of the reactor tube and heated to the reaction temperature (900ºC) in an Ar (1000 sccm) atmosphere. Once the temperature reached 900ºC, the catalyst was pretreated for 20 min in an Ar/H2 (800/200 sccm) stream. Immediately after this pretreatment, the mixture of Ar/CH4/H2 (1000/1000/200 sccm) was supplied into the tube reactor at 900ºC for 30 min in order to synthesize CNTs. Finally, the reactor was cooled to room temperature in an Ar (500 sccm) stream."
+          }
+        ]
+      }
+    ],
+    "product_candidates": [
+      {
+        "product_id": "PROD_CAND_001",
+        "product_type": "t-MWCNTs",
+        "carbon_weight_gain": 452,
+        "purity": 85,
+        "raman_id_ig": 1.59,
+        "raman_ig_id": 1.35,
+        "diameter_range": "4-8 nm",
+        "graphene_wall_count": 4,
+        "tga_carbon_content": 85,
+        "evidence_claims": [
+          {
+            "target_fields": [
+              "product_type",
+              "carbon_weight_gain",
+              "purity",
+              "raman_id_ig",
+              "raman_ig_id",
+              "diameter_range",
+              "graphene_wall_count",
+              "tga_carbon_content"
+            ],
+            "span_ids": [
+              "SPAN_0E2B1FB2A8980F7E40E1",
+              "SPAN_12266E3C37872161EF3F",
+              "SPAN_2A79822B3BD65CE09C63"
+            ],
+            "quote": "The as-synthesized t-MWCNTs showed a high product yield of over 450% relative to the utilized Fe-Mo/MgO catalyst and a high purity of about 85%. The G-band, at approximately ~1593 cm-1, is associated with sp2 hybridized carbon bonding. The D-band at approximately ~1350 cm-1 reveals the defect level, impurities, or lattice disordering in the graphite sheets. The outer diameters and the graphene walls of the as-synthesized t-MWCNTs over the SG-2 catalyst were in the range of 4-8 nm (average dia. ~6.6 nm) and had graphene numbers in the range of 4-7. The weight loss percentages of t-MWCNTs due to SG-2 and SG-3 catalysts are around 85% and 82% from 500 to 650ºC."
+          }
+        ]
+      }
+    ],
+    "cost_scale_candidates": [
+      {
+        "cost_scale_id": "SCALE_CAND_001",
+        "scale_type": "laboratory",
+        "reactor_size": "10 cm i.d. and 120 cm length",
+        "catalyst_amount": 0.1,
+        "unit": "%",
+        "product_yield": 452,
+        "evidence_claims": [
+          {
+            "target_fields": [
+              "scale_type",
+              "reactor_size",
+              "catalyst_amount",
+              "product_yield"
+            ],
+            "span_ids": [
+              "SPAN_1D2AE8601EC76CD2C836"
+            ],
+            "quote": "An amount of 0.1 g of calcined catalyst was placed into a quartz boat at the center of the reactor tube and heated to the reaction temperature (900ºC) in an Ar (1000 sccm) atmosphere. The as-synthesized t-MWCNTs showed a high product yield of over 450% relative to the utilized Fe-Mo/MgO catalyst."
+          }
+        ]
+      }
+    ],
+    "source_observations": [
+      {
+        "observation_id": "OBS_CAND_001",
+        "observation_type": "characterization",
+        "method": "XPS",
+        "result": "Mo6+ in citratomolybdate complex",
+        "evidence_claims": [
+          {
+            "target_fields": [
+              "observation_type",
+              "method",
+              "result"
+            ],
+            "span_ids": [
+              "SPAN_332E3979FA5AB47A481B"
+            ],
+            "quote": "XPS exhibits a pair of spin-orbit binding energies (BEs) at 231.0 and 234.0 eV. The Mo 3d BE at 231.0 eV is attributed to Mo6+ in the citratomolybdate complex."
+          }
+        ]
+      }
+    ],
+    "evidence_claims": [
+      {
+        "target_fields": [
+          "active_metals",
+          "support",
+          "preparation_method",
+          "preparation_modifier"
+        ],
+        "span_ids": [
+          "SPAN_155FC44ACDBA623ED3F7",
+          "SPAN_5AF7B18B74DF201E02C3"
+        ],
+        "quote": "Fe-Mo/MgO catalysts prepared by a citrate precursor based on the sol-gel technique using MgO as catalyst support. Citric acid was added as a complexing agent."
+      },
+      {
+        "target_fields": [
+          "thermal_decomposition_atmosphere",
+          "thermal_decomposition_temperature",
+          "thermal_decomposition_time"
+        ],
+        "span_ids": [
+          "SPAN_30C659068E9D39856040"
+        ],
+        "quote": "thermally decomposed under air, Ar (500 sccm), and H2 (500 sccm) atmosphere at 700ºC for 2 h."
+      },
+      {
+        "target_fields": [
+          "surface_area",
+          "pore_volume",
+          "pore_diameter"
+        ],
+        "span_ids": [
+          "SPAN_3DF0C52F0761EBAE7D54"
+        ],
+        "quote": "surface area (m2/g) Product yield (%) Carbon % yield @TGA 60 (261) 452 85 210 (253) 370 82"
+      },
+      {
+        "target_fields": [
+          "xrd_analysis"
+        ],
+        "span_ids": [
+          "SPAN_00295F5DEAC53E7ADB0D"
+        ],
+        "quote": "XRD patterns of the Fe-Mo/MgO catalyst synthesized by thermal decomposition of the citrate precursor at 700ºC for 2 h: the five well-resolved characteristic peaks of the MgO rock-salt lattice."
+      },
+      {
+        "target_fields": [
+          "xps_analysis"
+        ],
+        "span_ids": [
+          "SPAN_332E3979FA5AB47A481B"
+        ],
+        "quote": "XPS exhibits a pair of spin-orbit binding energies (BEs) at 231.0 and 234.0 eV. The Mo 3d BE at 231.0 eV is attributed to Mo6+ in the citratomolybdate complex."
+      },
+      {
+        "target_fields": [
+          "eds_analysis"
+        ],
+        "span_ids": [
+          "SPAN_34B0E599F6E7326B4EDE"
+        ],
+        "quote": "higher atomic % of Mo compared with that of Fe in the cases of SG-2 (at% Fe:Mo ~ 3.1:10.5) and SG-3 catalysts."
+      },
+      {
+        "target_fields": [
+          "stage_type",
+          "reactor_type",
+          "reactor_dimensions",
+          "gas_program",
+          "temperature",
+          "time",
+          "cooling_gas",
+          "cooling_flow_rate"
+        ],
+        "span_ids": [
+          "SPAN_1D2AE8601EC76CD2C836"
+        ],
+        "quote": "The synthesis of t-MWCNTs was carried out in a quartz tube reactor (10 cm i.d. and 120 cm length) mounted in a tube furnace. An amount of 0.1 g of calcined catalyst was placed into a quartz boat at the center of the reactor tube and heated to the reaction temperature (900ºC) in an Ar (1000 sccm) atmosphere. Once the temperature reached 900ºC, the catalyst was pretreated for 20 min in an Ar/H2 (800/200 sccm) stream. Immediately after this pretreatment, the mixture of Ar/CH4/H2 (1000/1000/200 sccm) was supplied into the tube reactor at 900ºC for 30 min in order to synthesize CNTs. Finally, the reactor was cooled to room temperature in an Ar (500 sccm) stream."
+      },
+      {
+        "target_fields": [
+          "product_type",
+          "carbon_weight_gain",
+          "purity",
+          "raman_id_ig",
+          "raman_ig_id",
+          "diameter_range",
+          "graphene_wall_count",
+          "tga_carbon_content"
+        ],
+        "span_ids": [
+          "SPAN_0E2B1FB2A8980F7E40E1",
+          "SPAN_12266E3C37872161EF3F",
+          "SPAN_2A79822B3BD65CE09C63"
+        ],
+        "quote": "The as-synthesized t-MWCNTs showed a high product yield of over 450% relative to the utilized Fe-Mo/MgO catalyst and a high purity of about 85%. The G-band, at approximately ~1593 cm-1, is associated with sp2 hybridized carbon bonding. The D-band at approximately ~1350 cm-1 reveals the defect level, impurities, or lattice disordering in the graphite sheets. The outer diameters and the graphene walls of the as-synthesized t-MWCNTs over the SG-2 catalyst were in the range of 4-8 nm (average dia. ~6.6 nm) and had graphene numbers in the range of 4-7. The weight loss percentages of t-MWCNTs due to SG-2 and SG-3 catalysts are around 85% and 82% from 500 to 650ºC."
+      },
+      {
+        "target_fields": [
+          "scale_type",
+          "reactor_size",
+          "catalyst_amount",
+          "product_yield"
+        ],
+        "span_ids": [
+          "SPAN_1D2AE8601EC76CD2C836"
+        ],
+        "quote": "An amount of 0.1 g of calcined catalyst was placed into a quartz boat at the center of the reactor tube and heated to the reaction temperature (900ºC) in an Ar (1000 sccm) atmosphere. The as-synthesized t-MWCNTs showed a high product yield of over 450% relative to the utilized Fe-Mo/MgO catalyst."
+      },
+      {
+        "target_fields": [
+          "observation_type",
+          "method",
+          "result"
+        ],
+        "span_ids": [
+          "SPAN_332E3979FA5AB47A481B"
+        ],
+        "quote": "XPS exhibits a pair of spin-orbit binding energies (BEs) at 231.0 and 234.0 eV. The Mo 3d BE at 231.0 eV is attributed to Mo6+ in the citratomolybdate complex."
+      }
+    ],
+    "review_issues": [
+      {
+        "issue_id": "ISSUE_CAND_001",
+        "issue_type": "definition_ambiguity",
+        "description": "The term 't-MWCNTs' is used without a clear definition in the text. It is assumed to refer to thin-multiwalled carbon nanotubes, but this should be explicitly stated."
+      },
+      {
+        "issue_id": "ISSUE_CAND_002",
+        "issue_type": "critical_gap",
+        "description": "The exact composition of the citrate precursor solution is not fully specified, which could affect the reproducibility of the catalyst preparation."
+      },
+      {
+        "issue_id": "ISSUE_CAND_003",
+        "issue_type": "quality_warning",
+        "description": "The Raman analysis results are reported without a clear indication of the measurement conditions or the instrument used, which could affect the reliability of the results."
+      }
+    ],
+    "extraction_notes": "The extraction was performed based on the provided candidate spans. All fields were populated using the exact information from the spans. Where information was not available, the fields were left as null or empty arrays. The review issues were identified based on the content of the spans and the extraction process."
+  }
+}

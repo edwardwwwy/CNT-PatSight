@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CNT-PatSight evidence-value extraction contract v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "source_id", "input_content_hash", "run_candidates",
+    "catalyst_candidates", "process_stage_candidates", "product_candidates",
+    "cost_scale_candidates", "review_issues", "extraction_notes"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2"},
+    "source_id": {"type": "string", "minLength": 1},
+    "input_content_hash": {"type": "string", "minLength": 16},
+    "run_candidates": {"type": "array", "items": {"$ref": "#/$defs/run"}},
+    "catalyst_candidates": {"type": "array", "items": {"$ref": "#/$defs/catalyst"}},
+    "process_stage_candidates": {"type": "array", "items": {"$ref": "#/$defs/process"}},
+    "product_candidates": {"type": "array", "items": {"$ref": "#/$defs/product"}},
+    "cost_scale_candidates": {"type": "array", "items": {"$ref": "#/$defs/cost"}},
+    "review_issues": {"type": "array", "items": {"$ref": "#/$defs/issue"}},
+    "extraction_notes": {"type": "string"}
+  },
+  "$defs": {
+    "scalar": {"type": ["string", "number", "boolean", "null"]},
+    "normalized": {
+      "oneOf": [
+        {"$ref": "#/$defs/scalar"},
+        {"type": "array", "items": {"$ref": "#/$defs/scalar"}}
+      ]
+    },
+    "evidence_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value_raw", "value_normalized", "unit", "evidence_text",
+        "evidence_section", "evidence_page", "confidence", "value_status"
+      ],
+      "properties": {
+        "value_raw": {"$ref": "#/$defs/normalized"},
+        "value_normalized": {"$ref": "#/$defs/normalized"},
+        "unit": {"type": ["string", "null"]},
+        "evidence_text": {"type": "string", "minLength": 1},
+        "evidence_section": {"type": ["string", "null"]},
+        "evidence_page": {"type": ["integer", "string", "null"]},
+        "confidence": {"enum": ["low", "medium", "high"]},
+        "value_status": {"enum": ["reported", "calculated", "inferred"]}
+      }
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {"oneOf": [{"$ref": "#/$defs/evidence_value"}, {"type": "null"}]}
+    },
+    "run": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_run_id", "fields"],
+      "properties": {
+        "candidate_run_id": {"type": "string", "pattern": "^RUN_CAND_[0-9]{3}$"},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    },
+    "catalyst": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_catalyst_id", "candidate_run_id", "fields"],
+      "properties": {
+        "candidate_catalyst_id": {"type": "string", "pattern": "^CAT_CAND_[0-9]{3}$"},
+        "candidate_run_id": {"type": "string", "pattern": "^RUN_CAND_[0-9]{3}$"},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    },
+    "process": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_stage_id", "candidate_run_id", "fields"],
+      "properties": {
+        "candidate_stage_id": {"type": "string", "pattern": "^STAGE_CAND_[0-9]{3}$"},
+        "candidate_run_id": {"type": "string", "pattern": "^RUN_CAND_[0-9]{3}$"},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    },
+    "product": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_product_id", "candidate_run_id", "fields"],
+      "properties": {
+        "candidate_product_id": {"type": "string", "pattern": "^PROD_CAND_[0-9]{3}$"},
+        "candidate_run_id": {"type": "string", "pattern": "^RUN_CAND_[0-9]{3}$"},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    },
+    "cost": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_cost_scale_id", "candidate_run_id", "fields"],
+      "properties": {
+        "candidate_cost_scale_id": {"type": "string", "pattern": "^SCALE_CAND_[0-9]{3}$"},
+        "candidate_run_id": {"type": "string", "pattern": "^RUN_CAND_[0-9]{3}$"},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    },
+    "issue": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_issue_id", "candidate_run_id", "fields"],
+      "properties": {
+        "candidate_issue_id": {"type": "string", "pattern": "^ISSUE_CAND_[0-9]{3}$"},
+        "candidate_run_id": {"type": ["string", "null"]},
+        "fields": {"$ref": "#/$defs/fields"}
+      }
+    }
+  }
+}

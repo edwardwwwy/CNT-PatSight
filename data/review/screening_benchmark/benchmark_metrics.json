@@ -1,0 +1,206 @@
+{
+  "benchmark_version": "screening_benchmark_v1.1",
+  "summarized_at": "2026-07-16T02:01:04Z",
+  "screening_sample_rows": 121,
+  "stratified_sample_rows": 120,
+  "special_screening_rows": 1,
+  "reviewed_stratified_rows": 120,
+  "review_completion": 1.0,
+  "sampling_design_rule_version": "screening_benchmark_v1.1",
+  "sampling_design_population": {
+    "A": 195,
+    "B": 225,
+    "C": 434,
+    "M": 222,
+    "R": 411
+  },
+  "current_corpus_tier_population": {
+    "A": 208,
+    "B": 371,
+    "C": 450,
+    "M": 35,
+    "R": 423
+  },
+  "A_precision": 0.9574,
+  "AB_target_recall_weighted_estimate": 0.9056,
+  "R_false_kill_rate": 0.0,
+  "R_false_kill_count": 0,
+  "R_rule_of_three_95pct_upper_if_zero": 0.1154,
+  "R_followup_action": "expand_R_boundary_sample_by_50_to_75_before_declaring_stable",
+  "AB_obvious_non_target_rate": 0.1039,
+  "M_indeterminate_rate": 1.0,
+  "tier_statistics": {
+    "A": {
+      "population": 195,
+      "sample_size": 30,
+      "weight": 6.5,
+      "reviewed": 30,
+      "include": 29,
+      "exclude": 1,
+      "indeterminate": 0,
+      "weighted_target_estimate": 188.5,
+      "complete": true
+    },
+    "B": {
+      "population": 225,
+      "sample_size": 25,
+      "weight": 9.0,
+      "reviewed": 25,
+      "include": 17,
+      "exclude": 8,
+      "indeterminate": 0,
+      "weighted_target_estimate": 153.0,
+      "complete": true
+    },
+    "C": {
+      "population": 434,
+      "sample_size": 20,
+      "weight": 21.7,
+      "reviewed": 20,
+      "include": 2,
+      "exclude": 16,
+      "indeterminate": 2,
+      "weighted_target_estimate": 43.4,
+      "complete": true
+    },
+    "M": {
+      "population": 222,
+      "sample_size": 20,
+      "weight": 11.1,
+      "reviewed": 20,
+      "include": 18,
+      "exclude": 0,
+      "indeterminate": 2,
+      "weighted_target_estimate": 199.8,
+      "complete": true
+    },
+    "R": {
+      "population": 411,
+      "sample_size": 25,
+      "weight": 16.44,
+      "reviewed": 25,
+      "include": 0,
+      "exclude": 25,
+      "indeterminate": 0,
+      "weighted_target_estimate": 0.0,
+      "complete": true
+    }
+  },
+  "prediction_statistics": {
+    "A": {
+      "sample_count": 31,
+      "weighted_population_estimate": 211.1,
+      "weighted_target_estimate": 202.1,
+      "weighted_non_target_estimate": 9.0
+    },
+    "B": {
+      "sample_count": 34,
+      "weighted_population_estimate": 379.8,
+      "weighted_target_estimate": 327.4,
+      "weighted_non_target_estimate": 52.4
+    },
+    "C": {
+      "sample_count": 27,
+      "weighted_population_estimate": 456.4,
+      "weighted_target_estimate": 55.2,
+      "weighted_non_target_estimate": 357.8
+    },
+    "M": {
+      "sample_count": 2,
+      "weighted_population_estimate": 22.2,
+      "weighted_target_estimate": 0,
+      "weighted_non_target_estimate": 0
+    },
+    "R": {
+      "sample_count": 26,
+      "weighted_population_estimate": 417.5,
+      "weighted_target_estimate": 0,
+      "weighted_non_target_estimate": 417.5
+    }
+  },
+  "weighted_target_estimates": {
+    "A": 188.5,
+    "B": 153.0,
+    "C": 43.4,
+    "M": 199.8,
+    "R": 0.0
+  },
+  "dedup_audit_rows": 23,
+  "dedup_by_match_type": {
+    "external_id": {
+      "population_groups": 298,
+      "audit_rows": 5,
+      "reviewed": 5,
+      "false_merges": 0,
+      "false_merge_rate": 0.0,
+      "all_groups_in_audit": false
+    },
+    "doi": {
+      "population_groups": 647,
+      "audit_rows": 15,
+      "reviewed": 15,
+      "false_merges": 0,
+      "false_merge_rate": 0.0,
+      "all_groups_in_audit": false
+    },
+    "title_exact": {
+      "population_groups": 0,
+      "audit_rows": 0,
+      "reviewed": 0,
+      "false_merges": 0,
+      "false_merge_rate": null,
+      "all_groups_in_audit": true
+    },
+    "title_fuzzy": {
+      "population_groups": 0,
+      "audit_rows": 0,
+      "reviewed": 0,
+      "false_merges": 0,
+      "false_merge_rate": null,
+      "all_groups_in_audit": true
+    }
+  },
+  "dedup_conflict_review": {
+    "rows": 3,
+    "reviewed": 3,
+    "incorrect_decisions": 0
+  },
+  "release_gates": {
+    "A_precision_gte_0.85": "pass",
+    "AB_weighted_recall_gte_0.90": "pass",
+    "R_false_kill_lte_0.05": "pass",
+    "R_false_kill_count_lte_1": "pass",
+    "external_id_auto_merge_no_error": "pass",
+    "doi_auto_merge_no_error": "pass",
+    "doi_conflict_decisions_correct": "pass"
+  },
+  "diagnostic_gates": {
+    "title_fuzzy_false_merge_eq_0": "not_applicable_no_fuzzy_auto_merges",
+    "AB_obvious_non_target_lte_0.10": "fail",
+    "M_indeterminate_rate": "informational"
+  },
+  "benchmark_decision": "pass_freeze_and_start_30_fulltext_pilot",
+  "error_type_distribution": {
+    "application_paper_overpromoted": 1,
+    "limited_metadata_overpromoted": 1,
+    "modelling_paper_overpromoted": 1,
+    "simulation_economic_paper_overpromoted": 1,
+    "non_cnt_material_false_positive": 1,
+    "experimental_synthesis_underpromoted": 14,
+    "preexisting_cnt_application_false_positive": 1,
+    "review_or_catalyst_support_false_positive": 1,
+    "cnt_as_catalyst_support_false_positive": 1,
+    "generic_nanocarbon_false_positive": 1,
+    "postprocessing_paper_false_positive": 1,
+    "simulation_without_synthesis_false_positive": 3,
+    "strong_title_target_held_in_missing_metadata": 16
+  },
+  "note": "Release metrics remain null until every corresponding stratum is reviewed. Indeterminate records are reported separately and are not counted as target papers.",
+  "error_case_rows": 52,
+  "dynamic_error_class_distribution": {
+    "tier_disagreement": 52,
+    "false_negative_target": 5,
+    "false_positive_candidate": 4
+  },
+  "errors_csv": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\benchmark_errors.csv"
+}

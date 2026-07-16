@@ -1,4 +1,4 @@
-version: "1.0"
+version: "1.1"
 name: "CNT-PatSight first collection scope"
 status: "advisory"
 
@@ -57,28 +57,32 @@ v1_collection_priorities:
   process:
     - reactor_type
     - temperature_setpoint_C
-    - temperature_actual_C
     - temperature_range_reported_C
-    - reported_optimal_temperature
+    - temperature_program_summary
     - holding_time_min
     - pressure_original
     - carbon_source
-    - gas_flows
-    - gas_ratio_summary
+    - carbon_source_flow_original
+    - reducing_gas_flow_original
+    - inert_gas_flow_original
+    - cofeed_flow_original
+    - gas_composition_summary
   product:
     - yield_original
     - yield_definition_original
     - CNT_type_reported
     - CNT_type_confirmed
     - CNT_type_evidence
-    - purity_wt_percent
+    - TGA_carbon_content_wt_percent
+    - purified_product_purity_wt_percent
+    - purity_basis
     - outer_diameter_range_nm
     - length_summary
-    - metal_residue_wt_percent
+    - residue_summary
     - post_treatment_or_purification
   traceability:
     - evidence_text
-    - evidence_location
+    - source_locator
     - confidence
 
 screening:
@@ -113,5 +117,6 @@ guardrails:
 flexibility:
   - "建议字段不是完成一条记录的硬性必填清单。"
   - "非甲烷碳源、非主流 CNT 类型、失败条件和不完整观察均可保留。"
-  - "来源出现有价值的新字段时，可扩展 schema 或先写入 notes。"
+  - "来源出现有价值的新信息时，先写入现有摘要字段和 evidence_index；不得随单篇来源即时扩展正式字段。"
+  - "新字段须按数百篇论文/专利的预期复用率评估，并在代表性来源中重复出现后再进行版本化评审。"
   - "相关性分类可以随研发问题变化而调整。"

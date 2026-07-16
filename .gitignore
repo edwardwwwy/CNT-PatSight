@@ -10,6 +10,11 @@ venv/
 .env
 .env.*
 !.env.example
+.tools/
+
+# Local LLM weights are large runtime assets, never repository content.
+/models/*
+!/models/README.md
 
 # Temporary files and logs
 tmp/
@@ -26,3 +31,42 @@ tmp/
 /data/raw/patents/*
 !/data/raw/patents/.gitkeep
 
+# Reproducible metadata-collection runtime artifacts. Raw responses remain local
+# and traceable through the SQLite request log and per-run report.
+/data/raw/metadata/api_responses/
+/data/raw/metadata/run_reports/
+/data/raw/metadata/*.sqlite3
+/data/raw/metadata/*.sqlite3-shm
+/data/raw/metadata/*.sqlite3-wal
+
+# Full-text acquisition runtime artifacts. Downloaded/licensed content and
+# faithful text derivatives remain local; CSV coverage exports stay visible.
+/data/raw/fulltext/pdf/
+/data/raw/fulltext/html/
+/data/raw/fulltext/text/
+/data/raw/fulltext/reports/
+/data/raw/fulltext/*.sqlite3
+/data/raw/fulltext/*.sqlite3-shm
+/data/raw/fulltext/*.sqlite3-wal
+
+# Reproducible parser runtime artifacts. Candidate CSV exports are intentionally
+# not ignored so they can be reviewed or versioned when appropriate.
+/data/interim/parsed_text/*
+!/data/interim/parsed_text/README.md
+/data/interim/extraction_candidates/reports/
+/data/interim/extraction_candidates/*.sqlite3
+/data/interim/extraction_candidates/*.sqlite3-shm
+/data/interim/extraction_candidates/*.sqlite3-wal
+
+# Phase-four LLM request/response runtime logs. Validated JSON and review CSVs
+# remain visible; raw prompts/responses may contain licensed text and are local.
+/data/interim/llm_extraction/requests/
+/data/interim/llm_extraction/raw/
+/data/interim/llm_extraction/reports/
+/data/interim/llm_extraction/raw_v0.2/
+/data/interim/llm_extraction/*.sqlite3
+/data/interim/llm_extraction/*.sqlite3-shm
+/data/interim/llm_extraction/*.sqlite3-wal
+
+# Continuous producer/consumer PID, heartbeat, log, and local control state.
+/data/interim/runtime/

@@ -1,52 +1,56 @@
-# 五表数据收集基础
+# 八表数据结构说明
 
-本文件说明 CNT-PatSight v0.3 的五张数据表如何开始使用。当前字段是便于启动采集的建议集合，不要求每条记录全部填写，也可以根据真实资料增加字段。第一批建议关注范围和推荐字段由 `config/project_scope.yaml` 与 `config/schema.json` 中的 `v1_recommended_fields` 定义；它们用于排序，不是硬性限制。
+CNT-PatSight v0.4 使用八张长期维护表。字段是否进入正式结构，依据其在数百篇论文与专利中的预期复用价值，而不是当前六篇样本的非空率：保留跨来源常见字段、特定来源类别中常见字段，以及虽少见但对安全、规模或证据判断不可替代的字段。
 
 ## 基本关系
 
 ```text
-source_run.run_id
-    ├── catalyst_system.run_id
-    ├── reactor_process_gas.run_id
-    ├── yield_quality.run_id
-    └── cost_scale_review.run_id
+source_master.source_id
+    └── source_run.source_id
+            ├── catalyst_system.run_id
+            ├── reactor_process_gas.run_id
+            ├── yield_quality.run_id
+            └── cost_scale_review.run_id
+
+evidence_index ──> 任一来源、运行或事实记录
+review_issue_log ──> 任一待复核记录，并可关联 evidence_id
 ```
 
-一篇论文或一项专利可以拆成多个 `run_id`。`reactor_process_gas` 可以按吹扫、升温、还原、生长、降温等阶段为同一 run 保存多行；其他表也可以在确有多个催化剂或产品对象时保存多行。
+## 八张表的分工
 
-## 五张表的分工
+| 表 | 主要内容 |
+|---|---|
+| `source_master` | 文献或专利唯一元数据、文件状态、筛选与总审核状态 |
+| `source_run` | 实验运行身份、路线、抽取状态和运行摘要 |
+| `catalyst_system` | 催化剂组成、载体、制备、热处理与结构性质 |
+| `reactor_process_gas` | 分阶段反应器条件、温度、压力和角色化气体程序 |
+| `yield_quality` | 原始产率口径、CNT 类型、形貌、Raman、TGA 与后处理 |
+| `cost_scale_review` | 已展示规模、连续运行、寿命、成本事实与人工评价位 |
+| `evidence_index` | 原文证据、位置、对象、值状态、置信度及问题关联 |
+| `review_issue_log` | 冲突、数据缺口、质量警告及人工复核结论 |
 
-| 表 | 主要内容 | 首要关联字段 |
-|---|---|---|
-| `source_run` | 来源、run 身份、路线分类、组合键和抽取状态 | `run_id`, `source_id` |
-| `catalyst_system` | 催化剂组成、载体、制备、酸化/络合/活化和性质 | `run_id`, `catalyst_id` |
-| `reactor_process_gas` | 反应器、阶段、温度、压力、气体和温度影响 | `run_id`, `process_stage_id` |
-| `yield_quality` | 原始产率定义、CNT 类型、SWCNT 证据、结构和质量 | `run_id`, `product_id` |
-| `cost_scale_review` | 成本与放大事实、适合条件、复现价值和工业判断 | `run_id` |
+## 字段管理原则
 
-## 填写原则
+- 来源元数据只放 `source_master`，不在每个 run 重复。
+- 事实表不嵌入证据文本与位置；所有证据统一进入 `evidence_index`。
+- 冲突、警告和待决定事项只进入 `review_issue_log`，不混入一般备注。
+- 缺失使用 `not_reported`、`not_applicable` 或受控状态；不猜测，不用空字符串掩盖含义。
+- 条件性字段可以在不适用的来源类别中为空或标记不适用；不能仅因当前样本为空就删除。
+- 高维、低复用信息优先放入摘要字段和证据表；同一信息反复出现后，再按字段变更协议评估是否结构化。
+- `ml_runs_clean.csv` 是后期由八表自动拼接的宽表，不手工维护。
 
-- 先填写原文明确报告的值；推断、计算或评价内容应在文字中说明。
-- 原始产率、单位和定义优先保留，只有口径清楚时才填写标准化值。
-- 专利实施例可以形成 run；claim 或宽泛范围可以记录，但不要当成已经完成的实验。
-- `combo_key` 用于后续聚合，建议由催化剂、碳源、反应器和 CNT 类型组合而成；组成字段仍应单独保留。
-- 酸化、络合和活化信息放入 `catalyst_system`。
-- 适应温度、最优温度和温度影响放入 `reactor_process_gas`。
-- SWCNT 声称与证据放入 `yield_quality`。
-- 最适条件、复现价值和工业判断放入 `cost_scale_review`，并与原文事实区分。
-- 找不到合适字段时，可以先放入 `notes`、`process_note` 或 `review_note`，不要因此丢失有价值信息。
+完整字段语义和稀疏度策略见 `skills/cnt-patsight/references/schema.md`；机器可读字段以 `config/schema.json` 为准，字段用途、预期出现率和保留理由见 `config/field_dictionary.csv`。
 
-## 文件位置
+## 文件位置与校验
 
-- 字段清单：`config/schema.json`
-- CSV 模板：`data/processed/templates/`
-- Excel 模板：`data/processed/templates/cnt_patsight_collection_template.xlsx`
+- CSV/Excel 空白模板：`data/processed/templates/`
+- 单篇抽取包：`data/interim/<source_id>/`
 - 校验脚本：`scripts/validation/validate_tables.py`
 
-运行基础校验：
+校验一个已经抽取的数据包：
 
 ```powershell
-python scripts/validation/validate_tables.py data/processed/templates
+python scripts/validation/validate_tables.py data/interim/<source_id>
 ```
 
-校验主要关注文件、表头、重复 `run_id` 和表间关联。字段为空通常只提示，不会阻止继续收集。
+空白模板仅用于录入起点，不按“完整来源包”规则执行校验。

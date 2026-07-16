@@ -1,0 +1,6 @@
+﻿run_id,source_id,run_label,data_type,target_track,relevance_class,extraction_status,extraction_confidence,run_summary,notes
+P003_FE,P003_Pan_2025_FeMo_MgO_Methane_CNT,Fe/MgO,experimental_run,CH4_catalytic_pyrolysis_CNT,formal_extract,needs_review,high,Fe/MgO; methane pyrolysis at 850 C for 30 min; product: mixed SWCNT/DWCNT.,not_reported
+P003_FE_MO01,P003_Pan_2025_FeMo_MgO_Methane_CNT,Fe-0.1Mo/MgO,experimental_run,CH4_catalytic_pyrolysis_CNT,formal_extract,needs_review,high,Fe-0.1Mo/MgO; methane pyrolysis at 850 C for 30 min; product: SWCNT.,not_reported
+P003_FE_MO05,P003_Pan_2025_FeMo_MgO_Methane_CNT,Fe-0.5Mo/MgO,experimental_run,CH4_catalytic_pyrolysis_CNT,formal_extract,needs_review,high,Fe-0.5Mo/MgO; methane pyrolysis at 850 C for 30 min; product: MWCNT.,not_reported
+P003_FE_MO1,P003_Pan_2025_FeMo_MgO_Methane_CNT,Fe-1Mo/MgO,experimental_run,CH4_catalytic_pyrolysis_CNT,formal_extract,needs_review,high,Fe-1Mo/MgO; methane pyrolysis at 850 C for 30 min; product: MWCNT.,not_reported
+P003_MO,P003_Pan_2025_FeMo_MgO_Methane_CNT,Mo/MgO,experimental_run,CH4_catalytic_pyrolysis_CNT,formal_extract,needs_review,high,Mo/MgO; methane pyrolysis at 850 C for 30 min; product: no_CNT_graphite.,not_reported

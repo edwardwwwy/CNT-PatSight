@@ -1,15 +1,15 @@
-# Scripts
+# 脚本目录
 
-脚本按数据流程分为 metadata 采集、候选筛选、run 级抽取、数据校验和分析五组。脚本应从 `config/` 读取规则，并明确输入、输出和是否会修改数据。
+脚本按来源登记、筛选、抽取、验证、报告和分析分组。脚本应明确输入、输出和是否修改数据。
 
-探索性代码可以先放在 `notebooks/`；验证稳定后应迁移到相应脚本目录并增加测试。
+## 八表校验
 
-## 五表基础校验
-
-使用项目 schema 检查五张 CSV 的文件名、字段顺序、行主键重复和 `run_id` 关联：
-
-```powershell
-python scripts/validation/validate_tables.py data/processed/templates
+```text
+python scripts/validation/validate_tables.py data/interim/<source_id>
 ```
 
-空白模板允许没有数据行；正式数据中行标识不完整会提示，重复主键或跨表孤立的 `run_id` 会导致校验失败。
+校验器读取 `config/schema.json` 和 `config/field_dictionary.csv`，检查八表字段、顺序、主外键、证据目标、证据覆盖和复核问题链接。
+
+## v0.3 到 v0.4 迁移
+
+`scripts/extraction/migrate_v03_to_v04.py` 用于把历史五表复核包迁移为八表结构。已迁移目录会被跳过；迁移后的数据仍需逐篇校验和人工复核。

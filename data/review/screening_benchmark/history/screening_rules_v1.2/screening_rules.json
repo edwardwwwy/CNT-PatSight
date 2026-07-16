@@ -1,0 +1,30 @@
+{
+  "screening_rule_version": "v1.2",
+  "dedup_rule_version": "v1.0",
+  "screening": {
+    "tier_a_topic_min": 7.0,
+    "tier_a_evidence_min": 3.0,
+    "tier_b_topic_min": 6.0,
+    "direct_synthesis_bonus": 1.0,
+    "strong_title_missing_abstract_tier": "B",
+    "require_strong_cnt_identity_for_candidate": true,
+    "non_cnt_title_guard": true,
+    "review_abstract_guard": true,
+    "theory_without_experiment_guard": true,
+    "preexisting_cnt_guard": true
+  },
+  "dedup": {
+    "auto_merge_threshold": 0.97,
+    "review_threshold": 0.92,
+    "title_min_length": 30,
+    "year_tolerance": 1,
+    "require_document_type_compatibility": true,
+    "require_first_author_or_venue_match": true,
+    "different_nonempty_doi_action": "doi_conflict_review"
+  },
+  "policy": {
+    "automatic_formal_extract": false,
+    "metadata_candidate_tiers": ["A", "B", "M"],
+    "fulltext_required_before_candidate_extract": true
+  }
+}

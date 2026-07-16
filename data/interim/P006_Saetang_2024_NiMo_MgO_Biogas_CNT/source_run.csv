@@ -1,0 +1,9 @@
+﻿run_id,source_id,run_label,data_type,target_track,relevance_class,extraction_status,extraction_confidence,run_summary,notes
+P006_T700_R15_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,700 C; CH4:CO2 1.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 700 C; 60/40 CH4/CO2; 3 h; MWCNT product.,not_reported
+P006_T800_R15_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,800 C; CH4:CO2 1.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 800 C; 60/40 CH4/CO2; 3 h; MWCNT product.,not_reported
+P006_T900_R15_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,900 C; CH4:CO2 1.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 900 C; 60/40 CH4/CO2; 3 h; MWCNT product.,not_reported
+P006_T1000_R15_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,1000 C; CH4:CO2 1.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 1000 C; 60/40 CH4/CO2; 3 h; MWCNT product.,not_reported
+P006_T1100_R15_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,1100 C; CH4:CO2 1.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 1100 C; 60/40 CH4/CO2; 3 h; MWCNT product.,not_reported
+P006_T800_R10_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,800 C; CH4:CO2=1:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 800 C; CH4:CO2=1:1; 3 h; MWCNT-containing sparse product.,not_reported
+P006_T800_R05_3H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,800 C; CH4:CO2=0.5:1; 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 800 C; CH4:CO2=0.5:1; 3 h; no_CNT_or_trace.,not_reported
+P006_T800_R15_20H,P006_Saetang_2024_NiMo_MgO_Biogas_CNT,800 C; CH4:CO2 1.5:1; 20 h durability,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO 20 h durability run at 800 C; MWCNTs with mean diameter 21.2 nm.,not_reported

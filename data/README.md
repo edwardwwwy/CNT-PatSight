@@ -1,17 +1,32 @@
-# Data
+# 数据目录规则
 
-本目录保存 CNT-PatSight 数据全生命周期。`raw` 保存公开原始输入，`interim` 保存待复核中间结果，`processed` 保存校验后的正式数据，`dictionaries` 保存标准化词典，`internal` 单独保存敏感内部数据。
+原始资料不得被清洗脚本原地覆盖。`source_id` 和 `run_id` 是稳定业务键，文件路径不是业务主键。
 
-原始资料不得被清洗脚本原地覆盖。正式五表数据必须通过 `run_id` 保持来源、催化剂、工艺、产品结果和工业评价之间的关联。
+## 分层
 
-五表空白 CSV 模板位于 `processed/templates/`，可用于程序导入或作为新数据批次的起点。
+- `raw/`：来源登记、公开论文 PDF、专利原文和其他只读原始资料。
+- `interim/<source_id>/`：单篇来源的八张 CSV 与 `extraction_workbook.xlsx`，全部为待人工复核数据。
+- `processed/`：人工复核通过后的跨来源八表数据。
+- `internal/`：公司或实验室内部数据，默认敏感并与公开数据分离。
 
-## 面向大规模文献的数据位置
+`raw/metadata/literature_master.csv` 是接收和下载流程登记，不是正式业务表。正式来源元数据进入 `source_master.csv`。
 
-- `raw/papers/` 保存不可变的公开论文原件，文件名优先使用 DOI 或出版商稳定编号。
-- `interim/<source_id>/` 按 `P{三位编号}_{FirstAuthor}_{Year}_{ShortTopic}` 命名，目录名与表内 `source_id` 完全一致，不使用原始 PDF 文件名、DOI 片段或不清楚的缩写。
-- 每个来源目录固定保存五张 CSV、`extraction_workbook.xlsx` 和 `source_observations.jsonl`；这些是逐篇复核包，不代表为每篇文献建立五套正式数据库。
-- `interim/source_observations.jsonl` 跨来源保存完整结构化的 warning 和 observation，并通过 `source_id`、`related_run_id` 回连来源与正式 run。
-- `processed/` 最终按五张主表跨来源汇总，不按论文拆成五套正式表。只有人工复核通过的数据才能进入该层。
+## 单篇复核包
 
-当前 10 篇样本阶段保持一篇一个 `interim/<source_id>/` 目录，便于逐篇复核。来源达到数千篇后，可在不改变 `source_id` 和五表关系的前提下按年份或哈希前缀对 `raw`、`interim` 做目录分片；不要把路径本身当作业务主键。
+每个 `interim/<source_id>/` 固定包含：
+
+```text
+source_master.csv
+source_run.csv
+catalyst_system.csv
+reactor_process_gas.csv
+yield_quality.csv
+cost_scale_review.csv
+evidence_index.csv
+review_issue_log.csv
+extraction_workbook.xlsx
+```
+
+不再保留独立 `source_observations.jsonl`；其内容进入 `evidence_index`，真实冲突和关键缺口同时进入 `review_issue_log`。
+
+空白八表模板位于 `processed/templates/`。只有人工复核通过的数据才能汇总进入 `processed/`。

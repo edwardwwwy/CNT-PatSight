@@ -1,0 +1,317 @@
+{
+  "schema_version": "0.1",
+  "source_id": "P002_Chotmunkhongsin_2023_FeMo_MgO_H2_MWCNT",
+  "source_title": "Synthesis of MWCNTs by chemical vapor deposition of methane using FeMo/MgO catalyst: role of hydrogen and kinetic study",
+  "input_content_hash": "4eb86a0991b916e259a6e7e7b00d7575e61274c5a2a6b40da91fe25f859d34fe",
+  "extraction_scope": "candidate_spans_only",
+  "run_candidates": [
+    {
+      "candidate_run_id": "RUN_CAND_001",
+      "relevance_class": "high",
+      "confidence": 0.9,
+      "run_split_basis": "H2 concentration variation and process stages (reduction, growth, hydrogenation)",
+      "evidence_span_ids": [
+        "SPAN_3154DE7D755EF18A4C67",
+        "SPAN_67655C59EA005A3FFD0B",
+        "SPAN_3360F1D2BBE02E7820E2",
+        "SPAN_459577EF3878D62A62EE",
+        "SPAN_32963D6F0EF60C754926",
+        "SPAN_C714C9AFAAEDFFDBF85C",
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "run_summary": "Synthesis of MWCNTs using FeMo/MgO catalyst via CCVD with methane, varying H2 concentrations (1:0 to 1:3 CH4:H2), including reduction and catalytic hydrogenation processes.",
+      "run_label": "FeMo/MgO CNT synthesis with H2"
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "preparation_detail": "Fe and Mo solutions mixed in 2:1 ratio, impregnated onto MgO, dried at 90°C, calcined at 500°C for 3h",
+      "calcination_condition": "500°C for 3h",
+      "BET_surface_area_m2_g": null,
+      "metal_ratio_original": "2:1 (Fe:Mo)",
+      "candidate_run_id": "RUN_CAND_001",
+      "promoter": null,
+      "catalyst_particle_size_range_nm": null,
+      "preparation_modifier": null,
+      "support_material": "MgO",
+      "active_metals": [
+        "Fe",
+        "Mo"
+      ],
+      "candidate_catalyst_id": "CAT_CAND_001",
+      "precursor_summary": "Fe(NO3)3.9H2O and (NH4)6Mo7O24",
+      "evidence_span_ids": [
+        "SPAN_3360F1D2BBE02E7820E2",
+        "SPAN_459577EF3878D62A62EE",
+        "SPAN_C714C9AFAAEDFFDBF85C"
+      ],
+      "activation_condition": null,
+      "preparation_method": "impregnation",
+      "phase_or_state_summary": "oxide form before reduction, metallic after reduction",
+      "reduction_condition": "H2 atmosphere (R-woH and R-wH processes)",
+      "drying_condition": "90°C hot plate stirrer, 4h oven",
+      "confidence": 0.9,
+      "catalyst_label": "FeMo/MgO"
+    }
+  ],
+  "process_stage_candidates": [
+    {
+      "carbon_source_flow_original": null,
+      "process_note": "Catalyst calcination at 500°C for 3h, followed by reduction in H2/N2 atmosphere",
+      "temperature_setpoint_C": 500,
+      "scale_level": null,
+      "inert_gas_flow_original": "200 ml/min",
+      "cofeed_or_reactive_gas": null,
+      "candidate_stage_id": "STAGE_CAND_001",
+      "holding_time_min": 180,
+      "reducing_gas_flow_original": null,
+      "carbon_source": null,
+      "catalyst_loading_mass_g": 0.5,
+      "reactor_type": "quartz tube reactor",
+      "reducing_gas": "H2",
+      "cofeed_flow_original": null,
+      "carbon_source_flow_sccm": null,
+      "total_flow_sccm": null,
+      "confidence": 0.9,
+      "inert_gas": "N2",
+      "total_flow_original": "200 ml/min",
+      "temperature_range_reported_C": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "gas_composition_summary": "N2 adjusted to 200 ml/min, H2 concentrations varied (1:0 to 1:3 CH4:H2)",
+      "reactor_size_summary": null,
+      "reducing_gas_flow_sccm": null,
+      "stage_order": 1,
+      "pressure_kPa": null,
+      "pressure_original": null,
+      "stage_type": "calcination",
+      "inert_gas_flow_sccm": null,
+      "GHSV_or_residence_time": null,
+      "evidence_span_ids": [
+        "SPAN_3360F1D2BBE02E7820E2",
+        "SPAN_67655C59EA005A3FFD0B",
+        "SPAN_459577EF3878D62A62EE"
+      ],
+      "reactor_material": "quartz",
+      "cofeed_flow_sccm": null
+    },
+    {
+      "carbon_source_flow_original": "50 ml/min",
+      "process_note": "CCVD growth at 900°C with varying H2 concentrations, methane as carbon source",
+      "temperature_setpoint_C": 900,
+      "scale_level": null,
+      "inert_gas_flow_original": "200 ml/min",
+      "cofeed_or_reactive_gas": null,
+      "candidate_stage_id": "STAGE_CAND_002",
+      "holding_time_min": 180,
+      "reducing_gas_flow_original": "25-150 ml/min",
+      "carbon_source": "CH4",
+      "catalyst_loading_mass_g": 0.5,
+      "reactor_type": "quartz boat in quartz tube reactor",
+      "reducing_gas": "H2",
+      "cofeed_flow_original": null,
+      "carbon_source_flow_sccm": null,
+      "total_flow_sccm": null,
+      "confidence": 0.9,
+      "inert_gas": "N2",
+      "total_flow_original": "200 ml/min",
+      "temperature_range_reported_C": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "gas_composition_summary": "CH4:H2:N2 ratios varied (1:0, 2:1, 1:1, 1:2, 1:3)",
+      "reactor_size_summary": null,
+      "reducing_gas_flow_sccm": null,
+      "stage_order": 2,
+      "pressure_kPa": null,
+      "pressure_original": null,
+      "stage_type": "cnt_growth",
+      "inert_gas_flow_sccm": null,
+      "GHSV_or_residence_time": null,
+      "evidence_span_ids": [
+        "SPAN_3360F1D2BBE02E7820E2",
+        "SPAN_459577EF3878D62A62EE",
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "reactor_material": "quartz",
+      "cofeed_flow_sccm": null
+    },
+    {
+      "carbon_source_flow_original": null,
+      "process_note": "Catalytic hydrogenation of CNTs at 900°C with H2/N2 flow",
+      "temperature_setpoint_C": 900,
+      "scale_level": null,
+      "inert_gas_flow_original": "50 ml/min",
+      "cofeed_or_reactive_gas": null,
+      "candidate_stage_id": "STAGE_CAND_003",
+      "holding_time_min": 100,
+      "reducing_gas_flow_original": "100 ml/min",
+      "carbon_source": null,
+      "catalyst_loading_mass_g": 0.5,
+      "reactor_type": "quartz boat in quartz tube reactor",
+      "reducing_gas": "H2",
+      "cofeed_flow_original": null,
+      "carbon_source_flow_sccm": null,
+      "total_flow_sccm": null,
+      "confidence": 0.9,
+      "inert_gas": "N2",
+      "total_flow_original": "150 ml/min",
+      "temperature_range_reported_C": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "gas_composition_summary": "H2:N2 (100:50 ml/min)",
+      "reactor_size_summary": null,
+      "reducing_gas_flow_sccm": null,
+      "stage_order": 3,
+      "pressure_kPa": null,
+      "pressure_original": null,
+      "stage_type": "other",
+      "inert_gas_flow_sccm": null,
+      "GHSV_or_residence_time": null,
+      "evidence_span_ids": [
+        "SPAN_32963D6F0EF60C754926",
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "reactor_material": "quartz",
+      "cofeed_flow_sccm": null
+    }
+  ],
+  "product_candidates": [
+    {
+      "primary_yield_metric": "CNT_yield_per_catalyst",
+      "Raman_ratio_value": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "yield_calculation_method": "Eq. (5) and (6)",
+      "yield_value_standardized": 1.2401,
+      "CNT_productivity_g_gcat_h": null,
+      "purified_product_purity_wt_percent": null,
+      "product_mixture_summary": null,
+      "CNT_type_confirmed": "MWCNTs",
+      "post_treatment_or_purification": "catalytic hydrogenation",
+      "amorphous_carbon_level": null,
+      "carbon_source_conversion_percent": 17.06,
+      "yield_unit_standardized": "g/gcat",
+      "CNT_type_reported": "MWCNTs",
+      "yield_definition_original": "g-CNTs/g-catalyst",
+      "candidate_product_id": "PROD_CAND_001",
+      "purity_basis": null,
+      "wall_number_summary": null,
+      "yield_original": "1.2401",
+      "evidence_span_ids": [
+        "SPAN_459577EF3878D62A62EE",
+        "SPAN_BC7861F624AB5E3598DA",
+        "SPAN_0F4C615EBC27FE71696B"
+      ],
+      "morphology": null,
+      "CNT_yield_per_catalyst_g_gcat": 1.2401,
+      "Raman_ratio_type": "ID/IG",
+      "carbon_conversion_to_solid_percent": null,
+      "TGA_carbon_content_wt_percent": null,
+      "characterization_methods": [
+        "XRD",
+        "TGA"
+      ],
+      "confidence": 0.9,
+      "CNT_type_evidence": "XRD and TGA analysis",
+      "outer_diameter_range_nm": "35.72 nm (average)"
+    }
+  ],
+  "cost_scale_candidates": [
+    {
+      "safety_risk": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "quantitative_cost_reported": false,
+      "cost_driver_summary": "Catalyst preparation and CCVD process",
+      "emission_or_waste": "CH4 and CO emissions during reaction",
+      "batch_stability": null,
+      "scale_up_issue": null,
+      "quantitative_cost_summary": null,
+      "evidence_span_ids": [
+        "SPAN_67655C59EA005A3FFD0B",
+        "SPAN_32963D6F0EF60C754926"
+      ],
+      "candidate_cost_scale_id": "SCALE_CAND_001",
+      "scale_level_demonstrated": "laboratory",
+      "scale_evidence_summary": "0.5 g catalyst used in quartz boat reactor, no industrial scale data",
+      "catalyst_lifetime_or_reuse": null,
+      "reactor_capacity_or_throughput": "0.5 g catalyst",
+      "confidence": 0.9,
+      "continuous_operation_time_h": null,
+      "scale_level_claimed": null
+    }
+  ],
+  "source_observations": [
+    {
+      "confidence": 0.9,
+      "evidence_span_ids": [
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "summary": "Maximum yield of 1.2401 g-CNTs/g-catalyst at 1:1 CH4:H2 ratio",
+      "observation_type": "other",
+      "value_status": "reported",
+      "candidate_observation_id": "OBS_CAND_001"
+    },
+    {
+      "confidence": 0.9,
+      "evidence_span_ids": [
+        "SPAN_459577EF3878D62A62EE"
+      ],
+      "summary": "Methane conversion highest at 1:1 CH4:H2 ratio",
+      "observation_type": "other",
+      "value_status": "reported",
+      "candidate_observation_id": "OBS_CAND_002"
+    },
+    {
+      "confidence": 0.9,
+      "evidence_span_ids": [
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "summary": "Average CNT diameter 35.72 nm at 1:1 CH4:H2 ratio",
+      "observation_type": "other",
+      "value_status": "reported",
+      "candidate_observation_id": "OBS_CAND_003"
+    }
+  ],
+  "evidence_claims": [
+    {
+      "claim_id": "CLM_001",
+      "target_type": "run",
+      "target_id": "RUN_CAND_001",
+      "target_fields": [
+        "run_label",
+        "run_summary",
+        "run_split_basis"
+      ],
+      "span_ids": [
+        "SPAN_3154DE7D755EF18A4C67",
+        "SPAN_67655C59EA005A3FFD0B",
+        "SPAN_3360F1D2BBE02E7820E2",
+        "SPAN_459577EF3878D62A62EE",
+        "SPAN_32963D6F0EF60C754926",
+        "SPAN_C714C9AFAAEDFFDBF85C",
+        "SPAN_BC7861F624AB5E3598DA"
+      ],
+      "evidence_quote": "CNTs synthesis CNTs were synthesized by the catalytic chemical vapor deposition (CCVD) method using methane as a carbon source.",
+      "value_status": "reported",
+      "confidence": 0.9,
+      "notes": "Derived from catalyst preparation, process stages, and yield data in multiple spans."
+    }
+  ],
+  "review_issues": [
+    {
+      "candidate_issue_id": "ISSUE_CAND_001",
+      "candidate_run_id": "RUN_CAND_001",
+      "issue_type": "definition_ambiguity",
+      "target_type": "product",
+      "target_id": "PROD_CAND_001",
+      "target_field": "CNT_type_confirmed",
+      "issue_summary": "Assumed confirmation of MWCNTs based on XRD and TGA without explicit confirmation in text",
+      "conflicting_values": [
+        "MWCNTs (assumed)",
+        "not explicitly confirmed"
+      ],
+      "evidence_span_ids": [
+        "SPAN_0F4C615EBC27FE71696B"
+      ],
+      "severity": "medium",
+      "review_status": "open"
+    }
+  ],
+  "extraction_notes": "Extraction completed with 10 selected spans. Review issues include assumption of MWCNT confirmation. All outputs remain needs_review."
+}

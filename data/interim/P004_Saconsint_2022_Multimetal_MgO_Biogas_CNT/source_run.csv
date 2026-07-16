@@ -1,0 +1,5 @@
+﻿run_id,source_id,run_label,data_type,target_track,relevance_class,extraction_status,extraction_confidence,run_summary,notes
+P004_NIMO,P004_Saconsint_2022_Multimetal_MgO_Biogas_CNT,NiMo/MgO,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NiMo/MgO; 60/40 CH4/CO2 at 800 C for 3 h; MWCNT product.,not_reported
+P004_CONIMO,P004_Saconsint_2022_Multimetal_MgO_Biogas_CNT,CoNiMo/MgO,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,CoNiMo/MgO; 60/40 CH4/CO2 at 800 C for 3 h; MWCNT product.,not_reported
+P004_FENIMO,P004_Saconsint_2022_Multimetal_MgO_Biogas_CNT,FeNiMo/MgO,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,FeNiMo/MgO; 60/40 CH4/CO2 at 800 C for 3 h; MWCNT product.,not_reported
+P004_COFEMO,P004_Saconsint_2022_Multimetal_MgO_Biogas_CNT,CoFeMo/MgO,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,CoFeMo/MgO; 60/40 CH4/CO2 at 800 C for 3 h; MWCNT-containing sparse product product.,not_reported

@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "enabled": false,
+  "phase": "reserved_for_later_implementation",
+  "sources": [
+    {
+      "source_id": "lens_patent_api",
+      "role": "preferred_global_search_if_access_is_approved",
+      "protocol": "REST_JSON",
+      "credential_env": ["LENS_API_TOKEN"],
+      "access": "request_or_subscription_token",
+      "adapter_status": "not_implemented"
+    },
+    {
+      "source_id": "epo_ops",
+      "role": "global_bibliographic_legal_status_and_full_text_fallback",
+      "protocol": "REST_XML_OAUTH2",
+      "credential_env": ["EPO_OPS_CONSUMER_KEY", "EPO_OPS_CONSUMER_SECRET"],
+      "access": "registered_application_with_quota",
+      "adapter_status": "not_implemented"
+    },
+    {
+      "source_id": "uspto_open_data_portal",
+      "role": "us_specific_enrichment_and_bulk_dataset_discovery",
+      "protocol": "REST_JSON",
+      "credential_env": ["USPTO_ODP_API_KEY"],
+      "access": "uspto_account_and_api_key",
+      "adapter_status": "not_implemented"
+    },
+    {
+      "source_id": "wipo_patentscope",
+      "role": "pct_specific_validation_and_document_access",
+      "protocol": "SOAP_or_WIPO_data_product",
+      "credential_env": ["WIPO_PATENTSCOPE_USERNAME", "WIPO_PATENTSCOPE_PASSWORD"],
+      "access": "conditional_or_paid_webservice_access",
+      "adapter_status": "not_implemented"
+    }
+  ]
+}
+

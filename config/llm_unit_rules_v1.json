@@ -1,0 +1,21 @@
+{
+  "unit_rule_version": "v1.0",
+  "bounds_are_warnings_only": true,
+  "bounds": {
+    "temperature_C": [-273.15, 2500],
+    "pressure_kPa": [0, 100000],
+    "flow_sccm": [0, 10000000],
+    "time_min": [0, 525600],
+    "ordinary_percent": [0, 100]
+  },
+  "conversions": {
+    "temperature": ["°C", "C", "K", "°F", "F"],
+    "pressure": ["Pa", "kPa", "MPa", "bar", "atm", "Torr"],
+    "time": ["s", "min", "h"],
+    "mass": ["mg", "g", "kg"],
+    "length": ["nm", "µm", "um", "mm"],
+    "standard_flow": ["sccm", "slm", "L/min", "mL/min"]
+  },
+  "non_convertible_policy": "preserve_raw_and_raise_review_warning",
+  "yield_policy": "never_convert_between_different_yield_identities"
+}

@@ -1,0 +1,4 @@
+﻿source_id,request_hash,extraction_status,review_status,error_count,warning_count,run_count,catalyst_count,process_stage_count,product_count,evidence_claim_count,evidence_field_coverage,reviewer,reviewed_at,notes
+P001_Dubey_2012_FeMo_MgO_tMWCNT,4bb56655ca4b17f3e9b8,validated_needs_review,open,0,75,1,1,2,1,1,0.09523809523809523,,,First-pass Qwen staging output; not formal eight-table data.
+P002_Chotmunkhongsin_2023_FeMo_MgO_H2_MWCNT,9563b37e1868ee62476b,validated_needs_review,open,0,84,1,1,3,1,1,0.038461538461538464,,,First-pass Qwen staging output; not formal eight-table data.
+P006_Saetang_2024_NiMo_MgO_Biogas_CNT,72828a35e0124e410a6c,validated_needs_review,open,0,52,1,1,1,1,1,0.06521739130434782,,,First-pass Qwen staging output; not formal eight-table data.

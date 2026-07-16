@@ -1,70 +1,67 @@
 # CNT-PatSight 仓库结构
 
-本仓库按“配置、原始资料、处理中间数据、正式数据、规则文档、脚本、分析输出”分层。目录结构服务于以下数据流：
+## 目录职责
+
+| 路径 | 作用 |
+|---|---|
+| `skills/cnt-patsight/` | CNT 文献/专利提取、证据和复核规范 |
+| `config/` | 八表 schema、字段字典和项目范围 |
+| `data/raw/` | 只读原始 PDF、专利和来源接收登记 |
+| `data/raw/fulltext/` | 全文获取登记、原始 PDF/HTML 缓存和获取报告 |
+| `data/interim/` | 解析候选层和单篇来源待复核八表包 |
+| `data/interim/extraction_candidates/` | Python 正文分段与实验候选 span |
+| `data/interim/llm_extraction/` | Qwen 请求、原始响应和验证后 staging JSON |
+| `data/review/llm_extraction/` | LLM 抽取人工复核队列和校验问题 |
+| `data/processed/` | 人工复核通过后的跨来源数据和空模板 |
+| `data/internal/` | 敏感内部数据 |
+| `scripts/fetch_fulltext/` | 幂等全文获取与覆盖登记 |
+| `scripts/parse_fulltext/` | PDF/HTML 分段、表格和候选 span 解析 |
+| `scripts/extraction/` | 提取与结构迁移脚本 |
+| `scripts/validation/` | schema、关系、证据和问题校验 |
+| `scripts/reporting/` | 可再生成的展示材料 |
+| `reports/` | 阶段报告、统计结果和研发建议 |
+| `tmp/` | 可删除的解析、渲染和调试文件 |
+
+## 推荐结构
 
 ```text
-公开元数据 / 论文 / 专利                    内部实验数据（敏感）
-             |                                      |
-             v                                      v
-          data/raw                             data/internal
-             |                                      |
-             +---------- 筛选与 run 级抽取 ----------+
-                              |
-                              v
-                         data/interim
-                              |
-                     校验、标准化、人工复核
-                              |
-                              v
-                        data/processed
-                              |
-                   分析、图表和研发建议报告
-                              |
-                              v
-                           reports
+config/
+  schema.json
+  field_dictionary.csv
+
+data/
+  raw/
+    metadata/
+      literature_master.csv      # 接收/下载流程登记
+    papers/                       # 原始论文 PDF
+    patents/                      # 原始专利
+    fulltext/                     # 全文登记、原始缓存和获取报告
+  interim/
+    parsed_text/                  # 可再生成的全文分段文本
+    extraction_candidates/       # section/span CSV、SQLite 和解析报告
+    llm_extraction/               # Qwen staging JSON 和本地运行记录
+    <source_id>/
+      source_master.csv
+      source_run.csv
+      catalyst_system.csv
+      reactor_process_gas.csv
+      yield_quality.csv
+      cost_scale_review.csv
+      evidence_index.csv
+      review_issue_log.csv
+      extraction_workbook.xlsx
+  processed/
+    templates/                    # 八表空模板
+    # 人工复核后再汇总跨来源八表
 ```
 
-## 顶层目录
+`literature_master.csv` 只管理来源接收和 PDF 状态；正式来源数据以 `source_master.csv` 为准。实验事实、证据和复核问题分别进入对应表。
 
-| 路径 | 作用 | 放置规则 |
-|---|---|---|
-| `skills/` | Codex/Agent 执行项目任务时使用的专业工作规范 | 项目技能位于 `skills/cnt-patsight/SKILL.md` |
-| `config/` | 项目范围、数据源、筛选规则、字段 schema、路径和模型配置 | 只放可复用配置，不放密钥 |
-| `data/` | 研究数据全生命周期 | 公开资料与内部敏感资料必须分开 |
-| `docs/` | 字段定义、抽取规则、专利规则和架构说明 | 规则变化应先更新文档，再调整脚本 |
-| `scripts/` | 数据采集、筛选、抽取、校验和分析程序 | 按工作阶段拆分，避免一次性脚本散落根目录 |
-| `reports/` | 可交付的分析报告、图表和研发建议 | 最终输出与临时中间数据分开 |
-| `notebooks/` | 探索性分析和原型验证 | 稳定逻辑应迁移到 `scripts/` 并补测试 |
-| `tests/` | 数据规则和脚本测试 | `fixtures/` 只放小型、脱敏的测试样本 |
+## 扩展规则
 
-## `data/` 分层
-
-| 路径 | 作用 |
-|---|---|
-| `data/raw/metadata/` | OpenAlex、Crossref、WoS、Scopus、CNKI 等原始 metadata 导出 |
-| `data/raw/papers/` | 下载的公开论文及补充材料；默认不提交 Git |
-| `data/raw/patents/` | 下载的专利全文、附图和法律状态材料；默认不提交 Git |
-| `data/interim/` | 去重、筛选、OCR、候选 run 和待人工复核数据 |
-| `data/processed/` | 通过校验的五表数据库及可发布数据版本 |
-| `data/dictionaries/` | 催化剂、载体、碳源、单位和同义词映射字典 |
-| `data/internal/` | 公司或实验室内部数据；默认敏感并被 Git 忽略 |
-
-## `scripts/` 分工
-
-| 路径 | 作用 |
-|---|---|
-| `scripts/collect_metadata/` | 获取和合并论文、专利候选 metadata |
-| `scripts/screening/` | 七问题筛选、相关性评分和候选分类 |
-| `scripts/extraction/` | PDF/专利实施例解析和 run 级字段抽取 |
-| `scripts/validation/` | schema、单位、外键、证据和产率定义校验 |
-| `scripts/analysis/` | 催化剂、工艺窗口、产品质量和工业价值分析 |
-
-## 文件放置原则
-
-1. 根目录只保留项目入口和仓库级配置，不堆放数据或临时脚本。
-2. 一份文献可以对应多个 `run_id`；正式数据以 run 为核心，不以 PDF 为核心。
-3. 原始数据只读保存，所有清洗结果写入 `interim` 或 `processed`。
-4. `processed` 数据必须保留来源、证据位置、抽取方法和置信度。
-5. 专利 claim、背景描述和具体实施例必须区分存储。
-6. 内部实验数据不得默认上传外部 API，也不得提交到公开仓库。
-
+- 当前按来源保存复核包，便于人工检查；汇总数据库仍是跨来源八表，不是每篇论文一套独立数据库。
+- 来源达到数百或数千篇后，可按年份或哈希前缀分片目录，但不得改变 `source_id` 和 `run_id`。
+- PDF 使用 DOI、出版商编号或其他稳定文件名；不要为单个 PDF 增加无意义嵌套目录。
+- 页面图片、OCR 文本和工作簿预览放入 `tmp/`，需要时重新生成。
+- 不创建含义模糊的根目录 `output/` 或 `outputs/`。原始/中间数据按 `data/` 分层，运行报告跟随对应数据层，面向人的阶段报告统一放入 `reports/`。
+- 内部数据不得默认上传外部服务或提交到公开仓库。

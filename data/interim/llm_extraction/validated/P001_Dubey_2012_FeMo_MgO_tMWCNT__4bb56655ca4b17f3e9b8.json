@@ -1,0 +1,311 @@
+{
+  "schema_version": "0.1",
+  "source_id": "P001_Dubey_2012_FeMo_MgO_tMWCNT",
+  "source_title": "Synthesis of thin-multiwalled carbon nanotubes by Fe-Mo/MgO catalyst using sol-gel method",
+  "input_content_hash": "6e9cdd4406f7d8c71631e6ba62b01b35309c34654d3fbf37447c05c03b94c0eb",
+  "extraction_scope": "candidate_spans_only",
+  "run_candidates": [
+    {
+      "run_split_basis": "different catalyst preparation conditions and growth parameters",
+      "candidate_run_id": "RUN_CAND_001",
+      "confidence": 0.9,
+      "run_label": "Fe-Mo/MgO catalyst synthesis of t-MWCNTs",
+      "run_summary": "Synthesis of thin-multiwalled carbon nanotubes using Fe-Mo/MgO catalyst prepared by sol-gel method under various conditions.",
+      "relevance_class": "high",
+      "evidence_span_ids": [
+        "SPAN_E48033EB57419DA29713",
+        "SPAN_816F50E7DBB31475E4CF",
+        "SPAN_E423DE40AC7C4897918C"
+      ]
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "BET_surface_area_m2_g": 202,
+      "drying_condition": "120ºC for 5 h",
+      "candidate_catalyst_id": "CAT_CAND_001",
+      "catalyst_particle_size_range_nm": null,
+      "calcination_condition": "700ºC for 2 h under Ar, air, and H2",
+      "confidence": 0.9,
+      "metal_ratio_original": "Fe:Mo:MgO = 1:1.5:10",
+      "catalyst_label": "Fe-Mo/MgO",
+      "evidence_span_ids": [
+        "SPAN_E48033EB57419DA29713",
+        "SPAN_E423DE40AC7C4897918C",
+        "SPAN_80E5C104489ADBCC687A"
+      ],
+      "precursor_summary": "citrate precursor based sol-gel method",
+      "activation_condition": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "active_metals": [
+        "Fe",
+        "Mo"
+      ],
+      "preparation_method": "sol-gel",
+      "preparation_detail": "Fe(NO3)3·9H2O and Mg(NO3)2·4H2O dissolved in DI water with citric acid at 1:1.2 ratio, followed by addition of (NH4)6Mo7O24·4H2O",
+      "promoter": null,
+      "preparation_modifier": "acid_complexing",
+      "support_material": "MgO",
+      "phase_or_state_summary": "solid",
+      "reduction_condition": null
+    }
+  ],
+  "process_stage_candidates": [
+    {
+      "inert_gas": "Ar",
+      "inert_gas_flow_sccm": 500,
+      "scale_level": "laboratory",
+      "cofeed_or_reactive_gas": "CH4",
+      "process_note": "Thermal decomposition of citrate precursor",
+      "reactor_type": "quartz tube furnace",
+      "holding_time_min": 120,
+      "temperature_range_reported_C": "700ºC",
+      "reducing_gas": "H2",
+      "evidence_span_ids": [
+        "SPAN_E423DE40AC7C4897918C"
+      ],
+      "total_flow_sccm": 2700,
+      "pressure_kPa": null,
+      "carbon_source": null,
+      "cofeed_flow_original": "1000 sccm",
+      "reducing_gas_flow_sccm": 500,
+      "carbon_source_flow_sccm": null,
+      "inert_gas_flow_original": "500 sccm",
+      "stage_type": "other",
+      "total_flow_original": "2700 sccm",
+      "confidence": 0.9,
+      "reactor_size_summary": "10 cm i.d. and 120 cm length",
+      "reducing_gas_flow_original": "500 sccm",
+      "catalyst_loading_mass_g": 0.1,
+      "GHSV_or_residence_time": null,
+      "candidate_stage_id": "STAGE_CAND_001",
+      "candidate_run_id": "RUN_CAND_001",
+      "carbon_source_flow_original": null,
+      "stage_order": 1,
+      "cofeed_flow_sccm": 1000,
+      "temperature_setpoint_C": 700,
+      "pressure_original": "atmospheric",
+      "gas_composition_summary": "Ar/H2/CH4 (1000/200/1000 sccm)",
+      "reactor_material": "quartz"
+    },
+    {
+      "inert_gas": "Ar",
+      "inert_gas_flow_sccm": 1000,
+      "scale_level": "laboratory",
+      "cofeed_or_reactive_gas": null,
+      "process_note": "CNT synthesis under Ar/H2/CH4 atmosphere",
+      "reactor_type": "quartz tube reactor",
+      "holding_time_min": 30,
+      "temperature_range_reported_C": "900ºC",
+      "reducing_gas": "H2",
+      "evidence_span_ids": [
+        "SPAN_816F50E7DBB31475E4CF"
+      ],
+      "total_flow_sccm": 2200,
+      "pressure_kPa": null,
+      "carbon_source": "CH4",
+      "cofeed_flow_original": null,
+      "reducing_gas_flow_sccm": 200,
+      "carbon_source_flow_sccm": 1000,
+      "inert_gas_flow_original": "1000 sccm",
+      "stage_type": "cnt_growth",
+      "total_flow_original": "2200 sccm",
+      "confidence": 0.9,
+      "reactor_size_summary": "10 cm i.d. and 120 cm length",
+      "reducing_gas_flow_original": "200 sccm",
+      "catalyst_loading_mass_g": 0.1,
+      "GHSV_or_residence_time": null,
+      "candidate_stage_id": "STAGE_CAND_002",
+      "candidate_run_id": "RUN_CAND_001",
+      "carbon_source_flow_original": "1000 sccm",
+      "stage_order": 2,
+      "cofeed_flow_sccm": null,
+      "temperature_setpoint_C": 900,
+      "pressure_original": "atmospheric",
+      "gas_composition_summary": "Ar/H2/CH4 (1000/200/1000 sccm)",
+      "reactor_material": "quartz"
+    }
+  ],
+  "product_candidates": [
+    {
+      "CNT_type_reported": "thin-multiwalled CNTs (t-MWCNTs)",
+      "candidate_product_id": "PROD_CAND_001",
+      "CNT_yield_per_catalyst_g_gcat": 0.85,
+      "post_treatment_or_purification": "none",
+      "CNT_productivity_g_gcat_h": null,
+      "outer_diameter_range_nm": null,
+      "yield_value_standardized": 85,
+      "primary_yield_metric": "carbon_weight_gain_percent",
+      "characterization_methods": [
+        "SEM",
+        "TEM",
+        "HRTEM",
+        "XRD",
+        "TGA",
+        "Raman"
+      ],
+      "Raman_ratio_type": "ID/IG",
+      "wall_number_summary": null,
+      "carbon_conversion_to_solid_percent": null,
+      "confidence": 0.9,
+      "yield_unit_standardized": "%",
+      "morphology": "thin-multiwalled",
+      "Raman_ratio_value": null,
+      "evidence_span_ids": [
+        "SPAN_80E5C104489ADBCC687A",
+        "SPAN_B507F4272E9467EE6555"
+      ],
+      "purified_product_purity_wt_percent": null,
+      "candidate_run_id": "RUN_CAND_001",
+      "yield_calculation_method": "[(w_tot - w_cat)/w_cat] × 100",
+      "CNT_type_evidence": "TEM and HRTEM images showing multiwalled structure",
+      "CNT_type_confirmed": "thin-multiwalled CNTs (t-MWCNTs)",
+      "carbon_source_conversion_percent": null,
+      "product_mixture_summary": "CNTs with MgO support",
+      "amorphous_carbon_level": null,
+      "purity_basis": null,
+      "TGA_carbon_content_wt_percent": 85,
+      "yield_definition_original": "weight gain of catalyst before and after CNT growth",
+      "yield_original": "60 (55) 73 43 202 (261) 452 85 210 (253) 370 82"
+    }
+  ],
+  "cost_scale_candidates": [
+    {
+      "quantitative_cost_reported": false,
+      "continuous_operation_time_h": null,
+      "scale_evidence_summary": "0.1 g catalyst in quartz tube reactor",
+      "cost_driver_summary": null,
+      "confidence": 0.9,
+      "scale_level_claimed": "laboratory",
+      "evidence_span_ids": [
+        "SPAN_816F50E7DBB31475E4CF"
+      ],
+      "scale_level_demonstrated": "laboratory",
+      "candidate_run_id": "RUN_CAND_001",
+      "quantitative_cost_summary": null,
+      "safety_risk": null,
+      "emission_or_waste": null,
+      "candidate_cost_scale_id": "SCALE_CAND_001",
+      "scale_up_issue": null,
+      "catalyst_lifetime_or_reuse": null,
+      "reactor_capacity_or_throughput": "10 cm i.d. and 120 cm length",
+      "batch_stability": null
+    }
+  ],
+  "source_observations": [
+    {
+      "value_status": "reported",
+      "confidence": 0.9,
+      "observation_type": "preparation_hint",
+      "candidate_observation_id": "OBS_CAND_001",
+      "summary": "Fe-Mo/MgO catalyst prepared by sol-gel method with citric acid complexing agent",
+      "evidence_span_ids": [
+        "SPAN_E48033EB57419DA29713"
+      ]
+    },
+    {
+      "value_status": "reported",
+      "confidence": 0.9,
+      "observation_type": "other",
+      "candidate_observation_id": "OBS_CAND_002",
+      "summary": "BET surface area of 202 m2/g for Fe-Mo/MgO catalyst",
+      "evidence_span_ids": [
+        "SPAN_E423DE40AC7C4897918C"
+      ]
+    },
+    {
+      "value_status": "reported",
+      "confidence": 0.9,
+      "observation_type": "transferable_route",
+      "candidate_observation_id": "OBS_CAND_003",
+      "summary": "t-MWCNTs synthesized at 900ºC using Ar/H2/CH4 gas program",
+      "evidence_span_ids": [
+        "SPAN_816F50E7DBB31475E4CF"
+      ]
+    },
+    {
+      "value_status": "reported",
+      "confidence": 0.9,
+      "observation_type": "other",
+      "candidate_observation_id": "OBS_CAND_004",
+      "summary": "TGA carbon content of 85% for as-synthesized t-MWCNTs",
+      "evidence_span_ids": [
+        "SPAN_B507F4272E9467EE6555"
+      ]
+    }
+  ],
+  "evidence_claims": [
+    {
+      "claim_id": "CLM_001",
+      "target_type": "catalyst",
+      "target_id": "CAT_CAND_001",
+      "target_fields": [
+        "active_metals",
+        "support_material",
+        "preparation_method",
+        "preparation_modifier",
+        "precursor_summary",
+        "drying_condition",
+        "calcination_condition",
+        "BET_surface_area_m2_g"
+      ],
+      "span_ids": [
+        "SPAN_E48033EB57419DA29713",
+        "SPAN_E423DE40AC7C4897918C",
+        "SPAN_80E5C104489ADBCC687A"
+      ],
+      "evidence_quote": "The catalysts were prepared by a citrate precursor based on the sol-gel technique using MgO as catalyst support",
+      "value_status": "reported",
+      "confidence": 0.9,
+      "notes": "Catalyst preparation details including sol-gel method, citric acid complexing, and calcination conditions are reported."
+    }
+  ],
+  "review_issues": [
+    {
+      "candidate_issue_id": "ISSUE_CAND_001",
+      "candidate_run_id": "RUN_CAND_001",
+      "issue_type": "critical_data_gap",
+      "target_type": "product",
+      "target_id": "PROD_CAND_001",
+      "target_field": "outer_diameter_range_nm",
+      "issue_summary": "Outer diameter range of t-MWCNTs is not reported in the provided spans.",
+      "conflicting_values": [],
+      "evidence_span_ids": [
+        "SPAN_80E5C104489ADBCC687A"
+      ],
+      "severity": "high",
+      "review_status": "open"
+    },
+    {
+      "candidate_issue_id": "ISSUE_CAND_002",
+      "candidate_run_id": "RUN_CAND_001",
+      "issue_type": "critical_data_gap",
+      "target_type": "product",
+      "target_id": "PROD_CAND_001",
+      "target_field": "wall_number_summary",
+      "issue_summary": "Wall number summary for t-MWCNTs is not reported in the provided spans.",
+      "conflicting_values": [],
+      "evidence_span_ids": [
+        "SPAN_80E5C104489ADBCC687A"
+      ],
+      "severity": "high",
+      "review_status": "open"
+    },
+    {
+      "candidate_issue_id": "ISSUE_CAND_003",
+      "candidate_run_id": "RUN_CAND_001",
+      "issue_type": "critical_data_gap",
+      "target_type": "product",
+      "target_id": "PROD_CAND_001",
+      "target_field": "Raman_ratio_value",
+      "issue_summary": "Raman ratio value (ID/IG or IG/ID) is not reported in the provided spans.",
+      "conflicting_values": [],
+      "evidence_span_ids": [
+        "SPAN_B507F4272E9467EE6555"
+      ],
+      "severity": "high",
+      "review_status": "open"
+    }
+  ],
+  "extraction_notes": "Outer diameter, wall number, and Raman ratio value for t-MWCNTs are not explicitly reported in the provided spans, leading to critical gaps in product characterization."
+}

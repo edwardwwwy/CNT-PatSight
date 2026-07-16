@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_title",
+    "input_content_hash",
+    "extraction_scope",
+    "run_candidates",
+    "catalyst_candidates",
+    "process_stage_candidates",
+    "product_candidates",
+    "cost_scale_candidates",
+    "source_observations",
+    "evidence_claims",
+    "review_issues",
+    "extraction_notes"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "0.1"},
+    "source_id": {"type": "string"},
+    "source_title": {"type": "string"},
+    "input_content_hash": {"type": "string"},
+    "extraction_scope": {"type": "string", "const": "candidate_spans_only"},
+    "run_candidates": {"type": "array", "items": {"type": "object"}},
+    "catalyst_candidates": {"type": "array", "items": {"type": "object"}},
+    "process_stage_candidates": {"type": "array", "items": {"type": "object"}},
+    "product_candidates": {"type": "array", "items": {"type": "object"}},
+    "cost_scale_candidates": {"type": "array", "items": {"type": "object"}},
+    "source_observations": {"type": "array", "items": {"type": "object"}},
+    "evidence_claims": {"type": "array", "items": {"type": "object"}},
+    "review_issues": {"type": "array", "items": {"type": "object"}},
+    "extraction_notes": {"type": "string"}
+  }
+}

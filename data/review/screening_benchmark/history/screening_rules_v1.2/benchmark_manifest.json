@@ -1,0 +1,39 @@
+{
+  "benchmark_version": "screening_benchmark_v1.1",
+  "generated_at": "2026-07-16T01:47:50Z",
+  "seed": "cnt-patsight-benchmark-v1",
+  "rows": 121,
+  "sample_distribution": {
+    "A": 30,
+    "B": 25,
+    "C": 20,
+    "DEDUP_REVIEW": 1,
+    "M": 20,
+    "R": 25
+  },
+  "tier_population": {
+    "A": 195,
+    "B": 225,
+    "C": 434,
+    "M": 222,
+    "R": 411
+  },
+  "preserved_review_rows": 0,
+  "output": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\screening_benchmark.csv",
+  "dedup_audit": {
+    "rows": 23,
+    "audit_distribution": {
+      "external_id_sample": 5,
+      "doi_sample": 15,
+      "conflict_review_all": 3
+    },
+    "auto_merge_group_population": {
+      "external_id": 298,
+      "doi": 647,
+      "title_exact": 0,
+      "title_fuzzy": 0
+    },
+    "preserved_review_rows": 0,
+    "output": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\dedup_audit.csv"
+  }
+}
