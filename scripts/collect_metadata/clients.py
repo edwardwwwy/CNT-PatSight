@@ -15,7 +15,6 @@ from .models import ApiResponse, NormalizedWork, SourceBatch
 from .utils import (
     first_text,
     first_year,
-    json_dumps,
     normalize_doi,
     reconstruct_openalex_abstract,
     redact_url,

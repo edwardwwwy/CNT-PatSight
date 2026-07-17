@@ -25,15 +25,38 @@ python scripts/fetch_fulltext/fetch.py report
 python scripts/fetch_fulltext/fetch.py export
 ```
 
-`queue` generates exactly one derived acquisition row for each current A/B
-canonical work. M is excluded until metadata is improved and rescored; C and R
-are excluded by default. `run` consumes this queue in priority order. Use
+`queue` generates exactly one derived acquisition row for each eligible
+canonical work in deterministic production lanes A, B, C, then D. D contains
+frozen M records only after the metadata-enrichment completion gate; R remains
+excluded. `run` consumes this queue in lane and priority order. Use
 `--all-metadata` only for an explicit diagnostic override.
 
-The verified-candidate CSV is an auditable fallback for official publisher or
-institutional-repository links that are missing from the API metadata. Rows are
-eligible only when both `verified` and `legal_oa` are true. The fetcher records
-the supplied source, access type, and licence; unverified rows are ignored.
+For a source without validated full text, candidates are attempted in this
+order:
+
+1. Existing local PDF, registered in place and never overwritten.
+2. Unpaywall OA PDF/HTML.
+3. OpenAlex and Semantic Scholar open-full-text locations retained in the
+   source-provider records.
+4. DOI/publisher pages for public OA, accepted manuscripts, or public
+   scholarly HTML.
+5. Verified arXiv, ChemRxiv, bioRxiv, Zenodo, HAL, CORE, PubMed Central,
+   Europe PMC, institutional-repository, or author-page locations.
+6. Verified related preprint, accepted-manuscript, author-manuscript, and
+   published versions with an explicit version relation.
+7. DOI and publisher URL for download through an authorised institutional
+   subscription.
+
+The verified-candidate CSV is the auditable input for step 5 and step 6 links
+that are missing from API metadata. Rows are eligible only when both
+`verification_status=verified` and `access_type=legal_oa`. It may add
+`acquisition_step`, `version_type`, `version_relation`, and
+`related_source_id`. Non-published versions require an explicit relation:
+`preprint_of`, `accepted_manuscript_of`, or `author_manuscript_of`; otherwise
+the row is ignored to prevent false merging.
+
+Sci-Hub, shadow libraries, unknown PDF mirrors, and other unauthorised sources
+are permanently prohibited and are never a fallback step.
 
 Limit a diagnostic run with repeated `--source-id` options. `--force` retries
 remote candidates, while successful content is still stored by hash and atomic
@@ -68,3 +91,15 @@ access type, license when supplied, and the queue-rule version. Direct PDF/HTML
 candidates are accepted only from OA metadata or Unpaywall; DOI/publisher pages
 may be inspected for openly served content but are never saved as PDF merely
 because the URL or response claims PDF.
+
+When all legal candidates are exhausted, the control and coverage exports keep
+the metadata row and record:
+
+```text
+fulltext_status = unavailable_legally
+acquisition_status = manual_access_required
+failure_reason = no_legal_fulltext_found
+```
+
+The same row retains `doi`, `publisher_url`, and `manual_access_url` for an
+authorised user or company subscription.

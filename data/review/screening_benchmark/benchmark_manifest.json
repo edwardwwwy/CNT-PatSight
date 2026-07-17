@@ -19,7 +19,7 @@
     "R": 411
   },
   "preserved_review_rows": 0,
-  "output": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\screening_benchmark.csv",
+  "output": "data/review/screening_benchmark/screening_benchmark.csv",
   "dedup_audit": {
     "rows": 23,
     "audit_distribution": {
@@ -34,6 +34,6 @@
       "title_fuzzy": 0
     },
     "preserved_review_rows": 0,
-    "output": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\dedup_audit.csv"
+    "output": "data/review/screening_benchmark/dedup_audit.csv"
   }
 }

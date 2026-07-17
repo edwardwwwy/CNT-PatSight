@@ -6,6 +6,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
+from scripts.io_utils import replace_with_retry, unique_part_path
+
 from .models import CandidateSpan, TextSection
 
 
@@ -326,11 +328,13 @@ class CandidateStore:
 
     @staticmethod
     def _write_rows(path: Path, columns: list[str], rows: list[sqlite3.Row]) -> None:
-        with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        temporary = unique_part_path(path)
+        with temporary.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
             writer.writeheader()
             for row in rows:
                 writer.writerow({column: row[column] if row[column] is not None else "" for column in columns})
+        replace_with_retry(temporary, path)
 
     def summary(self) -> dict[str, Any]:
         status_counts = {

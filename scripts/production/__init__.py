@@ -1,1 +1,1 @@
-"""Continuous CNT-PatSight producer/consumer runtime."""
+"""CNT-PatSight metadata, full-text, candidate-queue, and staging runtime."""

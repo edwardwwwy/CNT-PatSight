@@ -1,117 +1,151 @@
-# CNT-PatSight
+# CNT-PatSight: Evidence-Grounded Carbon Nanotube Literature & Patent Intelligence
 
-CNT-PatSight 用于把 CNT 论文、专利和后续实验记录整理为结构化、可追溯、可复核的研发数据。
+> From CNT papers and patents to structured, traceable, and human-reviewable research data.
 
-当前重点是人工校验高质量样本并稳定字段，不建设爬虫、网页平台、机器学习预测或自动工业评分系统。文件放置见 [仓库结构](docs/repository_structure.md)，扩展阶段见 [全量文献库路线图](docs/full_corpus_roadmap.md)。
+CNT-PatSight is a research data pipeline for carbon nanotube (CNT) R&D. It transforms papers, patents, and experimental records into structured, run-level datasets while preserving the evidence, uncertainty, and review status behind every catalyst, process condition, yield definition, and product-quality claim.
 
-## 当前目标
+The project is currently a research preview. Automated outputs remain in `needs_review` or `pending_human_review`; they are never promoted automatically to `formal_extract` or `reviewed`.
 
-- 从论文和专利中识别可成立的实验运行或实施例；
-- 记录催化剂、反应器、温度、压力、气体程序、产率和产品质量；
-- 将文献元数据、实验事实、证据和人工复核问题分开管理；
-- 保持所有首轮提取记录为 `needs_review`；
-- 让结构可平滑扩展到几百篇论文和专利。
+[Data model](docs/field_definitions.md) · [Project scope](docs/project_scope.md) · [Repository structure](docs/repository_structure.md) · [Public release policy](docs/public_repository_policy.md)
 
-## 八张长期维护表
+## Key Capabilities
 
-```text
-source_master         文献/专利主表
-source_run            实验运行主表
-catalyst_system       催化剂体系表
-reactor_process_gas   反应器、工艺与气体程序表
-yield_quality         产率与产品品质表
-cost_scale_review     成本、规模与工业适配表
-evidence_index        证据索引表
-review_issue_log      复核与问题记录表
+- Collect and normalize literature metadata from OpenAlex, Crossref, Semantic Scholar, and related sources.
+- Apply conservative deduplication and A/B/C/M/R screening rules.
+- Acquire legally accessible open full text and verify PDF, HTML, and file integrity.
+- Parse sections, tables, captions, and candidate experimental passages.
+- Extract catalyst systems, reactor conditions, gas programs, yields, and CNT quality at the individual run level.
+- Validate the eight-table contract, foreign keys, evidence coverage, and review-state boundaries.
+- Export review packages without hiding missing values, conflicting reports, or uncertainty.
+
+## Workflow
+
+```mermaid
+flowchart LR
+    A["API metadata"] --> B["Normalization and conservative deduplication"]
+    B --> C["A / B / C / M / R screening"]
+    C --> D["Legal open-full-text acquisition"]
+    D --> E["PDF / HTML validation and parsing"]
+    E --> F["Candidate experimental passages"]
+    F --> G["Evidence-grounded run extraction"]
+    G --> H["Schema and relationship validation"]
+    H --> I["Eight-table staging"]
+    I --> J["Human review"]
 ```
 
-此外：
+The production layer manages queues, leases, recovery, and transactional staging. It does not launch a local language model or bypass the human-review boundary.
 
-- `config/field_dictionary.csv` 维护字段定义、数据类型、单位、预期出现概率和保留理由；
-- `ml_runs_clean.csv` 后期由八表自动生成，不手工维护。
+## Benchmark Snapshot
 
-## 设计原则
+The current public benchmark is based on the frozen results dated 2026-07-16. See [`benchmark_metrics.json`](data/review/screening_benchmark/benchmark_metrics.json) for the complete machine-readable output.
 
-### 文献元数据只存一次
+| Metric | Result |
+|---|---:|
+| Current metadata corpus | 1,487 records |
+| Stratified human review | 120 / 120 |
+| Tier-A precision | 95.74% |
+| Weighted Tier-A+B target recall estimate | 90.56% |
+| Tier-R false exclusions | 0 / 25 |
+| Deduplication audit | 23 decisions; no sampled errors found |
+| Stage gate | Passed; freeze rules and begin the 30-paper full-text pilot |
 
-题名、年份、作者、DOI/专利号和文件路径只进入 `source_master`。一篇文献有多个 run 时，不在 `source_run` 重复这些字段。
+These figures evaluate metadata screening and deduplication, not end-to-end full-text parsing or fact-extraction accuracy. The rule-of-three 95% upper bound for the zero-error Tier-R sample remains 11.54%, so another 50–75 boundary cases are required before the rules can be considered stable.
 
-### 证据集中索引
+## Eight-Table Data Contract
 
-业务表不再重复 `evidence_text` 和 `evidence_location`。每条证据在 `evidence_index` 中记录来源位置、原文摘录、目标表、目标记录、目标字段、值状态和置信度。
+| Table | Responsibility |
+|---|---|
+| `source_master` | Unique paper or patent metadata, file state, and review state |
+| `source_run` | Experimental-run identity, route, extraction state, and summary |
+| `catalyst_system` | Catalyst composition, support, preparation, thermal treatment, and structural properties |
+| `reactor_process_gas` | Stage-specific reactor conditions, temperature, pressure, and role-based gas programs |
+| `yield_quality` | Original yield definition, CNT type, morphology, Raman, TGA, and post-treatment |
+| `cost_scale_review` | Demonstrated scale, continuous operation, lifetime, cost facts, and human assessment fields |
+| `evidence_index` | Source locations, target records, value status, confidence, and issue links |
+| `review_issue_log` | Conflicts, critical gaps, quality warnings, and human-review decisions |
 
-### 冲突集中复核
+The authoritative machine-readable contract is defined in [`config/schema.json`](config/schema.json) and [`config/field_dictionary.csv`](config/field_dictionary.csv). See [`docs/field_definitions.md`](docs/field_definitions.md) for field semantics and relationships.
 
-来源内部冲突、定义歧义、运行拆分不确定、CNT 类型不确定和关键数据缺口进入 `review_issue_log`，并链接相关证据。没有问题的记录不创建占位行。
+## Quick Start
 
-### 面向几百篇论文和专利控制空值
+Clone the repository and install the runtime dependencies:
 
-是否保留字段不以当前 6 篇的占用率为唯一依据：
-
-- 保留跨语料常见的字段；
-- 保留在催化剂论文、反应器论文、放大研究或专利中条件性常见的字段；
-- 保留虽然不高频但对 CNT 身份、安全、规模、纯度和可复现性关键的字段；
-- 将长期极少量化且定义不统一的细节合并为通用摘要或证据行。
-
-例如，保留 BET、孔结构、GHSV、长度、残留、催化剂寿命、连续运行和吞吐量；不为每一种气体或每一种应用性能无限增加专栏。
-
-## 一条运行的成立条件
-
-```text
-一个可识别的催化剂体系
-+ 一个可识别的工艺/气体程序
-+ 一个对应的产品或结果
-= 一个 run_id
+```powershell
+git clone https://github.com/edwardwwwy/CNT-PatSight.git
+cd CNT-PatSight
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-催化剂、温度、气体组成、流量、压力、时间、反应器、纯化或结果发生实质变化时，应拆分 run。升温、预处理/还原、生长和冷却按工艺阶段分别记录。
+Run the smoke test, which does not download external content:
 
-## 关键语义
-
-- Fe-Mo 等协同体系在 `active_metals` 中保留全部核心金属；
-- 酸洗、载体酸化、催化剂酸化和酸络合必须区分；
-- 干燥、焙烧、还原、活化和 CNT 生长温度不能混用；
-- 气体按碳源、还原气、惰性气和共进料/反应性气体归类，同时保留完整原始比例；
-- 不把碳增重、g CNT/g 催化剂、生产率、转化率、碳效率和阵列高度当成同一指标；
-- Raman 使用 `Raman_ratio_type + Raman_ratio_value` 明确方向；
-- TGA 碳含量不等于纯化后应用级产品纯度；
-- 混合产物必须在 `product_mixture_summary` 中明确说明；
-- 作者声称的规模与实验实际证明的规模必须分开。
-
-## 数据位置
-
-```text
-data/raw/                     原始 PDF、专利和来源登记
-data/interim/<source_id>/     单篇来源的八表复核包和工作簿
-data/processed/               人工复核通过后的跨来源数据
-config/schema.json            机器可读字段和关系契约
-config/field_dictionary.csv   字段字典
-skills/cnt-patsight/          提取与复核规则
+```powershell
+python scripts/production/pipeline.py smoke-test
 ```
 
-原始资料不得被清洗脚本原地覆盖。内部实验数据默认视为敏感信息，并与公开资料分开保存。
+Development checks require `pytest` and `ruff`:
 
-## 校验
+```powershell
+python -m pip install pytest ruff
+python -m pytest -q
+ruff check scripts/collect_metadata scripts/fetch_fulltext scripts/parse_fulltext scripts/production scripts/extraction scripts/validation scripts/screening_benchmark tests
+```
 
-对每篇来源目录运行：
+Validate an eight-table package:
 
-```text
+```powershell
 python scripts/validation/validate_tables.py data/interim/<source_id>
 ```
 
-校验内容包括：
+See [`scripts/production/README.md`](scripts/production/README.md) for production commands and data locations. Copy [`.env.example`](.env.example) to a local `.env` for API credentials, and never commit populated secrets.
 
-- 八张 CSV 的文件名、字段和顺序；
-- 主键、外键和目标记录关系；
-- 字段字典覆盖；
-- 催化剂、工艺阶段、产率和成本/规模记录的证据覆盖；
-- 复核问题与证据的关联；
-- 提取和复核状态。
+## Repository Layout
 
-## 当前完成标准
+```text
+CNT-PatSight/
+├── config/                     # Schemas, field dictionary, screening and extraction contracts
+├── data/
+│   ├── samples/                # Small, licensed, sanitized, human-reviewed examples
+│   ├── processed/templates/    # Blank eight-table CSV and Excel templates
+│   └── review/screening_benchmark/
+│                               # Reproducible screening and deduplication benchmark
+├── docs/                       # Scope, field definitions, structure, and release policy
+├── reports/                    # Public metrics, figures, and reports
+├── scripts/                    # Collection, full text, parsing, extraction, production, and validation
+└── tests/                      # Unit tests and small public fixtures
+```
 
-- 每条重要事实可追溯到 `evidence_index`；
-- 每个冲突或关键缺口可在 `review_issue_log` 中闭环；
-- 首轮记录保持 `needs_review`；
-- schema 能支持论文和专利，不因当前小样本临时增删字段；
-- 所有验证错误清零后才报告数据整理完成。
+Local runs also create `data/raw/`, `data/interim/`, `data/derived/`, and `output/`. These directories contain source caches, intermediate artifacts, or complete deliverables and are not part of the default GitHub release.
+
+## GitHub Release Boundary
+
+| Include by default | Exclude by default |
+|---|---|
+| Source code, tests, and secret-free configuration | `.env`, API keys, passwords, tokens, and private credentials |
+| Eight-table schemas, field definitions, and blank templates | Company experiments, unpublished R&D records, and unsanitized logs |
+| Benchmark metrics, audit tables, and public reports | Complete databases, SQLite files, queue state, and bulk intermediate output |
+| One to three licensed, sanitized, human-reviewed examples | Papers obtained through subscriptions, institutional access, or unauthorized sources |
+| DOI, title, OA URL, and license metadata | PDFs, supplements, or raw API responses without confirmed redistribution rights |
+
+Open access does not automatically grant redistribution rights. Even when a source uses an open license, verify the exact terms and retain the title, authors, source, and license attribution. By default, this repository stores metadata and publishable structured derivatives rather than copies of source documents.
+
+When the complete database is stable, publish it as a separately versioned dataset through GitHub Releases, Zenodo, or a dedicated dataset platform instead of adding it to normal Git history.
+
+`.gitignore` only prevents untracked files from being added. Files already tracked by Git must be removed from the index and checked across repository history before publication. See [`docs/public_repository_policy.md`](docs/public_repository_policy.md) for the allowlist, review checklist, and safe migration guidance.
+
+## Project Boundaries
+
+- The main focus is CVD and CCVD CNT synthesis, especially catalysts, gas programs, process conditions, and experimental outcomes.
+- Patent collection adapters are currently reserved for later use; broad claims must not be treated as demonstrated experiments.
+- Yield values with different definitions are not treated as directly comparable.
+- Author-claimed scale is kept separate from experimentally demonstrated scale.
+- Missing and uncertain information remains explicit and is never guessed by the extraction layer.
+- First-pass automated output requires human confirmation before entering the formal data layer.
+
+## License and Third-Party Rights
+
+This repository does not currently include a `LICENSE` file, so its code and data must not be assumed to be open-source licensed. Rights to third-party papers, patents, supplementary materials, and trademarks remain with their respective owners. CNT-PatSight does not grant redistribution rights for those materials.
+
+Before public release, the repository owner should select separate, appropriate licenses for the project code and the published dataset.

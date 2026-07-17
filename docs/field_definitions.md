@@ -39,7 +39,7 @@ review_issue_log ──> 任一待复核记录，并可关联 evidence_id
 - 高维、低复用信息优先放入摘要字段和证据表；同一信息反复出现后，再按字段变更协议评估是否结构化。
 - `ml_runs_clean.csv` 是后期由八表自动拼接的宽表，不手工维护。
 
-完整字段语义和稀疏度策略见 `skills/cnt-patsight/references/schema.md`；机器可读字段以 `config/schema.json` 为准，字段用途、预期出现率和保留理由见 `config/field_dictionary.csv`。
+机器可读字段、文件名和关系以 `config/schema.json` 为准；字段用途、预期出现率、空值策略和保留理由见 `config/field_dictionary.csv`。
 
 ## 文件位置与校验
 

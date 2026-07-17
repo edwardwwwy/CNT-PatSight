@@ -202,5 +202,5 @@
     "false_positive_candidate": 9,
     "false_negative_target": 20
   },
-  "errors_csv": "E:\\github\\CNT-PatSight\\data\\review\\screening_benchmark\\benchmark_errors.csv"
+  "errors_csv": "data/review/screening_benchmark/benchmark_errors.csv"
 }

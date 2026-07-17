@@ -1,0 +1,14 @@
+{
+  "name": "three_source_regression_v1",
+  "purpose": "Three high-value papers for evidence-grounded extraction and regression testing.",
+  "source_ids": [
+    "P001_Dubey_2012_FeMo_MgO_tMWCNT",
+    "P002_Chotmunkhongsin_2023_FeMo_MgO_H2_MWCNT",
+    "P006_Saetang_2024_NiMo_MgO_Biogas_CNT"
+  ],
+  "selection_rationale": {
+    "P001_Dubey_2012_FeMo_MgO_tMWCNT": "Known three-run regression case with catalyst preparation, staged gas program, yield, Raman, TGA, and mixture caveats.",
+    "P002_Chotmunkhongsin_2023_FeMo_MgO_H2_MWCNT": "Methane CVD study with hydrogen reduction/cofeed, kinetics, yield, and characterization.",
+    "P006_Saetang_2024_NiMo_MgO_Biogas_CNT": "Multiple temperatures and feed ratios with conversion, long-term stability, CNT quality, and scale-relevant evidence."
+  }
+}

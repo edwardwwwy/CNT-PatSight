@@ -6,11 +6,10 @@ layer only: no LLM is called and none of the eight formal tables is written.
 
 ## Dependencies
 
-Install `requirements-fulltext.txt`, or use the bundled Codex workspace Python
-runtime, which includes `pdfplumber` and `pypdf`.
+Install the project dependencies, which include `pdfplumber` and `pypdf`.
 
 ```powershell
-python -m pip install -r requirements-fulltext.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Run
@@ -38,7 +37,7 @@ rules. Caching is keyed by source content hash and parser version.
 Each per-source package contains `document_metadata.json`, `full_text.txt`,
 `sections.json`, `tables.json`, `figures_captions.json`, and
 `parse_report.json`. These files preserve the parser result used for review and
-later LLM benchmarking without writing to the formal eight-table layer.
+later extraction benchmarking without writing to the formal eight-table layer.
 
 PDF parsing uses page-aware text extraction, conservative two-column ordering,
 table extraction, figure-caption detection, and metadata fallbacks. HTML parsing

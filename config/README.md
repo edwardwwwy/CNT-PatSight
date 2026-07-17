@@ -1,7 +1,15 @@
-# 配置目录
+# Configuration
 
-- `project_scope.yaml`：项目范围和当前阶段边界；
-- `schema.json`：八张长期维护表的文件名、字段顺序、主键、外键和必填字段；
-- `field_dictionary.csv`：字段含义、类型、单位、预期出现概率、空值规则和保留理由。
+- `schema.json`: authoritative eight-table filenames, columns, identities,
+  foreign keys, and required fields.
+- `field_dictionary.csv`: field semantics, units, population expectations,
+  null policy, and inclusion rationale.
+- `extraction_result_v0.2.schema.json`: evidence-value extraction payload
+  contract.
+- `run_plan_v1.schema.json`: experiment/run planning contract.
+- `extraction_unit_rules_v1.json`: unit normalization and non-conversion rules.
+- `screening_rules.json`: metadata screening rules.
 
-修改正式字段时必须同步更新 schema、字段字典、项目 Skill、验证脚本和现有数据迁移逻辑。
+When the formal eight-table contract changes, update `schema.json`,
+`field_dictionary.csv`, validators, tests, documentation, and any required
+migration together.

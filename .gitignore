@@ -1,72 +1,97 @@
-# Python and notebook caches
+# Python, tests, coverage, and build artifacts
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .ipynb_checkpoints/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+node_modules/
 
-# Local environments and secrets
+# Local environments and credentials
 .venv/
 venv/
 .env
 .env.*
 !.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+service-account*.json
+
+# Local tools, editors, and assistant workspace metadata
 .tools/
+.agents/
+.vscode/
+.idea/
+AGENTS.md
+skills/
 
-# Local LLM weights are large runtime assets, never repository content.
-/models/*
-!/models/README.md
-
-# Temporary files and logs
+# OS and temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
 tmp/
+temp/
+*.tmp
 *.log
 ~$*
 
-# Confidential internal R&D data: keep only the policy README in Git.
-/data/internal/*
+# Generated deliverables are local until deliberately curated for reports/.
+/output/
+/exports/
+
+# Local model weights and runtimes are never repository content.
+/models/**
+
+# Generic database and runtime state. Public datasets should use reviewed,
+# versioned CSV/Parquet releases rather than mutable database files.
+*.sqlite
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Confidential or internal R&D data. Keep only the policy file.
+/data/internal/**
 !/data/internal/README.md
+/data/private/
+/data/company/
 
-# Downloaded source documents are reproducible inputs and may be large or licensed.
-/data/raw/papers/*
-!/data/raw/papers/.gitkeep
-/data/raw/patents/*
-!/data/raw/patents/.gitkeep
+# Downloaded papers, patents, supplementary files, raw API responses, complete
+# metadata, and faithful full-text derivatives stay local. README files may
+# document how to obtain or rebuild them without redistributing the content.
+/data/raw/**
+!/data/raw/**/
+!/data/raw/**/README.md
 
-# Reproducible metadata-collection runtime artifacts. Raw responses remain local
-# and traceable through the SQLite request log and per-run report.
-/data/raw/metadata/api_responses/
-/data/raw/metadata/run_reports/
-/data/raw/metadata/*.sqlite3
-/data/raw/metadata/*.sqlite3-shm
-/data/raw/metadata/*.sqlite3-wal
+# Interim, derived, review-queue, and delivery data are local by default.
+# Approved examples belong in data/samples/, not in these runtime directories.
+/data/interim/**
+!/data/interim/**/
+!/data/interim/**/README.md
+/data/interim/legacy_audit/
+/data/derived/
+/data/processed/**
+!/data/processed/**/
+!/data/processed/templates/**
+/data/review/extraction/
 
-# Full-text acquisition runtime artifacts. Downloaded/licensed content and
-# faithful text derivatives remain local; CSV coverage exports stay visible.
-/data/raw/fulltext/pdf/
-/data/raw/fulltext/html/
-/data/raw/fulltext/text/
-/data/raw/fulltext/reports/
-/data/raw/fulltext/*.sqlite3
-/data/raw/fulltext/*.sqlite3-shm
-/data/raw/fulltext/*.sqlite3-wal
+# Sample data never includes source documents or bundled archives.
+/data/samples/**/*.pdf
+/data/samples/**/*.docx
+/data/samples/**/*.zip
 
-# Reproducible parser runtime artifacts. Candidate CSV exports are intentionally
-# not ignored so they can be reviewed or versioned when appropriate.
-/data/interim/parsed_text/*
-!/data/interim/parsed_text/README.md
-/data/interim/extraction_candidates/reports/
-/data/interim/extraction_candidates/*.sqlite3
-/data/interim/extraction_candidates/*.sqlite3-shm
-/data/interim/extraction_candidates/*.sqlite3-wal
-
-# Phase-four LLM request/response runtime logs. Validated JSON and review CSVs
-# remain visible; raw prompts/responses may contain licensed text and are local.
-/data/interim/llm_extraction/requests/
-/data/interim/llm_extraction/raw/
-/data/interim/llm_extraction/reports/
-/data/interim/llm_extraction/raw_v0.2/
-/data/interim/llm_extraction/*.sqlite3
-/data/interim/llm_extraction/*.sqlite3-shm
-/data/interim/llm_extraction/*.sqlite3-wal
-
-# Continuous producer/consumer PID, heartbeat, log, and local control state.
-/data/interim/runtime/
+# Generated page renders and OCR/debug assets outside the standard runtime dirs.
+/rendered_*.png
+/page_*.png

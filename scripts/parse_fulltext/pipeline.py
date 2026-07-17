@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from scripts.io_utils import replace_with_retry, unique_part_path
+
 from .extractor import PARSER_VERSION, extract_document
 from .storage import CandidateStore
 
@@ -218,9 +220,9 @@ class ParsePipeline:
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists() and path.read_text(encoding="utf-8", errors="replace") == content:
             return
-        temp = path.with_suffix(path.suffix + ".part")
+        temp = unique_part_path(path)
         temp.write_text(content, encoding="utf-8")
-        temp.replace(path)
+        replace_with_retry(temp, path)
 
     def _write_json_if_changed(self, path: Path, value: Any) -> None:
         self._write_if_changed(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")

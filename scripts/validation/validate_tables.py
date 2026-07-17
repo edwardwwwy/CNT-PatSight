@@ -269,7 +269,7 @@ def validate(data_dir: Path, schema_path: Path, dictionary_path: Path) -> int:
 
     issue_rows = loaded.get("review_issue_log", [])
     issue_ids = {row.get("issue_id", "") for row in issue_rows}
-    allowed_issue_status = {"open", "in_review", "resolved", "wont_fix"}
+    allowed_issue_status = {"pending_human_review", "in_review", "reviewed"}
     for row_number, row in enumerate(issue_rows, start=2):
         if row.get("review_status") not in allowed_issue_status:
             errors.append(f"review_issue_log:{row_number}: review_status 非法")

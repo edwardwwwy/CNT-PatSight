@@ -7,6 +7,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any, Iterable
 
+from scripts.io_utils import replace_with_retry, unique_part_path
+
 from .models import ArtifactRecord, MetadataRecord
 
 
@@ -14,29 +16,86 @@ FULLTEXT_COLUMNS = [
     "fulltext_id", "source_id", "doi", "title", "fulltext_type", "fulltext_url",
     "local_path", "fetch_status", "failure_reason", "content_hash", "content_bytes",
     "media_type", "http_status", "url_source", "content_scope", "validation_note",
-    "is_primary", "created_at", "updated_at", "last_checked_at",
+    "is_primary", "acquisition_step", "version_type", "version_relation",
+    "related_source_id", "created_at", "updated_at", "last_checked_at",
 ]
 
 COVERAGE_COLUMNS = [
     "source_id", "doi", "title", "availability_status", "primary_fulltext_type",
     "primary_local_path", "successful_artifact_count", "failed_attempt_count",
-    "failure_reasons", "last_checked_at",
+    "failure_reasons", "last_checked_at", "fulltext_status", "acquisition_status",
+    "failure_reason", "publisher_url", "manual_access_url",
 ]
 
 QUEUE_COLUMNS = [
     "queue_id", "source_id", "work_id", "title", "doi", "priority_tier",
-    "queue_priority", "priority_reason", "topic_relevance_score",
+    "production_lane", "queue_priority", "priority_reason", "topic_relevance_score",
     "evidence_likelihood_score", "citation_count", "preferred_format",
     "candidate_url", "url_source", "access_type", "license", "download_status",
     "http_status", "content_type", "resolved_url", "attempt_count", "max_attempts",
     "last_attempt_at", "local_path", "file_size", "sha256", "failure_reason",
-    "rule_version", "created_at", "updated_at",
+    "rule_version", "created_at", "updated_at", "metadata_enrichment_status",
+    "fulltext_status", "acquisition_status", "publisher_url", "manual_access_url",
 ]
 
 QUEUE_STATUSES = {
     "queued", "downloading", "downloaded", "validated", "not_pdf", "blocked",
     "paywalled", "not_found", "failed_retryable", "failed_final", "local_existing",
 }
+
+
+def _queue_table_sql(*, if_not_exists: bool = False) -> str:
+    clause = "IF NOT EXISTS " if if_not_exists else ""
+    return f"""
+        CREATE TABLE {clause}fulltext_acquisition_queue (
+            queue_id TEXT PRIMARY KEY,
+            source_id TEXT NOT NULL UNIQUE,
+            work_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            doi TEXT NOT NULL DEFAULT '',
+            priority_tier TEXT NOT NULL CHECK(priority_tier IN ('A','B','C','M')),
+            production_lane TEXT NOT NULL CHECK(production_lane IN ('A','B','C','D')),
+            queue_priority INTEGER NOT NULL,
+            priority_reason TEXT NOT NULL DEFAULT '',
+            topic_relevance_score REAL NOT NULL DEFAULT 0,
+            evidence_likelihood_score REAL NOT NULL DEFAULT 0,
+            citation_count INTEGER NOT NULL DEFAULT 0,
+            preferred_format TEXT NOT NULL CHECK(preferred_format IN ('local_pdf','pdf','html','landing_page')),
+            candidate_url TEXT NOT NULL DEFAULT '',
+            url_source TEXT NOT NULL DEFAULT '',
+            access_type TEXT NOT NULL DEFAULT 'unknown',
+            license TEXT NOT NULL DEFAULT '',
+            download_status TEXT NOT NULL DEFAULT 'queued' CHECK(download_status IN (
+                'queued','downloading','downloaded','validated','not_pdf','blocked',
+                'paywalled','not_found','failed_retryable','failed_final','local_existing'
+            )),
+            http_status INTEGER,
+            content_type TEXT NOT NULL DEFAULT '',
+            resolved_url TEXT NOT NULL DEFAULT '',
+            attempt_count INTEGER NOT NULL DEFAULT 0,
+            max_attempts INTEGER NOT NULL DEFAULT 3,
+            last_attempt_at TEXT NOT NULL DEFAULT '',
+            local_path TEXT NOT NULL DEFAULT '',
+            file_size INTEGER NOT NULL DEFAULT 0,
+            sha256 TEXT NOT NULL DEFAULT '',
+            failure_reason TEXT NOT NULL DEFAULT '',
+            rule_version TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            batch_id TEXT NOT NULL DEFAULT '',
+            lease_owner TEXT NOT NULL DEFAULT '',
+            lease_at TEXT NOT NULL DEFAULT '',
+            next_attempt_at TEXT NOT NULL DEFAULT '',
+            parse_status TEXT NOT NULL DEFAULT '',
+            fulltext_relevance_status TEXT NOT NULL DEFAULT '',
+            identity_check_status TEXT NOT NULL DEFAULT 'not_checked',
+            metadata_enrichment_status TEXT NOT NULL DEFAULT '',
+            fulltext_status TEXT NOT NULL DEFAULT 'pending',
+            acquisition_status TEXT NOT NULL DEFAULT 'queued',
+            publisher_url TEXT NOT NULL DEFAULT '',
+            manual_access_url TEXT NOT NULL DEFAULT ''
+        )
+    """
 
 
 def artifact_id(source_id: str, fulltext_type: str, location: str) -> str:
@@ -61,6 +120,7 @@ class FulltextStore:
         self.connection.close()
 
     def _create_schema(self) -> None:
+        self._migrate_queue_schema()
         self.connection.executescript(
             """
             CREATE TABLE IF NOT EXISTS fetch_runs (
@@ -91,6 +151,10 @@ class FulltextStore:
                 content_scope TEXT NOT NULL DEFAULT 'unknown',
                 validation_note TEXT NOT NULL DEFAULT '',
                 is_primary INTEGER NOT NULL DEFAULT 0,
+                acquisition_step INTEGER NOT NULL DEFAULT 0,
+                version_type TEXT NOT NULL DEFAULT 'published',
+                version_relation TEXT NOT NULL DEFAULT 'same_record',
+                related_source_id TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 last_checked_at TEXT NOT NULL
@@ -110,82 +174,136 @@ class FulltextStore:
                 created_at TEXT NOT NULL
             );
 
-            CREATE TABLE IF NOT EXISTS fulltext_acquisition_queue (
-                queue_id TEXT PRIMARY KEY,
-                source_id TEXT NOT NULL UNIQUE,
-                work_id TEXT NOT NULL,
-                title TEXT NOT NULL,
-                doi TEXT NOT NULL DEFAULT '',
-                priority_tier TEXT NOT NULL CHECK(priority_tier IN ('A','B')),
-                queue_priority INTEGER NOT NULL,
-                priority_reason TEXT NOT NULL DEFAULT '',
-                topic_relevance_score REAL NOT NULL DEFAULT 0,
-                evidence_likelihood_score REAL NOT NULL DEFAULT 0,
-                citation_count INTEGER NOT NULL DEFAULT 0,
-                preferred_format TEXT NOT NULL CHECK(preferred_format IN ('local_pdf','pdf','html','landing_page')),
-                candidate_url TEXT NOT NULL DEFAULT '',
-                url_source TEXT NOT NULL DEFAULT '',
-                access_type TEXT NOT NULL DEFAULT 'unknown',
-                license TEXT NOT NULL DEFAULT '',
-                download_status TEXT NOT NULL DEFAULT 'queued' CHECK(download_status IN (
-                    'queued','downloading','downloaded','validated','not_pdf','blocked',
-                    'paywalled','not_found','failed_retryable','failed_final','local_existing'
-                )),
-                http_status INTEGER,
-                content_type TEXT NOT NULL DEFAULT '',
-                resolved_url TEXT NOT NULL DEFAULT '',
-                attempt_count INTEGER NOT NULL DEFAULT 0,
-                max_attempts INTEGER NOT NULL DEFAULT 3,
-                last_attempt_at TEXT NOT NULL DEFAULT '',
-                local_path TEXT NOT NULL DEFAULT '',
-                file_size INTEGER NOT NULL DEFAULT 0,
-                sha256 TEXT NOT NULL DEFAULT '',
-                failure_reason TEXT NOT NULL DEFAULT '',
-                rule_version TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_fulltext_queue_order
-                ON fulltext_acquisition_queue(download_status,queue_priority);
             """
         )
+        self._ensure_columns(
+            "fulltext_source",
+            {
+                "acquisition_step": "INTEGER NOT NULL DEFAULT 0",
+                "version_type": "TEXT NOT NULL DEFAULT 'published'",
+                "version_relation": "TEXT NOT NULL DEFAULT 'same_record'",
+                "related_source_id": "TEXT NOT NULL DEFAULT ''",
+            },
+        )
+        self.connection.execute(
+            """
+            UPDATE fulltext_source
+            SET version_type='unknown_legacy',version_relation='not_assessed'
+            WHERE acquisition_step=0
+              AND version_type='published'
+              AND version_relation='same_record'
+            """
+        )
+        self.connection.execute(_queue_table_sql(if_not_exists=True))
+        self._ensure_columns(
+            "fulltext_acquisition_queue",
+            {
+                "fulltext_status": "TEXT NOT NULL DEFAULT 'pending'",
+                "acquisition_status": "TEXT NOT NULL DEFAULT 'queued'",
+                "publisher_url": "TEXT NOT NULL DEFAULT ''",
+                "manual_access_url": "TEXT NOT NULL DEFAULT ''",
+            },
+        )
+        self.connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_fulltext_queue_order "
+            "ON fulltext_acquisition_queue(download_status,production_lane,queue_priority)"
+        )
         self.connection.commit()
+
+    def _ensure_columns(self, table: str, declarations: dict[str, str]) -> None:
+        columns = {str(item[1]) for item in self.connection.execute(f"PRAGMA table_info({table})")}
+        for name, declaration in declarations.items():
+            if name not in columns:
+                self.connection.execute(f'ALTER TABLE "{table}" ADD COLUMN "{name}" {declaration}')
+
+    def _migrate_queue_schema(self) -> None:
+        row = self.connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='fulltext_acquisition_queue'"
+        ).fetchone()
+        if row is None:
+            return
+        columns = {str(item[1]) for item in self.connection.execute("PRAGMA table_info(fulltext_acquisition_queue)")}
+        sql = str(row[0] or "")
+        if "production_lane" in columns and "'C'" in sql and "'M'" in sql:
+            return
+        legacy = "fulltext_acquisition_queue_legacy"
+        self.connection.execute("PRAGMA foreign_keys=OFF")
+        self.connection.execute("BEGIN IMMEDIATE")
+        try:
+            self.connection.execute(f"DROP TABLE IF EXISTS {legacy}")
+            self.connection.execute(f"ALTER TABLE fulltext_acquisition_queue RENAME TO {legacy}")
+            self.connection.execute(_queue_table_sql())
+            old_columns = {str(item[1]) for item in self.connection.execute(f"PRAGMA table_info({legacy})")}
+            new_columns = [str(item[1]) for item in self.connection.execute("PRAGMA table_info(fulltext_acquisition_queue)")]
+            insert_columns: list[str] = []
+            select_expressions: list[str] = []
+            for column in new_columns:
+                if column == "production_lane":
+                    insert_columns.append(column)
+                    select_expressions.append("CASE priority_tier WHEN 'M' THEN 'D' ELSE priority_tier END")
+                elif column in old_columns:
+                    insert_columns.append(column)
+                    select_expressions.append('"' + column.replace('"', '""') + '"')
+            quoted = ",".join('"' + column.replace('"', '""') + '"' for column in insert_columns)
+            self.connection.execute(
+                f"INSERT INTO fulltext_acquisition_queue ({quoted}) "
+                f"SELECT {','.join(select_expressions)} FROM {legacy}"
+            )
+            self.connection.execute(f"DROP TABLE {legacy}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            self.connection.execute("PRAGMA foreign_keys=ON")
 
     def sync_queue(self, rows: list[dict[str, Any]]) -> int:
         """Upsert queue planning fields without overwriting acquisition results."""
 
         now_rows = []
+        reset_source_ids: list[str] = []
         for row in rows:
             queue_id = str(row["queue_id"])
             existing = self.connection.execute(
-                "SELECT download_status,created_at FROM fulltext_acquisition_queue WHERE source_id=?",
+                """
+                SELECT download_status,created_at,rule_version
+                FROM fulltext_acquisition_queue WHERE source_id=?
+                """,
                 (row["source_id"],),
             ).fetchone()
             status = str(existing["download_status"]) if existing else str(row.get("download_status") or "queued")
             created_at = str(existing["created_at"]) if existing else str(row["created_at"])
-            if status in {"not_found", "paywalled", "blocked", "not_pdf", "failed_final"} and row.get("reset_terminal"):
+            terminal_status = status in {"not_found", "paywalled", "blocked", "not_pdf", "failed_final"}
+            rule_changed = bool(existing) and str(existing["rule_version"] or "") != str(row["rule_version"])
+            if terminal_status and (row.get("reset_terminal") or rule_changed):
                 status = "queued"
+                reset_source_ids.append(str(row["source_id"]))
             now_rows.append(
                 (
                     queue_id, row["source_id"], row["work_id"], row["title"], row.get("doi") or "",
-                    row["priority_tier"], row["queue_priority"], row.get("priority_reason", ""),
+                    row["priority_tier"], row["production_lane"], row["queue_priority"], row.get("priority_reason", ""),
                     row.get("topic_relevance_score", 0), row.get("evidence_likelihood_score", 0),
                     row.get("citation_count", 0), row["preferred_format"], row.get("candidate_url", ""),
                     row.get("url_source", ""), row.get("access_type", "unknown"), row.get("license", ""),
                     status, row.get("max_attempts", 3), row["rule_version"], created_at, row["updated_at"],
+                    row.get("metadata_enrichment_status", ""), row.get("fulltext_status", "pending"),
+                    row.get("acquisition_status", "queued"), row.get("publisher_url", ""),
+                    row.get("manual_access_url", ""),
                 )
             )
         self.connection.executemany(
             """
             INSERT INTO fulltext_acquisition_queue(
-                queue_id,source_id,work_id,title,doi,priority_tier,queue_priority,
+                queue_id,source_id,work_id,title,doi,priority_tier,production_lane,queue_priority,
                 priority_reason,topic_relevance_score,evidence_likelihood_score,citation_count,
                 preferred_format,candidate_url,url_source,access_type,license,download_status,
-                max_attempts,rule_version,created_at,updated_at
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                max_attempts,rule_version,created_at,updated_at,metadata_enrichment_status,
+                fulltext_status,acquisition_status,publisher_url,manual_access_url
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(source_id) DO UPDATE SET
                 work_id=excluded.work_id,title=excluded.title,doi=excluded.doi,
-                priority_tier=excluded.priority_tier,queue_priority=excluded.queue_priority,
+                priority_tier=excluded.priority_tier,production_lane=excluded.production_lane,
+                queue_priority=excluded.queue_priority,
                 priority_reason=excluded.priority_reason,
                 topic_relevance_score=excluded.topic_relevance_score,
                 evidence_likelihood_score=excluded.evidence_likelihood_score,
@@ -193,9 +311,37 @@ class FulltextStore:
                 candidate_url=excluded.candidate_url,url_source=excluded.url_source,
                 access_type=excluded.access_type,license=excluded.license,
                 max_attempts=excluded.max_attempts,rule_version=excluded.rule_version,
+                metadata_enrichment_status=excluded.metadata_enrichment_status,
+                publisher_url=excluded.publisher_url,
+                manual_access_url=excluded.manual_access_url,
                 updated_at=excluded.updated_at
             """,
             now_rows,
+        )
+        for source_id in reset_source_ids:
+            self.connection.execute(
+                """
+                UPDATE fulltext_acquisition_queue
+                SET download_status='queued',fulltext_status='pending',acquisition_status='queued',
+                    failure_reason='',http_status=NULL,content_type='',resolved_url='',
+                    local_path='',file_size=0,sha256='',last_attempt_at='',
+                    next_attempt_at='',lease_owner='',lease_at='',attempt_count=0
+                WHERE source_id=?
+                """,
+                (source_id,),
+            )
+        self.connection.execute(
+            """
+            UPDATE fulltext_acquisition_queue
+            SET fulltext_status='available',
+                acquisition_status=CASE
+                    WHEN download_status='local_existing' THEN 'local_existing'
+                    WHEN acquisition_status IN ('','pending','queued') THEN 'validated'
+                    ELSE acquisition_status
+                END,
+                failure_reason=''
+            WHERE download_status IN ('validated','local_existing')
+            """
         )
         current_ids = [str(row["source_id"]) for row in rows]
         if current_ids:
@@ -216,7 +362,10 @@ class FulltextStore:
             where = "1=1"
         else:
             placeholders = ",".join("?" for _ in statuses)
-            where = f"download_status IN ({placeholders}) AND attempt_count < max_attempts"
+            where = (
+                f"download_status IN ({placeholders}) "
+                "AND (attempt_count < max_attempts OR acquisition_status='retry_pending')"
+            )
             params.extend(statuses)
         sql = f"SELECT source_id FROM fulltext_acquisition_queue WHERE {where} ORDER BY queue_priority,source_id"
         if limit is not None:
@@ -267,6 +416,10 @@ class FulltextStore:
         url_source: str = "",
         access_type: str = "",
         license: str = "",
+        fulltext_status: str = "",
+        acquisition_status: str = "",
+        publisher_url: str = "",
+        manual_access_url: str = "",
     ) -> None:
         if status not in QUEUE_STATUSES:
             raise ValueError(f"Unsupported queue status: {status}")
@@ -287,6 +440,14 @@ class FulltextStore:
             fields["access_type"] = access_type
         if license:
             fields["license"] = license
+        if fulltext_status:
+            fields["fulltext_status"] = fulltext_status
+        if acquisition_status:
+            fields["acquisition_status"] = acquisition_status
+        if publisher_url:
+            fields["publisher_url"] = publisher_url
+        if manual_access_url:
+            fields["manual_access_url"] = manual_access_url
         assignments = ",".join(f"{name}=?" for name in fields)
         self.connection.execute(
             f"UPDATE fulltext_acquisition_queue SET {assignments} WHERE source_id=?",
@@ -299,13 +460,13 @@ class FulltextStore:
         rows = self.connection.execute(
             "SELECT * FROM fulltext_acquisition_queue ORDER BY queue_priority,source_id"
         ).fetchall()
-        temporary = path.with_suffix(path.suffix + ".part")
+        temporary = unique_part_path(path)
         with temporary.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=QUEUE_COLUMNS, lineterminator="\n")
             writer.writeheader()
             for row in rows:
                 writer.writerow({column: row[column] if row[column] is not None else "" for column in QUEUE_COLUMNS})
-        temporary.replace(path)
+        replace_with_retry(temporary, path)
         return len(rows)
 
     def queue_summary(self) -> dict[str, Any]:
@@ -385,6 +546,19 @@ class FulltextStore:
             (source_id,),
         ).fetchall()
 
+    def exhausted_candidate_urls(self, source_id: str) -> set[str]:
+        return {
+            str(row[0])
+            for row in self.connection.execute(
+                """
+                SELECT DISTINCT fulltext_url FROM fulltext_source
+                WHERE source_id=? AND fulltext_url<>''
+                  AND fetch_status IN ('failed','skipped')
+                """,
+                (source_id,),
+            )
+        }
+
     def successful_path_for_hash(self, content_hash: str) -> str:
         row = self.connection.execute(
             """
@@ -429,16 +603,16 @@ class FulltextStore:
     def export(self, metadata: Iterable[MetadataRecord], source_csv: Path, coverage_csv: Path) -> tuple[int, int]:
         source_csv.parent.mkdir(parents=True, exist_ok=True)
         rows = self.connection.execute("SELECT * FROM fulltext_source ORDER BY source_id, is_primary DESC, fulltext_type, fulltext_url").fetchall()
-        source_temporary = source_csv.with_suffix(source_csv.suffix + ".part")
+        source_temporary = unique_part_path(source_csv)
         with source_temporary.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=FULLTEXT_COLUMNS, lineterminator="\n")
             writer.writeheader()
             for row in rows:
                 writer.writerow({column: row[column] if row[column] is not None else "" for column in FULLTEXT_COLUMNS})
-        source_temporary.replace(source_csv)
+        replace_with_retry(source_temporary, source_csv)
 
         records = list(metadata)
-        coverage_temporary = coverage_csv.with_suffix(coverage_csv.suffix + ".part")
+        coverage_temporary = unique_part_path(coverage_csv)
         with coverage_temporary.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=COVERAGE_COLUMNS, lineterminator="\n")
             writer.writeheader()
@@ -451,6 +625,33 @@ class FulltextStore:
                 failures = [row for row in artifacts if row["fetch_status"] in {"failed", "skipped"}]
                 primary = next((row for row in successes if row["is_primary"]), successes[0] if successes else None)
                 checked = max((str(row["last_checked_at"]) for row in artifacts), default="")
+                queue = self.connection.execute(
+                    """
+                    SELECT fulltext_status,acquisition_status,failure_reason,publisher_url,manual_access_url
+                    FROM fulltext_acquisition_queue WHERE source_id=?
+                    """,
+                    (record.source_id,),
+                ).fetchone()
+                fulltext_status = (
+                    "available"
+                    if successes
+                    else str(queue["fulltext_status"] if queue else "pending")
+                )
+                acquisition_status = (
+                    "acquired"
+                    if successes
+                    else str(queue["acquisition_status"] if queue else "not_started")
+                )
+                terminal_reason = (
+                    ""
+                    if successes
+                    else str(queue["failure_reason"] if queue else "")
+                )
+                fallback_publisher_url = (
+                    f"https://doi.org/{record.doi}"
+                    if record.doi
+                    else record.source_link or record.html_url
+                )
                 writer.writerow(
                     {
                         "source_id": record.source_id,
@@ -463,9 +664,14 @@ class FulltextStore:
                         "failed_attempt_count": len(failures),
                         "failure_reasons": "; ".join(sorted({str(row["failure_reason"]) for row in failures if row["failure_reason"]})),
                         "last_checked_at": checked,
+                        "fulltext_status": fulltext_status,
+                        "acquisition_status": acquisition_status,
+                        "failure_reason": terminal_reason,
+                        "publisher_url": str(queue["publisher_url"] if queue else fallback_publisher_url),
+                        "manual_access_url": str(queue["manual_access_url"] if queue else ""),
                     }
                 )
-        coverage_temporary.replace(coverage_csv)
+        replace_with_retry(coverage_temporary, coverage_csv)
         return len(rows), len(records)
 
     def coverage_summary(self, metadata: Iterable[MetadataRecord]) -> dict[str, Any]:

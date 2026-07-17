@@ -10,6 +10,7 @@ class MetadataRecord:
     doi: str
     title: str
     abstract: str = ""
+    source_link: str = ""
     pdf_url: str = ""
     html_url: str = ""
     pdf_path: str = ""
@@ -21,6 +22,8 @@ class MetadataRecord:
     open_access_status: str = "unknown"
     field_sources_json: str = "{}"
     screening_rule_version: str = ""
+    source_providers: str = ""
+    provider_records_json: str = "[]"
 
 
 @dataclass(slots=True)
@@ -30,6 +33,10 @@ class UrlCandidate:
     url_source: str
     access_type: str = "unknown"
     license: str = ""
+    acquisition_step: int = 99
+    version_type: str = "published"
+    version_relation: str = "same_record"
+    related_source_id: str = ""
 
 
 @dataclass(slots=True)
@@ -73,6 +80,10 @@ class ArtifactRecord:
     updated_at: str
     last_checked_at: str
     is_primary: int = 0
+    acquisition_step: int = 0
+    version_type: str = "published"
+    version_relation: str = "same_record"
+    related_source_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {

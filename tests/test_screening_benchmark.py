@@ -8,10 +8,104 @@ import unittest
 from contextlib import closing
 from pathlib import Path
 
-from scripts.screening_benchmark.benchmark import summarize
+from scripts.screening_benchmark.benchmark import generate_dedup_audit, summarize
 
 
 class ScreeningBenchmarkMetricTests(unittest.TestCase):
+    def test_generate_dedup_audit_executes_complete_function_body(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            database = root / "metadata.sqlite3"
+            output = root / "dedup_audit.csv"
+
+            with closing(sqlite3.connect(database)) as connection:
+                connection.execute(
+                    """
+                    CREATE TABLE works(
+                        source_id TEXT PRIMARY KEY,
+                        title TEXT,
+                        doi TEXT,
+                        year INTEGER,
+                        document_type TEXT,
+                        authors TEXT,
+                        journal TEXT
+                    )
+                    """
+                )
+                connection.executemany(
+                    "INSERT INTO works VALUES(?,?,?,?,?,?,?)",
+                    [
+                        ("LIT_1", "Resolved title", "10.1/resolved", 2024, "article", "[]", "Journal"),
+                        ("LIT_2", "Related title", "10.1/related", 2023, "article", "[]", "Journal"),
+                    ],
+                )
+                connection.execute(
+                    """
+                    CREATE TABLE dedup_decision_log(
+                        decision_id TEXT PRIMARY KEY,
+                        match_type TEXT,
+                        decision TEXT,
+                        resolved_source_id TEXT,
+                        related_source_id TEXT,
+                        incoming_source_api TEXT,
+                        incoming_external_id TEXT,
+                        incoming_title TEXT,
+                        incoming_doi TEXT,
+                        similarity REAL,
+                        dedup_reasons_json TEXT,
+                        conflict_reasons_json TEXT,
+                        dedup_rule_version TEXT
+                    )
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO dedup_decision_log VALUES(
+                        'D1','external_id','auto_merge','LIT_1','LIT_2',
+                        'openalex','W1','Incoming fallback','10.1/incoming',
+                        1.0,'["same external id"]','[]','v1'
+                    )
+                    """
+                )
+                connection.execute(
+                    """
+                    CREATE TABLE work_source_records(
+                        source_api TEXT,
+                        external_id TEXT,
+                        normalized_json TEXT
+                    )
+                    """
+                )
+                connection.execute(
+                    "INSERT INTO work_source_records VALUES(?,?,?)",
+                    (
+                        "openalex",
+                        "W1",
+                        json.dumps(
+                            {
+                                "title": "Incoming title",
+                                "doi": "10.1/incoming",
+                                "year": 2024,
+                                "document_type": "article",
+                                "authors": ["A. Author"],
+                                "journal": "Journal",
+                            }
+                        ),
+                    ),
+                )
+                connection.commit()
+
+            summary = generate_dedup_audit(
+                database, output, seed="test", doi_count=0, external_id_count=1
+            )
+
+            self.assertEqual(summary["rows"], 1)
+            self.assertEqual(summary["audit_distribution"], {"external_id_sample": 1})
+            with output.open("r", encoding="utf-8-sig", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual(rows[0]["decision_id"], "D1")
+            self.assertEqual(rows[0]["incoming_title"], "Incoming title")
+
     def test_weighted_recall_indeterminate_and_dedup_gates(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)

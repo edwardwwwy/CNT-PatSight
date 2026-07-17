@@ -13,6 +13,8 @@ from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from scripts.io_utils import replace_with_retry, unique_part_path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
@@ -24,8 +26,9 @@ from .models import ArtifactRecord, FetchResult, MetadataRecord, UrlCandidate
 from .storage import FulltextStore
 
 
-QUEUE_RULE_VERSION = "fulltext_queue_v1"
+QUEUE_RULE_VERSION = "fulltext_queue_v3_legal_fallbacks"
 OPEN_ACCESS_STATES = {"open", "gold", "green", "hybrid", "bronze", "diamond"}
+PRODUCTION_LANES = {"A": "A", "B": "B", "C": "C", "M": "D"}
 
 
 def utc_now() -> str:
@@ -159,12 +162,14 @@ class FulltextPipeline:
         with closing(sqlite3.connect(self.metadata_db)) as connection:
             connection.row_factory = sqlite3.Row
             columns = {str(row[1]) for row in connection.execute("PRAGMA table_info(works)")}
+            tables = {str(row[0]) for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 
             def field(name: str, fallback: str = "''") -> str:
                 return name if name in columns else f"{fallback} AS {name}"
 
             select_fields = [
                 field("source_id"), field("doi"), field("title"), field("abstract"),
+                field("source_link"),
                 field("pdf_url"), field("html_url"), field("pdf_path"),
                 field("priority_tier"), field("topic_relevance_score", "0"),
                 (
@@ -175,6 +180,11 @@ class FulltextPipeline:
                 field("access_score", "0"), field("citation_count", "0"),
                 field("open_access_status", "'unknown'"), field("field_sources_json", "'{}'"),
                 field("screening_rule_version"),
+                (
+                    "COALESCE((SELECT GROUP_CONCAT(DISTINCT source_api) FROM work_source_records s "
+                    "WHERE s.source_id=works.source_id),'') AS source_providers"
+                    if "work_source_records" in tables else "'' AS source_providers"
+                ),
             ]
             sql = f"SELECT {','.join(select_fields)} FROM works"
             params: list[Any] = []
@@ -186,10 +196,47 @@ class FulltextPipeline:
             if limit is not None:
                 sql += " LIMIT ?"
                 params.append(limit)
-            return [MetadataRecord(**dict(row)) for row in connection.execute(sql, params).fetchall()]
+            records = [MetadataRecord(**dict(row)) for row in connection.execute(sql, params).fetchall()]
+            if records and "work_source_records" in tables:
+                by_source: dict[str, list[dict[str, str]]] = {record.source_id: [] for record in records}
+                placeholders = ",".join("?" for _ in records)
+                provider_rows = connection.execute(
+                    f"""
+                    SELECT source_id,source_api,source_url,source_database,normalized_json
+                    FROM work_source_records
+                    WHERE source_id IN ({placeholders})
+                    ORDER BY source_id,source_api,external_id
+                    """,
+                    [record.source_id for record in records],
+                ).fetchall()
+                for provider_row in provider_rows:
+                    by_source[str(provider_row["source_id"])].append(
+                        {
+                            "source_api": str(provider_row["source_api"]),
+                            "source_url": str(provider_row["source_url"]),
+                            "source_database": str(provider_row["source_database"]),
+                            "normalized_json": str(provider_row["normalized_json"]),
+                        }
+                    )
+                for record in records:
+                    record.provider_records_json = json.dumps(
+                        by_source[record.source_id],
+                        ensure_ascii=False,
+                        sort_keys=True,
+                    )
+            return records
 
     def build_queue(self, *, reset_terminal: bool = False) -> dict[str, Any]:
-        records = [record for record in self.load_metadata() if record.priority_tier in {"A", "B"}]
+        all_records = self.load_metadata()
+        records: list[MetadataRecord] = []
+        deferred_metadata_pending = 0
+        for record in all_records:
+            if record.priority_tier not in PRODUCTION_LANES:
+                continue
+            if record.priority_tier == "M" and not self._metadata_enrichment_complete(record):
+                deferred_metadata_pending += 1
+                continue
+            records.append(record)
         planned: list[tuple[tuple[Any, ...], MetadataRecord, dict[str, Any]]] = []
         now = utc_now()
         for record in records:
@@ -200,36 +247,43 @@ class FulltextPipeline:
             is_oa = record.open_access_status.strip().lower() in OPEN_ACCESS_STATES
             pdf_source = str(field_sources.get("pdf_url") or "metadata.pdf_url")
             html_source = str(field_sources.get("html_url") or "metadata.html_url")
+            production_lane = PRODUCTION_LANES[record.priority_tier]
+            lane_rank = {"A": 0, "B": 1, "C": 2, "D": 3}[production_lane]
+            enrichment_status = (
+                "completed_no_abstract_fulltext_gate"
+                if record.priority_tier == "M" else "not_required_frozen_screening"
+            )
             if record.pdf_path:
-                bucket = 0
+                format_rank = 0
                 preferred_format = "local_pdf"
                 candidate_url = ""
                 url_source = "metadata.pdf_path"
                 access_type = "local_existing"
                 reason = "existing_local_pdf"
             elif is_oa and record.pdf_url:
-                bucket = 1 if record.priority_tier == "A" else 3
+                format_rank = 1
                 preferred_format = "pdf"
                 candidate_url = record.pdf_url
                 url_source = pdf_source
                 access_type = "legal_oa"
                 reason = f"tier_{record.priority_tier}_oa_pdf"
             elif is_oa and record.html_url:
-                bucket = 2 if record.priority_tier == "A" else 4
+                format_rank = 2
                 preferred_format = "html"
                 candidate_url = record.html_url
                 url_source = html_source
                 access_type = "legal_oa"
                 reason = f"tier_{record.priority_tier}_oa_html"
             else:
-                bucket = 5 if record.priority_tier == "A" else 6
+                format_rank = 3
                 preferred_format = "landing_page"
                 candidate_url = record.html_url or (f"https://doi.org/{record.doi}" if record.doi else "")
                 url_source = html_source if record.html_url else "doi_resolver"
                 access_type = "landing_page_only"
                 reason = f"tier_{record.priority_tier}_no_direct_oa_fulltext"
             sort_key = (
-                bucket,
+                lane_rank,
+                format_rank,
                 -float(record.topic_relevance_score or 0),
                 -float(record.evidence_likelihood_score or 0),
                 -int(record.citation_count or 0),
@@ -244,7 +298,9 @@ class FulltextPipeline:
                         "candidate_url": candidate_url,
                         "url_source": url_source,
                         "access_type": access_type,
-                        "priority_reason": reason,
+                        "priority_reason": f"lane_{production_lane}:{reason}",
+                        "production_lane": production_lane,
+                        "metadata_enrichment_status": enrichment_status,
                     },
                 )
             )
@@ -258,6 +314,7 @@ class FulltextPipeline:
                     "title": record.title,
                     "doi": record.doi,
                     "priority_tier": record.priority_tier,
+                    "production_lane": plan["production_lane"],
                     "queue_priority": priority,
                     "topic_relevance_score": record.topic_relevance_score,
                     "evidence_likelihood_score": record.evidence_likelihood_score,
@@ -268,6 +325,10 @@ class FulltextPipeline:
                     "rule_version": QUEUE_RULE_VERSION,
                     "created_at": now,
                     "updated_at": now,
+                    "fulltext_status": "pending",
+                    "acquisition_status": "queued",
+                    "publisher_url": self._publisher_url(record),
+                    "manual_access_url": "",
                     "reset_terminal": reset_terminal,
                     **plan,
                 }
@@ -282,7 +343,20 @@ class FulltextPipeline:
             "exported_rows": exported,
             "queue_rule_version": QUEUE_RULE_VERSION,
             "queue_csv_path": self._rel(self.queue_csv),
+            "production_lane_counts": {
+                lane: sum(1 for row in queue_rows if row["production_lane"] == lane)
+                for lane in ("A", "B", "C", "D")
+            },
+            "deferred_metadata_pending": deferred_metadata_pending,
         }
+
+    @staticmethod
+    def _metadata_enrichment_complete(record: MetadataRecord) -> bool:
+        providers = {item.strip() for item in record.source_providers.split(",") if item.strip()}
+        # Semantic Scholar may legitimately return no record. OpenAlex,
+        # Crossref and Unpaywall coverage plus DOI identity is the deterministic
+        # completion gate before an M record enters production lane D.
+        return bool(record.doi) and {"openalex", "crossref", "unpaywall"}.issubset(providers)
 
     def run(
         self,
@@ -394,6 +468,7 @@ class FulltextPipeline:
                         created_at=now,
                         updated_at=now,
                         last_checked_at=now,
+                        acquisition_step=1,
                     )
                 )
                 store.record_event(run_id, record.source_id, "register_local_pdf", "success", now, detail=self._rel(local_path))
@@ -408,11 +483,24 @@ class FulltextPipeline:
                     sha256=content_hash,
                     url_source="metadata.pdf_path",
                     access_type="local_existing",
+                    fulltext_status="available",
+                    acquisition_status="local_existing",
+                    publisher_url=self._publisher_url(record),
+                    manual_access_url=self._manual_access_url(record),
                 )
                 store.refresh_primary(record.source_id)
                 return
             store.upsert_artifact(
-                self._failed_record(record, "local_pdf", "", record.pdf_path, "local_pdf_invalid_signature_or_missing", "metadata.pdf_path", now)
+                self._failed_record(
+                    record,
+                    "local_pdf",
+                    "",
+                    record.pdf_path,
+                    "local_pdf_invalid_signature_or_missing",
+                    "metadata.pdf_path",
+                    now,
+                    acquisition_step=1,
+                )
             )
             reason = "local_pdf_invalid_signature_or_missing"
             store.record_event(run_id, record.source_id, "register_local_pdf", "failed", now, detail=reason)
@@ -441,6 +529,10 @@ class FulltextPipeline:
                     file_size=int(primary["content_bytes"]),
                     sha256=str(primary["content_hash"]),
                     url_source=str(primary["url_source"]),
+                    fulltext_status="available",
+                    acquisition_status="reused_verified_fulltext",
+                    publisher_url=self._publisher_url(record),
+                    manual_access_url=self._manual_access_url(record),
                 )
                 store.refresh_primary(record.source_id)
                 return
@@ -478,7 +570,21 @@ class FulltextPipeline:
             )
             if result.error:
                 store.upsert_artifact(
-                    self._failed_record(record, candidate.expected_type, normalized_url, "", result.error, candidate.url_source, now, result.status_code, result.media_type)
+                    self._failed_record(
+                        record,
+                        candidate.expected_type,
+                        normalized_url,
+                        "",
+                        result.error,
+                        candidate.url_source,
+                        now,
+                        result.status_code,
+                        result.media_type,
+                        acquisition_step=candidate.acquisition_step,
+                        version_type=candidate.version_type,
+                        version_relation=candidate.version_relation,
+                        related_source_id=candidate.related_source_id,
+                    )
                 )
                 counters["failed_attempts"] += 1
                 last_http_status = result.status_code
@@ -517,6 +623,10 @@ class FulltextPipeline:
                         created_at=now,
                         updated_at=now,
                         last_checked_at=now,
+                        acquisition_step=candidate.acquisition_step,
+                        version_type=candidate.version_type,
+                        version_relation=candidate.version_relation,
+                        related_source_id=candidate.related_source_id,
                     )
                 )
                 counters["downloaded_pdf"] += 0 if reused else 1
@@ -533,6 +643,10 @@ class FulltextPipeline:
                     url_source=candidate.url_source,
                     access_type=candidate.access_type,
                     license=candidate.license,
+                    fulltext_status="available",
+                    acquisition_status="acquired_legal_fulltext",
+                    publisher_url=self._publisher_url(record),
+                    manual_access_url=self._manual_access_url(record),
                 )
                 pdf_success = True
                 break
@@ -547,6 +661,10 @@ class FulltextPipeline:
                                 f"{candidate.url_source}:html_discovery",
                                 candidate.access_type,
                                 candidate.license,
+                                candidate.acquisition_step,
+                                candidate.version_type,
+                                candidate.version_relation,
+                                candidate.related_source_id,
                             )
                         )
                 if inspection.is_likely_fulltext:
@@ -571,6 +689,10 @@ class FulltextPipeline:
                             created_at=now,
                             updated_at=now,
                             last_checked_at=now,
+                            acquisition_step=candidate.acquisition_step,
+                            version_type=candidate.version_type,
+                            version_relation=candidate.version_relation,
+                            related_source_id=candidate.related_source_id,
                         )
                     )
                     counters["downloaded_html"] += 0 if reused else 1
@@ -591,6 +713,10 @@ class FulltextPipeline:
                             else "public_fulltext_license_unknown"
                         ),
                         license=candidate.license,
+                        fulltext_status="available",
+                        acquisition_status="acquired_legal_fulltext",
+                        publisher_url=self._publisher_url(record),
+                        manual_access_url=self._manual_access_url(record),
                     )
                 else:
                     store.upsert_artifact(
@@ -606,6 +732,10 @@ class FulltextPipeline:
                             result.media_type,
                             inspection.validation_note,
                             "landing_page",
+                            candidate.acquisition_step,
+                            candidate.version_type,
+                            candidate.version_relation,
+                            candidate.related_source_id,
                         )
                     )
                     counters["failed_attempts"] += 1
@@ -620,7 +750,21 @@ class FulltextPipeline:
                     last_resolved_url = result.final_url
                 continue
             store.upsert_artifact(
-                self._failed_record(record, candidate.expected_type, normalized_url, "", "unsupported_or_unrecognized_content", candidate.url_source, now, result.status_code, result.media_type)
+                self._failed_record(
+                    record,
+                    candidate.expected_type,
+                    normalized_url,
+                    "",
+                    "unsupported_or_unrecognized_content",
+                    candidate.url_source,
+                    now,
+                    result.status_code,
+                    result.media_type,
+                    acquisition_step=candidate.acquisition_step,
+                    version_type=candidate.version_type,
+                    version_relation=candidate.version_relation,
+                    related_source_id=candidate.related_source_id,
+                )
             )
             counters["failed_attempts"] += 1
             last_failure_status = "not_pdf"
@@ -630,16 +774,38 @@ class FulltextPipeline:
             last_resolved_url = result.final_url
         store.refresh_primary(record.source_id)
         if not store.successful_artifacts(record.source_id):
+            legal_search_exhausted = not queue
+            terminal = legal_search_exhausted
+            terminal_download_status = (
+                last_failure_status
+                if last_failure_status in {"blocked", "paywalled", "not_found", "not_pdf"}
+                else "failed_final"
+            )
             store.update_queue_status(
                 record.source_id,
-                last_failure_status,
+                terminal_download_status if terminal else "failed_retryable",
                 utc_now(),
                 http_status=last_http_status,
                 content_type=last_content_type,
                 resolved_url=last_resolved_url,
-                failure_reason=last_failure_reason,
+                failure_reason="no_legal_fulltext_found" if terminal else last_failure_reason,
+                fulltext_status="unavailable_legally" if terminal else "pending",
+                acquisition_status="manual_access_required" if terminal else "retry_pending",
+                publisher_url=self._publisher_url(record),
+                manual_access_url=self._manual_access_url(record),
             )
-            store.record_event(run_id, record.source_id, "source_coverage", "failed", utc_now(), detail="no_successful_fulltext_candidate")
+            store.record_event(
+                run_id,
+                record.source_id,
+                "source_coverage",
+                "failed",
+                utc_now(),
+                detail=(
+                    "no_legal_fulltext_found; manual_access_required"
+                    if terminal
+                    else "legal_fulltext_search_retry_pending"
+                ),
+            )
         elif pdf_success:
             store.record_event(run_id, record.source_id, "source_coverage", "success", utc_now(), detail="pdf")
         else:
@@ -652,16 +818,18 @@ class FulltextPipeline:
             field_sources = json.loads(record.field_sources_json or "{}")
         except json.JSONDecodeError:
             field_sources = {}
-        if record.pdf_url and is_oa:
+        provider_records = self._provider_records(record)
+
+        # Step 2: Unpaywall OA PDF/HTML, including every licensed location.
+        candidates.extend(self._provider_candidates(provider_records, {"unpaywall"}, 2))
+        if record.pdf_url and is_oa and "unpaywall" in str(field_sources.get("pdf_url") or "").lower():
             candidates.append(
-                UrlCandidate(
-                    record.pdf_url,
-                    "pdf",
-                    str(field_sources.get("pdf_url") or "metadata.pdf_url"),
-                    "legal_oa",
-                )
+                UrlCandidate(record.pdf_url, "pdf", "metadata.unpaywall.pdf_url", "legal_oa", acquisition_step=2)
             )
-        candidates.extend(self.verified_candidates.get(record.source_id, []))
+        if record.html_url and is_oa and "unpaywall" in str(field_sources.get("html_url") or "").lower():
+            candidates.append(
+                UrlCandidate(record.html_url, "html", "metadata.unpaywall.html_url", "legal_oa", acquisition_step=2)
+            )
         if self.use_unpaywall and self.email and record.doi:
             api_url = f"https://api.unpaywall.org/v2/{quote(record.doi, safe='/')}?email={quote(self.email)}"
             result = self.downloader.fetch(api_url)
@@ -702,6 +870,7 @@ class FulltextPipeline:
                                 source,
                                 "legal_oa",
                                 str(location.get("license") or ""),
+                                2,
                             )
                         )
                 for source, location in locations:
@@ -714,28 +883,130 @@ class FulltextPipeline:
                                 source,
                                 "legal_oa",
                                 str(location.get("license") or ""),
+                                2,
                             )
                         )
-        if record.html_url and is_oa:
+
+        # Step 3: OpenAlex and Semantic Scholar open-full-text locations.
+        candidates.extend(self._provider_candidates(provider_records, {"openalex", "semantic_scholar"}, 3))
+        pdf_field_source = str(field_sources.get("pdf_url") or "metadata.pdf_url")
+        html_field_source = str(field_sources.get("html_url") or "metadata.html_url")
+        if record.pdf_url and is_oa and "unpaywall" not in pdf_field_source.lower():
+            candidates.append(
+                UrlCandidate(
+                    record.pdf_url,
+                    "pdf",
+                    pdf_field_source,
+                    "legal_oa",
+                    acquisition_step=3 if any(name in pdf_field_source.lower() for name in ("openalex", "semantic")) else 4,
+                )
+            )
+
+        # Step 4: official publisher/DOI page. A landing page is never treated
+        # as a PDF; only signature-validated PDF or scholarly full-text HTML is saved.
+        if record.doi:
+            candidates.append(
+                UrlCandidate(
+                    f"https://doi.org/{record.doi}",
+                    "html",
+                    "doi_resolver.publisher_check",
+                    "publisher_page_check",
+                    acquisition_step=4,
+                )
+            )
+        if record.source_link and record.source_link != f"https://doi.org/{record.doi}":
+            candidates.append(
+                UrlCandidate(
+                    record.source_link,
+                    "html",
+                    "metadata.source_link.publisher_check",
+                    "publisher_page_check",
+                    acquisition_step=4,
+                )
+            )
+        if record.html_url:
             candidates.append(
                 UrlCandidate(
                     record.html_url,
                     "html",
-                    str(field_sources.get("html_url") or "metadata.html_url"),
-                    "legal_oa",
+                    html_field_source,
+                    "legal_oa" if is_oa else "publisher_page_check",
+                    acquisition_step=3 if is_oa and any(name in html_field_source.lower() for name in ("openalex", "semantic")) else 4,
                 )
             )
-        if record.doi:
-            candidates.append(UrlCandidate(f"https://doi.org/{record.doi}", "html", "doi_resolver", "landing_page_only"))
-        if record.html_url and not is_oa:
-            candidates.append(UrlCandidate(record.html_url, "html", str(field_sources.get("html_url") or "metadata.html_url"), "landing_page_only"))
+
+        # Steps 5-6: explicitly verified official/institutional repositories,
+        # author pages, and linked preprint/accepted-manuscript versions.
+        candidates.extend(self.verified_candidates.get(record.source_id, []))
         output: list[UrlCandidate] = []
         seen: set[str] = set()
-        for candidate in candidates:
-            if candidate.url and candidate.url not in seen:
+        attempt_count = (
+            store.queue_attempt_count(record.source_id)[0]
+            if hasattr(store, "queue_attempt_count")
+            else 0
+        )
+        exhausted_urls = (
+            set()
+            if self.force or attempt_count == 0 or not hasattr(store, "exhausted_candidate_urls")
+            else store.exhausted_candidate_urls(record.source_id)
+        )
+        for candidate in sorted(candidates, key=lambda item: (item.acquisition_step, 0 if item.expected_type == "pdf" else 1)):
+            if candidate.url and candidate.url not in seen and candidate.url not in exhausted_urls:
                 seen.add(candidate.url)
                 output.append(candidate)
         return output
+
+    @staticmethod
+    def _provider_records(record: MetadataRecord) -> list[dict[str, Any]]:
+        try:
+            raw_records = json.loads(record.provider_records_json or "[]")
+        except json.JSONDecodeError:
+            return []
+        return [item for item in raw_records if isinstance(item, dict)]
+
+    @staticmethod
+    def _provider_candidates(
+        provider_records: list[dict[str, Any]],
+        providers: set[str],
+        acquisition_step: int,
+    ) -> list[UrlCandidate]:
+        candidates: list[UrlCandidate] = []
+        for provider_record in provider_records:
+            source_api = str(provider_record.get("source_api") or "").strip().lower()
+            if source_api not in providers:
+                continue
+            try:
+                normalized = json.loads(str(provider_record.get("normalized_json") or "{}"))
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(normalized, dict):
+                continue
+            oa_status = str(normalized.get("open_access_status") or "unknown").strip().lower()
+            if oa_status not in OPEN_ACCESS_STATES:
+                continue
+            pdf_url = str(normalized.get("pdf_url") or "").strip()
+            html_url = str(normalized.get("html_url") or "").strip()
+            if pdf_url:
+                candidates.append(
+                    UrlCandidate(
+                        pdf_url,
+                        "pdf",
+                        f"{source_api}.normalized.pdf_url",
+                        "legal_oa",
+                        acquisition_step=acquisition_step,
+                    )
+                )
+            if html_url:
+                candidates.append(
+                    UrlCandidate(
+                        html_url,
+                        "html",
+                        f"{source_api}.normalized.html_url",
+                        "legal_oa",
+                        acquisition_step=acquisition_step,
+                    )
+                )
+        return candidates
 
     @staticmethod
     def _load_verified_candidates(path: Path) -> dict[str, list[UrlCandidate]]:
@@ -749,14 +1020,32 @@ class FulltextPipeline:
                 fulltext_type = str(row.get("fulltext_type") or "").strip().lower()
                 access_type = str(row.get("access_type") or "").strip().lower()
                 verification_status = str(row.get("verification_status") or "").strip().lower()
+                version_type = str(row.get("version_type") or "published").strip().lower()
+                version_relation = str(row.get("version_relation") or "same_record").strip().lower()
+                related_source_id = str(row.get("related_source_id") or "").strip()
+                permitted_version_relations = {
+                    "published": {"same_record", "published_version"},
+                    "accepted_manuscript": {"accepted_manuscript_of"},
+                    "author_manuscript": {"author_manuscript_of"},
+                    "preprint": {"preprint_of"},
+                }
                 if (
                     not source_id
                     or not url
                     or fulltext_type not in {"pdf", "html"}
                     or access_type != "legal_oa"
                     or verification_status != "verified"
+                    or version_type not in permitted_version_relations
+                    or version_relation not in permitted_version_relations[version_type]
                 ):
                     continue
+                try:
+                    configured_step = int(str(row.get("acquisition_step") or "0"))
+                except ValueError:
+                    configured_step = 0
+                acquisition_step = configured_step or (
+                    6 if version_type in {"preprint", "accepted_manuscript", "author_manuscript"} else 5
+                )
                 output.setdefault(source_id, []).append(
                     UrlCandidate(
                         url,
@@ -764,9 +1053,23 @@ class FulltextPipeline:
                         str(row.get("url_source") or "verified_oa_candidates"),
                         "legal_oa",
                         str(row.get("license") or ""),
+                        acquisition_step,
+                        version_type,
+                        version_relation,
+                        related_source_id,
                     )
                 )
         return output
+
+    @staticmethod
+    def _publisher_url(record: MetadataRecord) -> str:
+        if record.doi:
+            return f"https://doi.org/{record.doi}"
+        return record.source_link or record.html_url
+
+    @classmethod
+    def _manual_access_url(cls, record: MetadataRecord) -> str:
+        return cls._publisher_url(record)
 
     def _save_content(self, store: FulltextStore, source_id: str, content: bytes, extension: str) -> tuple[str, str, bool]:
         content_hash = sha256_bytes(content)
@@ -777,12 +1080,12 @@ class FulltextPipeline:
         path = directory / f"{source_id}_{content_hash[:12]}.{extension}"
         if path.exists():
             return self._rel(path), content_hash, True
-        temp_path = path.with_suffix(path.suffix + ".part")
+        temp_path = unique_part_path(path)
         temp_path.write_bytes(content)
         if sha256_file(temp_path) != content_hash:
             temp_path.unlink(missing_ok=True)
             raise OSError("content_hash_mismatch_after_write")
-        temp_path.replace(path)
+        replace_with_retry(temp_path, path)
         return self._rel(path), content_hash, False
 
     def _failed_record(
@@ -798,6 +1101,10 @@ class FulltextPipeline:
         media_type: str = "",
         validation_note: str = "",
         content_scope: str = "unknown",
+        acquisition_step: int = 0,
+        version_type: str = "published",
+        version_relation: str = "same_record",
+        related_source_id: str = "",
     ) -> ArtifactRecord:
         return ArtifactRecord(
             source_id=record.source_id,
@@ -818,6 +1125,10 @@ class FulltextPipeline:
             created_at=now,
             updated_at=now,
             last_checked_at=now,
+            acquisition_step=acquisition_step,
+            version_type=version_type,
+            version_relation=version_relation,
+            related_source_id=related_source_id,
         )
 
     def _write_report(self, run_id: str, summary: dict[str, Any]) -> None:

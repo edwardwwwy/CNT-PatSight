@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import sqlite3
 import tempfile
 import unittest
 from contextlib import closing
 from pathlib import Path
+from unittest.mock import patch
 
+from scripts.io_utils import atomic_write_json, replace_with_retry
 from scripts.fetch_fulltext.html_inspection import inspect_html
 from scripts.fetch_fulltext.models import ArtifactRecord, FetchResult, MetadataRecord
 from scripts.fetch_fulltext.pipeline import FulltextPipeline, sniff_type
@@ -19,7 +22,6 @@ from scripts.parse_fulltext.extractor import (
     label_scientific_reports_frontmatter,
     normalize_section_name,
     segment_pages,
-    extract_document,
     assess_parse_quality,
 )
 from scripts.parse_fulltext.models import PageText, TextSection
@@ -28,6 +30,39 @@ from scripts.parse_fulltext.storage import CandidateStore
 
 
 NOW = "2026-01-01T00:00:00Z"
+
+
+class AtomicPublishTests(unittest.TestCase):
+    def test_atomic_json_uses_unique_temporary_file_and_cleans_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "state.json"
+            atomic_write_json(target, {"status": "ready"})
+            self.assertEqual(
+                json.loads(target.read_text(encoding="utf-8")),
+                {"status": "ready"},
+            )
+            self.assertEqual(list(Path(directory).glob("*.part")), [])
+
+    def test_transient_windows_replace_lock_is_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory) / "value.csv.part"
+            target = Path(directory) / "value.csv"
+            temporary.write_text("new", encoding="utf-8")
+            target.write_text("old", encoding="utf-8")
+            real_replace = os.replace
+            attempts = 0
+
+            def transient_replace(source: Path, destination: Path) -> None:
+                nonlocal attempts
+                attempts += 1
+                if attempts < 3:
+                    raise PermissionError(13, "transient reader lock")
+                real_replace(source, destination)
+
+            with patch("scripts.io_utils.os.replace", side_effect=transient_replace):
+                replace_with_retry(temporary, target, attempts=4)
+            self.assertEqual(target.read_text(encoding="utf-8"), "new")
+            self.assertEqual(attempts, 3)
 
 
 class HtmlInspectionTests(unittest.TestCase):
@@ -88,29 +123,157 @@ class FulltextStoreTests(unittest.TestCase):
                 with (root / "coverage.csv").open(encoding="utf-8-sig", newline="") as handle:
                     self.assertEqual(len(list(csv.DictReader(handle))), 2)
 
-    def test_queue_sync_keeps_only_a_and_b_plans(self) -> None:
+    def test_queue_sync_supports_abcd_production_lanes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             with FulltextStore(root / "fulltext.sqlite3") as store:
                 now = NOW
                 rows = []
-                for index, tier in enumerate(("A", "B"), start=1):
+                for index, (tier, lane) in enumerate((("A", "A"), ("B", "B"), ("C", "C"), ("M", "D")), start=1):
                     rows.append(
                         {
                             "queue_id": f"Q{index}", "source_id": f"S{index}", "work_id": f"S{index}",
                             "title": f"Title {index}", "doi": None if index == 1 else "", "priority_tier": tier,
+                            "production_lane": lane,
                             "queue_priority": index, "preferred_format": "landing_page",
                             "candidate_url": "", "url_source": "", "access_type": "landing_page_only",
                             "rule_version": "v1", "created_at": now, "updated_at": now,
                         }
                     )
-                self.assertEqual(store.sync_queue(rows), 2)
-                self.assertEqual(store.queued_source_ids(), ["S1", "S2"])
+                self.assertEqual(store.sync_queue(rows), 4)
+                self.assertEqual(store.queued_source_ids(), ["S1", "S2", "S3", "S4"])
                 self.assertEqual(
                     store.connection.execute(
                         "SELECT doi FROM fulltext_acquisition_queue WHERE source_id='S1'"
                     ).fetchone()[0],
                     "",
+                )
+
+    def test_legacy_ab_queue_is_migrated_without_losing_status(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "legacy.sqlite3"
+            connection = sqlite3.connect(path)
+            connection.execute(
+                """CREATE TABLE fulltext_acquisition_queue(
+                       queue_id TEXT PRIMARY KEY,source_id TEXT UNIQUE,work_id TEXT,title TEXT,
+                       doi TEXT DEFAULT '',priority_tier TEXT CHECK(priority_tier IN ('A','B')),
+                       queue_priority INTEGER,preferred_format TEXT,download_status TEXT DEFAULT 'queued',
+                       max_attempts INTEGER DEFAULT 3,rule_version TEXT,created_at TEXT,updated_at TEXT)"""
+            )
+            connection.execute(
+                "INSERT INTO fulltext_acquisition_queue VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                ("Q1", "S1", "S1", "Title", "", "B", 1, "pdf", "validated", 3, "v1", NOW, NOW),
+            )
+            connection.commit()
+            connection.close()
+            with FulltextStore(path) as store:
+                row = store.connection.execute(
+                    "SELECT priority_tier,production_lane,download_status FROM fulltext_acquisition_queue"
+                ).fetchone()
+                self.assertEqual(tuple(row), ("B", "B", "validated"))
+
+    def test_retry_pending_remains_claimable_and_terminal_reset_clears_control_state(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fulltext.sqlite3"
+            row = {
+                "queue_id": "Q1",
+                "source_id": "S1",
+                "work_id": "S1",
+                "title": "Title",
+                "doi": "10/test",
+                "priority_tier": "A",
+                "production_lane": "A",
+                "queue_priority": 1,
+                "preferred_format": "landing_page",
+                "candidate_url": "https://doi.org/10/test",
+                "url_source": "doi_resolver",
+                "access_type": "publisher_page_check",
+                "rule_version": "v1",
+                "created_at": NOW,
+                "updated_at": NOW,
+                "max_attempts": 1,
+            }
+            with FulltextStore(path) as store:
+                store.sync_queue([row])
+                store.connection.execute(
+                    """
+                    UPDATE fulltext_acquisition_queue
+                    SET download_status='failed_retryable',attempt_count=1,
+                        fulltext_status='pending',acquisition_status='retry_pending'
+                    WHERE source_id='S1'
+                    """
+                )
+                store.connection.commit()
+                self.assertEqual(store.queued_source_ids(), ["S1"])
+                store.connection.execute(
+                    """
+                    UPDATE fulltext_acquisition_queue
+                    SET download_status='not_found',fulltext_status='unavailable_legally',
+                        acquisition_status='manual_access_required',
+                        failure_reason='no_legal_fulltext_found'
+                    WHERE source_id='S1'
+                    """
+                )
+                store.connection.commit()
+                store.sync_queue([{**row, "reset_terminal": True, "updated_at": "2026-01-02T00:00:00Z"}])
+                reset = store.connection.execute(
+                    """
+                    SELECT download_status,fulltext_status,acquisition_status,failure_reason,attempt_count
+                    FROM fulltext_acquisition_queue WHERE source_id='S1'
+                    """
+                ).fetchone()
+                self.assertEqual(tuple(reset), ("queued", "pending", "queued", "", 0))
+
+    def test_new_queue_rule_reopens_legacy_terminal_records(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fulltext.sqlite3"
+            row = {
+                "queue_id": "Q1",
+                "source_id": "S1",
+                "work_id": "S1",
+                "title": "Title",
+                "doi": "10/test",
+                "priority_tier": "A",
+                "production_lane": "A",
+                "queue_priority": 1,
+                "preferred_format": "landing_page",
+                "candidate_url": "https://doi.org/10/test",
+                "url_source": "doi_resolver",
+                "access_type": "publisher_page_check",
+                "rule_version": "legacy_rule",
+                "created_at": NOW,
+                "updated_at": NOW,
+            }
+            with FulltextStore(path) as store:
+                store.sync_queue([row])
+                store.connection.execute(
+                    """
+                    UPDATE fulltext_acquisition_queue
+                    SET download_status='paywalled',fulltext_status='unavailable',
+                        acquisition_status='legacy_terminal',
+                        failure_reason='html_landing_page_not_fulltext',attempt_count=3
+                    WHERE source_id='S1'
+                    """
+                )
+                store.connection.commit()
+                store.sync_queue([{**row, "rule_version": "new_legal_fallback_rule"}])
+                reset = store.connection.execute(
+                    """
+                    SELECT download_status,fulltext_status,acquisition_status,
+                           failure_reason,attempt_count,rule_version
+                    FROM fulltext_acquisition_queue WHERE source_id='S1'
+                    """
+                ).fetchone()
+                self.assertEqual(
+                    tuple(reset),
+                    (
+                        "queued",
+                        "pending",
+                        "queued",
+                        "",
+                        0,
+                        "new_legal_fallback_rule",
+                    ),
                 )
 
 
@@ -192,6 +355,103 @@ class SafeAcquisitionRegressionTests(unittest.TestCase):
             ]
             self.assertEqual(urls, ["https://repository.test/paper.pdf"])
 
+    def test_legal_candidates_follow_required_source_order(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate_csv = root / "verified.csv"
+            candidate_csv.write_text(
+                "source_id,fulltext_url,fulltext_type,url_source,access_type,license,"
+                "verification_status,acquisition_step,version_type,version_relation,related_source_id\n"
+                "S1,https://repository.test/paper.pdf,pdf,HAL,legal_oa,,verified,5,"
+                "published,same_record,\n",
+                encoding="utf-8",
+            )
+            pipeline = FulltextPipeline(
+                root, root / "metadata.sqlite3", root / "fulltext.sqlite3",
+                root / "pdf", root / "html", root / "reports", root / "source.csv",
+                root / "coverage.csv", root / ".env", use_unpaywall=False,
+                verified_candidates_csv=candidate_csv,
+            )
+            provider_records = [
+                {
+                    "source_api": "unpaywall",
+                    "normalized_json": json.dumps(
+                        {
+                            "open_access_status": "gold",
+                            "pdf_url": "https://unpaywall.test/paper.pdf",
+                        }
+                    ),
+                },
+                {
+                    "source_api": "openalex",
+                    "normalized_json": json.dumps(
+                        {
+                            "open_access_status": "green",
+                            "pdf_url": "https://openalex.test/paper.pdf",
+                        }
+                    ),
+                },
+                {
+                    "source_api": "semantic_scholar",
+                    "normalized_json": json.dumps(
+                        {
+                            "open_access_status": "open",
+                            "pdf_url": "https://semanticscholar.test/paper.pdf",
+                        }
+                    ),
+                },
+            ]
+            candidates = pipeline._candidates(
+                MetadataRecord(
+                    "S1",
+                    "10/test",
+                    "Title",
+                    source_link="https://publisher.test/article",
+                    provider_records_json=json.dumps(provider_records),
+                ),
+                self.EventStore(),
+                "RUN1",
+            )
+            self.assertEqual(
+                [(candidate.acquisition_step, candidate.url) for candidate in candidates],
+                [
+                    (2, "https://unpaywall.test/paper.pdf"),
+                    (3, "https://openalex.test/paper.pdf"),
+                    (3, "https://semanticscholar.test/paper.pdf"),
+                    (4, "https://doi.org/10/test"),
+                    (4, "https://publisher.test/article"),
+                    (5, "https://repository.test/paper.pdf"),
+                ],
+            )
+
+    def test_unrelated_preprint_without_explicit_version_relation_is_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate_csv = root / "verified.csv"
+            candidate_csv.write_text(
+                "source_id,fulltext_url,fulltext_type,url_source,access_type,license,"
+                "verification_status,version_type,version_relation,related_source_id\n"
+                "S1,https://preprint.test/unsafe.pdf,pdf,ChemRxiv,legal_oa,,verified,"
+                "preprint,same_record,\n"
+                "S1,https://preprint.test/linked.pdf,pdf,ChemRxiv,legal_oa,,verified,"
+                "preprint,preprint_of,S1_PREPRINT\n",
+                encoding="utf-8",
+            )
+            pipeline = FulltextPipeline(
+                root, root / "metadata.sqlite3", root / "fulltext.sqlite3",
+                root / "pdf", root / "html", root / "reports", root / "source.csv",
+                root / "coverage.csv", root / ".env", use_unpaywall=False,
+                verified_candidates_csv=candidate_csv,
+            )
+            candidates = pipeline._candidates(
+                MetadataRecord("S1", "", "Title"),
+                self.EventStore(),
+                "RUN1",
+            )
+            self.assertEqual([candidate.url for candidate in candidates], ["https://preprint.test/linked.pdf"])
+            self.assertEqual(candidates[0].version_relation, "preprint_of")
+            self.assertEqual(candidates[0].related_source_id, "S1_PREPRINT")
+
     def _metadata_db(self, root: Path, rows: list[tuple[str, str]]) -> Path:
         db = root / "metadata.sqlite3"
         with closing(sqlite3.connect(db)) as connection:
@@ -261,6 +521,111 @@ class SafeAcquisitionRegressionTests(unittest.TestCase):
                     for row in store.connection.execute("SELECT source_id,download_status FROM fulltext_acquisition_queue")
                 }
                 self.assertEqual(statuses, {"S1": "not_pdf", "S2": "not_found"})
+                terminal = {
+                    row["source_id"]: (
+                        row["fulltext_status"],
+                        row["acquisition_status"],
+                        row["failure_reason"],
+                        row["manual_access_url"],
+                    )
+                    for row in store.connection.execute(
+                        """
+                        SELECT source_id,fulltext_status,acquisition_status,failure_reason,manual_access_url
+                        FROM fulltext_acquisition_queue
+                        """
+                    )
+                }
+                self.assertEqual(
+                    terminal,
+                    {
+                        "S1": (
+                            "unavailable_legally",
+                            "manual_access_required",
+                            "no_legal_fulltext_found",
+                            "",
+                        ),
+                        "S2": (
+                            "unavailable_legally",
+                            "manual_access_required",
+                            "no_legal_fulltext_found",
+                            "",
+                        ),
+                    },
+                )
+                failure_steps = {
+                    row["source_id"]: int(row["acquisition_step"])
+                    for row in store.connection.execute(
+                        """
+                        SELECT source_id,acquisition_step
+                        FROM fulltext_source
+                        WHERE fetch_status IN ('failed','skipped')
+                        """
+                    )
+                }
+                self.assertEqual(failure_steps, {"S1": 2, "S2": 2})
+
+    def test_candidate_limit_does_not_prematurely_mark_manual_access(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            metadata = self._metadata_db(root, [("S1", "https://example.test/blocked.pdf")])
+            with closing(sqlite3.connect(metadata)) as connection:
+                connection.execute("UPDATE works SET doi='10/test' WHERE source_id='S1'")
+                connection.commit()
+            pipeline = FulltextPipeline(
+                root, metadata, root / "fulltext.sqlite3", root / "pdf", root / "html",
+                root / "reports", root / "source.csv", root / "coverage.csv", root / ".env",
+                use_unpaywall=False, queue_csv=root / "queue.csv", max_candidates_per_source=1,
+            )
+            pipeline.downloader = self.StubDownloader(
+                {
+                    "https://example.test/blocked.pdf": FetchResult(
+                        "https://example.test/blocked.pdf",
+                        "https://example.test/blocked.pdf",
+                        403,
+                        "text/html",
+                        b"",
+                        "http_403",
+                    ),
+                    "https://doi.org/10/test": FetchResult(
+                        "https://doi.org/10/test",
+                        "https://publisher.test/article",
+                        404,
+                        "text/html",
+                        b"",
+                        "http_404",
+                    ),
+                }
+            )
+            pipeline.run(from_queue=True)
+            with FulltextStore(root / "fulltext.sqlite3") as store:
+                row = store.connection.execute(
+                    """
+                    SELECT download_status,fulltext_status,acquisition_status,failure_reason
+                    FROM fulltext_acquisition_queue WHERE source_id='S1'
+                    """
+                ).fetchone()
+                self.assertEqual(
+                    tuple(row),
+                    ("failed_retryable", "pending", "retry_pending", "http_403"),
+                )
+            pipeline.run(from_queue=True)
+            with FulltextStore(root / "fulltext.sqlite3") as store:
+                row = store.connection.execute(
+                    """
+                    SELECT download_status,fulltext_status,acquisition_status,failure_reason,manual_access_url
+                    FROM fulltext_acquisition_queue WHERE source_id='S1'
+                    """
+                ).fetchone()
+                self.assertEqual(
+                    tuple(row),
+                    (
+                        "not_found",
+                        "unavailable_legally",
+                        "manual_access_required",
+                        "no_legal_fulltext_found",
+                        "https://doi.org/10/test",
+                    ),
+                )
 
     def test_blank_pdf_is_classified_scanned_and_requires_ocr(self) -> None:
         quality, ocr_required = assess_parse_quality("pdf", 8, 120, 0, False)

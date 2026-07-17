@@ -77,6 +77,15 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def portable_path(path: Path) -> str:
+    """Return repository-relative paths for artifacts stored in public JSON."""
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(ROOT).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
 def stable_order(source_id: str, seed: str) -> str:
     return hashlib.sha256(f"{seed}|{source_id}".encode("utf-8")).hexdigest()
 
@@ -196,7 +205,7 @@ def generate(database: Path, output: Path, seed: str) -> dict[str, Any]:
         "preserved_review_rows": sum(
             1 for row in rendered if any(row[column] for column in HUMAN_COLUMNS)
         ),
-        "output": str(output),
+        "output": portable_path(output),
     }
 
 
@@ -232,53 +241,6 @@ def generate_dedup_audit(
     }
 
 
-def refresh_predictions(database: Path, input_csv: Path) -> dict[str, Any]:
-    with input_csv.open("r", encoding="utf-8-sig", newline="") as handle:
-        reader = csv.DictReader(handle)
-        rows = list(reader)
-        fieldnames = list(reader.fieldnames or OUTPUT_COLUMNS)
-    with closing(sqlite3.connect(database)) as connection:
-        connection.row_factory = sqlite3.Row
-        works = {
-            str(row["source_id"]): dict(row)
-            for row in connection.execute("SELECT * FROM works")
-        }
-    missing = sorted({row["source_id"] for row in rows} - set(works))
-    if missing:
-        raise RuntimeError(f"Benchmark source IDs missing from metadata database: {missing}")
-    for row in rows:
-        work = works[row["source_id"]]
-        row.update({
-            "title": work.get("title") or "",
-            "doi": work.get("doi") or "",
-            "year": work.get("year") or "",
-            "journal": work.get("journal") or "",
-            "document_type": work.get("document_type") or "",
-            "abstract": work.get("abstract") or "",
-            "auto_tier": work.get("priority_tier") or "",
-            "auto_topic_score": work.get("topic_relevance_score") or 0,
-            "auto_evidence_score": work.get("metadata_evidence_likelihood_score") or 0,
-            "auto_access_score": work.get("access_score") or 0,
-            "auto_reason": work.get("priority_tier_reason") or "",
-            "auto_positive_reasons": _json_text(str(work.get("topic_positive_reasons_json") or "[]")),
-            "auto_negative_reasons": _json_text(str(work.get("topic_negative_reasons_json") or "[]")),
-            "screening_rule_version": work.get("screening_rule_version") or "",
-            "dedup_status": work.get("dedup_status") or "",
-            "dedup_reasons": _json_text(str(work.get("dedup_reasons_json") or "[]")),
-            "conflict_reasons": _json_text(str(work.get("conflict_reasons_json") or "[]")),
-        })
-    with input_csv.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
-    return {
-        "refreshed_rows": len(rows),
-        "screening_rule_versions": dict(Counter(row["screening_rule_version"] for row in rows)),
-        "prediction_distribution": dict(Counter(
-            row["auto_tier"] for row in rows if row.get("sample_stratum") in DEFAULT_COUNTS
-        )),
-        "output": str(input_csv),
-    }
     for row in decisions:
         match_type = str(row.get("match_type") or "")
         if row.get("decision") != "auto_merge" or match_type not in auto_by_type:
@@ -362,7 +324,80 @@ def refresh_predictions(database: Path, input_csv: Path) -> dict[str, Any]:
         "preserved_review_rows": sum(
             1 for row in rendered if any(row[column] for column in DEDUP_HUMAN_COLUMNS)
         ),
-        "output": str(output),
+        "output": portable_path(output),
+    }
+
+
+def refresh_predictions(database: Path, input_csv: Path) -> dict[str, Any]:
+    with input_csv.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or OUTPUT_COLUMNS)
+    with closing(sqlite3.connect(database)) as connection:
+        connection.row_factory = sqlite3.Row
+        works = {
+            str(row["source_id"]): dict(row)
+            for row in connection.execute("SELECT * FROM works")
+        }
+    missing = sorted({row["source_id"] for row in rows} - set(works))
+    if missing:
+        raise RuntimeError(
+            f"Benchmark source IDs missing from metadata database: {missing}"
+        )
+    for row in rows:
+        work = works[row["source_id"]]
+        row.update(
+            {
+                "title": work.get("title") or "",
+                "doi": work.get("doi") or "",
+                "year": work.get("year") or "",
+                "journal": work.get("journal") or "",
+                "document_type": work.get("document_type") or "",
+                "abstract": work.get("abstract") or "",
+                "auto_tier": work.get("priority_tier") or "",
+                "auto_topic_score": work.get("topic_relevance_score") or 0,
+                "auto_evidence_score": work.get(
+                    "metadata_evidence_likelihood_score"
+                )
+                or 0,
+                "auto_access_score": work.get("access_score") or 0,
+                "auto_reason": work.get("priority_tier_reason") or "",
+                "auto_positive_reasons": _json_text(
+                    str(work.get("topic_positive_reasons_json") or "[]")
+                ),
+                "auto_negative_reasons": _json_text(
+                    str(work.get("topic_negative_reasons_json") or "[]")
+                ),
+                "screening_rule_version": work.get("screening_rule_version")
+                or "",
+                "dedup_status": work.get("dedup_status") or "",
+                "dedup_reasons": _json_text(
+                    str(work.get("dedup_reasons_json") or "[]")
+                ),
+                "conflict_reasons": _json_text(
+                    str(work.get("conflict_reasons_json") or "[]")
+                ),
+            }
+        )
+    with input_csv.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=fieldnames, lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+    return {
+        "refreshed_rows": len(rows),
+        "screening_rule_versions": dict(
+            Counter(row["screening_rule_version"] for row in rows)
+        ),
+        "prediction_distribution": dict(
+            Counter(
+                row["auto_tier"]
+                for row in rows
+                if row.get("sample_stratum") in DEFAULT_COUNTS
+            )
+        ),
+        "output": portable_path(input_csv),
     }
 
 
@@ -716,7 +751,7 @@ def summarize(
     summary["dynamic_error_class_distribution"] = dict(Counter(
         error_class for row in error_rows for error_class in row["error_class"].split(";")
     ))
-    summary["errors_csv"] = str(errors_csv)
+    summary["errors_csv"] = portable_path(errors_csv)
     output_json.parent.mkdir(parents=True, exist_ok=True)
     output_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return summary

@@ -1,15 +1,24 @@
 # 脚本目录
 
-脚本按来源登记、筛选、抽取、验证、报告和分析分组。脚本应明确输入、输出和是否修改数据。
+脚本按生产职责分组：
 
-## 八表校验
+| 目录 | 职责 |
+|---|---|
+| `collect_metadata/` | API 采集、规范化、保守去重和筛选输入 |
+| `fetch_fulltext/` | 合法 OA 全文定位、下载、签名与哈希校验 |
+| `parse_fulltext/` | PDF/HTML 解析、章节识别和候选 span |
+| `extraction/` | 提取输入包、规范化和 JSON 结果校验 |
+| `production/` | 队列、租约、恢复、监控和事务性八表暂存 |
+| `validation/` | 八表文件、字段、关系、证据和状态校验 |
+| `screening_benchmark/` | 元数据筛选与去重基准 |
+| `regression/` | 固定回归样例的可重复构建脚本 |
 
-```text
+常用检查：
+
+```powershell
+python -m pytest -q
+ruff check scripts tests
 python scripts/validation/validate_tables.py data/interim/<source_id>
 ```
 
-校验器读取 `config/schema.json` 和 `config/field_dictionary.csv`，检查八表字段、顺序、主外键、证据目标、证据覆盖和复核问题链接。
-
-## v0.3 到 v0.4 迁移
-
-`scripts/extraction/migrate_v03_to_v04.py` 用于把历史五表复核包迁移为八表结构。已迁移目录会被跳过；迁移后的数据仍需逐篇校验和人工复核。
+所有写入型脚本必须明确输入、输出和恢复策略，不得覆盖原始 PDF、冻结快照或既有提取尝试。
