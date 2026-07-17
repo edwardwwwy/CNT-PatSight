@@ -1,170 +1,364 @@
-# CNT-PatSight: Evidence-Grounded Carbon Nanotube Literature & Patent Intelligence
+# CNT-PatSight
 
-> From CNT papers and patents to structured, traceable, and independently reviewable research data.
+> **From carbon nanotube papers to evidence-grounded, ML-ready experimental data.**  
+> Literature-first today, patent-ready by design.
 
-CNT-PatSight is a research data pipeline for carbon nanotube (CNT) R&D. It transforms papers, patents, and experimental records into structured, run-level datasets while preserving the evidence, uncertainty, and review status behind every catalyst, process condition, yield definition, and product-quality claim.
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![Status](https://img.shields.io/badge/status-v0.1%20research%20preview-orange)
+![Data model](https://img.shields.io/badge/data-run--level%208--table%20schema-brightgreen)
+![Review](https://img.shields.io/badge/review-evidence--grounded-purple)
 
-First-pass outputs enter `needs_review` and `pending_review`. A separate evidence-grounded Codex review is sufficient to formalize a package once its evidence, run boundaries, units, relationships, and blocking issues pass validation. Owner input is reserved for unresolved source identity, confidentiality, licensing, or genuinely subjective R&D decisions.
+CNT synthesis papers contain valuable catalyst, reactor, gas-program, yield, and product-quality data—but those facts are scattered across prose, tables, figures, and supplementary files, and their definitions are often inconsistent.
 
-[Data model](docs/field_definitions.md) · [Formalization policy](docs/review_and_formalization.md) · [Project scope](docs/project_scope.md) · [Repository structure](docs/repository_structure.md) · [Public release policy](docs/public_repository_policy.md)
+**CNT-PatSight turns that literature into structured experimental records without breaking the link to the original evidence.**
 
-## Key Capabilities
+中文简介：CNT-PatSight 面向碳纳米管研发，将论文中的催化剂、反应条件、气体程序、产率和产品质量整理为可审核、可追溯、可用于机器学习的实验级数据。
 
-- Collect and normalize literature metadata from OpenAlex, Crossref, Semantic Scholar, and related sources.
-- Apply conservative deduplication and A/B/C/M/R screening rules.
-- Acquire legally accessible open full text and verify PDF, HTML, and file integrity.
-- Parse sections, tables, captions, and candidate experimental passages.
-- Extract catalyst systems, reactor conditions, gas programs, yields, and CNT quality at the individual run level.
-- Validate the eight-table contract, foreign keys, evidence coverage, and review-state boundaries.
-- Export review packages without hiding missing values, conflicting reports, or uncertainty.
+[Quick Start](#quick-start) · [Benchmark](#benchmark-snapshot) · [Eight-Table Schema](#eight-table-data-model) · [Project Scope](docs/project_scope.md) · [Field Definitions](docs/field_definitions.md)
 
-## Workflow
+---
 
-1. **Discover** — collect API metadata, normalize records, and apply conservative deduplication.
-2. **Screen** — assign A/B/C/M/R tiers and select candidates for full-text extraction.
-3. **Acquire and parse** — retrieve legally accessible PDF or HTML, verify file integrity, and locate experimental passages.
-4. **Extract and validate** — build run-level eight-table records, attach source evidence, and validate schema relationships.
-5. **Review and formalize** — independently verify the evidence and resolve blocking issues; packages that pass become formal datasets.
+## Why this project exists
 
-The production layer manages queues, leases, recovery, and transactional staging. Formalization is a separate evidence-review step with explicit quality gates; it does not require an additional owner review when those gates pass.
+A normal literature search can tell you **which papers mention CNT synthesis**. It usually cannot reliably answer questions such as:
 
-## Benchmark Snapshot
+- Which Fe–Mo/MgO formulations were actually tested?
+- What temperature, holding time, gas composition, and reactor stage produced each result?
+- Does a reported “yield” mean mass gain, carbon yield, productivity, or conversion?
+- Was the product SWCNT, DWCNT, or MWCNT, and how was that conclusion supported?
+- Which values were explicitly reported, normalized, inferred, missing, or disputed?
+- Can every database value be traced back to a page, section, table, figure, or quotation?
 
-The current public benchmark is based on the frozen results dated 2026-07-16. See [`benchmark_metrics.json`](data/review/screening_benchmark/benchmark_metrics.json) for the complete machine-readable output.
+CNT-PatSight is designed around those questions.
+
+### What makes it different
+
+- **Run-level extraction** — one paper can contain many independent experimental runs.
+- **Evidence-grounded records** — extracted facts remain linked to source evidence.
+- **Explicit uncertainty** — missing, conflicting, approximate, and normalized values are not silently flattened.
+- **Conservative screening** — relevance and extractability are evaluated separately.
+- **Human-reviewable outputs** — the formal dataset is not a black-box LLM summary.
+- **ML-ready architecture** — the reviewed eight-table database can be cleaned and exported to CSV or Parquet for modeling.
+
+---
+
+## Pipeline overview
+
+```mermaid
+flowchart LR
+    A[Metadata APIs] --> B[Normalize & deduplicate]
+    B --> C[A/B/C/M/R screening]
+    C --> D[Acquire legal full text]
+    D --> E[Parse sections, tables & captions]
+    E --> F[Run-level extraction]
+    F --> G[Eight-table validation]
+    G --> H[Evidence review]
+    H --> I[Formal research dataset]
+    I --> J[CSV / Parquet for ML]
+    I --> K[Optional nanopublication export]
+```
+
+The project separates three concerns that are often mixed together:
+
+1. **Discovery:** find and prioritize relevant literature.
+2. **Extraction:** convert experimental content into a stable schema.
+3. **Formalization:** verify evidence, units, run boundaries, and unresolved issues before data becomes formal.
+
+---
+
+## Current status
+
+CNT-PatSight is currently an **evidence-grounded research preview**.
+
+Implemented:
+
+- metadata collection and normalization;
+- conservative deduplication;
+- A/B/C/M/R relevance screening;
+- full-text acquisition queues and integrity checks;
+- section and candidate-experiment parsing;
+- run-level eight-table extraction;
+- schema, foreign-key, and evidence validation;
+- review-state and formalization rules;
+- public benchmark artifacts;
+- optional nanopublication proof of concept.
+
+In progress:
+
+- larger full-text extraction benchmark;
+- higher-quality table and figure parsing;
+- broader manually reviewed sample set;
+- stable ML export pipeline;
+- patent-specific collection and claim handling.
+
+---
+
+## Benchmark snapshot
+
+The frozen public screening benchmark is dated **2026-07-16**.
 
 | Metric | Result |
 |---|---:|
-| Current metadata corpus | 1,487 records |
-| Stratified evidence review | 120 / 120 |
-| Tier-A precision | 95.74% |
-| Weighted Tier-A+B target recall estimate | 90.56% |
-| Tier-R false exclusions | 0 / 25 |
-| Deduplication audit | 23 decisions; no sampled errors found |
-| Stage gate | Passed; freeze rules and begin the 30-paper full-text pilot |
+| Normalized metadata corpus | **1,487 records** |
+| Stratified manual review | **120 / 120** |
+| Tier-A precision | **95.74%** |
+| Weighted Tier-A+B target recall estimate | **90.56%** |
+| Tier-R false exclusions in reviewed sample | **0 / 25** |
+| Deduplication audit | **23 decisions; no sampled errors found** |
 
-These figures evaluate metadata screening and deduplication, not end-to-end full-text parsing or fact-extraction accuracy. The rule-of-three 95% upper bound for the zero-error Tier-R sample remains 11.54%, so another 50–75 boundary cases are required before the rules can be considered stable.
+Full machine-readable results: [`data/review/screening_benchmark/benchmark_metrics.json`](data/review/screening_benchmark/benchmark_metrics.json)
 
-## Eight-Table Data Contract
+> **Important:** these numbers evaluate metadata screening and deduplication. They are not claims about end-to-end PDF parsing or experimental fact-extraction accuracy.
 
-| Table | Responsibility |
+---
+
+## Eight-table data model
+
+The central design principle is simple:
+
+> **A paper is a source; an experiment is a run; every important value should remain traceable.**
+
+| Table | What it stores |
 |---|---|
-| `source_master` | Unique paper or patent metadata, file state, and review state |
-| `source_run` | Experimental-run identity, route, extraction state, and summary |
-| `catalyst_system` | Catalyst composition, support, preparation, thermal treatment, and structural properties |
-| `reactor_process_gas` | Stage-specific reactor conditions, temperature, pressure, and role-based gas programs |
-| `yield_quality` | Original yield definition, CNT type, morphology, Raman, TGA, and post-treatment |
-| `cost_scale_review` | Demonstrated scale, continuous operation, lifetime, cost facts, and review-stage assessment fields |
-| `evidence_index` | Source locations, target records, value status, confidence, and issue links |
-| `review_issue_log` | Conflicts, critical gaps, quality warnings, and review decisions |
+| `source_master` | Paper or patent identity, DOI, publication metadata, file state, and review state |
+| `source_run` | Individual experimental runs and their extraction status |
+| `catalyst_system` | Active metals, support, precursor, preparation, thermal treatment, composition, and structural properties |
+| `reactor_process_gas` | Reactor type, stage sequence, temperature, pressure, time, and gas program |
+| `yield_quality` | Original yield definition, normalized values, CNT type, morphology, Raman, TGA, diameter, and post-treatment |
+| `cost_scale_review` | Demonstrated scale, continuous operation, catalyst lifetime, cost facts, and industrial-review fields |
+| `evidence_index` | Source locator, quotation or evidence summary, confidence, target record, and value status |
+| `review_issue_log` | Conflicts, missing critical facts, extraction warnings, and review decisions |
 
-The authoritative machine-readable contract is defined in [`config/schema.json`](config/schema.json) and [`config/field_dictionary.csv`](config/field_dictionary.csv). See [`docs/field_definitions.md`](docs/field_definitions.md) for field semantics and relationships.
+Authoritative schema:
 
-## Formalization Gate
+- [`config/schema.json`](config/schema.json)
+- [`config/field_dictionary.csv`](config/field_dictionary.csv)
+- [`docs/field_definitions.md`](docs/field_definitions.md)
 
-A package is formal when all of the following are true:
+### Why not train directly from RDF or nanopublications?
 
-- `screening_class = formal_extract`;
-- source and run `extraction_status = reviewed`;
-- source `review_status = reviewed`;
-- the eight-table validator reports zero errors;
-- every catalyst, process, yield, and cost/scale row has linked evidence;
-- unresolved high- or critical-severity issues have been resolved or explicitly represented without overstating the source;
-- the reviewer and review time are recorded for resolved issues.
+The eight tables are the authoritative research database because they are easier to inspect, clean, join, and export.
 
-Missing optional values, negative results, and source conflicts that are faithfully preserved do not automatically block formalization. See [`docs/review_and_formalization.md`](docs/review_and_formalization.md) for the complete rule set.
+Typical ML preparation:
 
-## Quick Start
+```text
+eight tables
+→ join by run_id
+→ normalize units
+→ split mixed fields
+→ encode categories
+→ represent missingness
+→ build X / y
+→ export CSV or Parquet
+```
 
-Clone the repository and install the runtime dependencies:
+Nanopublications are kept as an **optional provenance and publishing layer**, not as a replacement for the main database.
 
-Python 3.11 or newer is recommended.
+---
 
-```powershell
+## Example research questions
+
+Once enough reviewed runs are available, the dataset can support questions such as:
+
+- How does Mo incorporation change CNT yield and diameter in Fe/MgO systems?
+- Which catalyst-support combinations remain active at high methane-CVD temperatures?
+- How do heating, growth, and cooling gas stages affect reproducibility?
+- Which reported yield metrics are actually comparable?
+- Which experimental conditions favor SWCNT, DWCNT, or MWCNT products?
+- Which literature records contain enough quantitative data for regression, Bayesian optimization, or active learning?
+
+The project does **not** assume that literature values are automatically comparable. Yield definitions, reactor scales, sampling methods, and characterization standards remain explicit.
+
+---
+
+## Quick start
+
+### 1. Clone and install
+
+Python **3.11+** is recommended.
+
+```bash
 git clone https://github.com/edwardwwwy/CNT-PatSight.git
 cd CNT-PatSight
+
 python -m venv .venv
+```
+
+Activate the environment:
+
+```powershell
+# Windows PowerShell
 .\.venv\Scripts\Activate.ps1
+```
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Run the public repository self-check, which does not require local databases or
-download external content:
+### 2. Run the clean-clone self-check
 
-```powershell
+```bash
 python scripts/production/pipeline.py doctor
 ```
 
-Install development tools and run the complete checks:
+This command checks the public repository without requiring local databases, credentials, or external downloads.
 
-```powershell
-python -m pip install -r requirements-dev.txt
-python -m pytest -q
-python -m ruff check scripts tests
-python -m mypy scripts
-```
+### 3. Validate an eight-table package
 
-PDF report generation is optional and uses
-[`requirements-reporting.txt`](requirements-reporting.txt). The nanopublication
-demo has its own dependency file under `scripts/nanopub_demo/`.
-
-Validate an eight-table package:
-
-```powershell
+```bash
 python scripts/validation/validate_tables.py data/interim/<source_id>
 ```
 
-The production `prepare` and `smoke-test` commands require local metadata,
-full-text, and candidate databases; they are not clean-clone checks. See
-[`scripts/production/README.md`](scripts/production/README.md) for production
-commands and data locations. Copy [`.env.example`](.env.example) to a local
-`.env` for API credentials, and never commit populated secrets.
+Browse the public examples and templates:
 
-## Repository Layout
+- [`data/samples/`](data/samples/)
+- [`data/processed/templates/`](data/processed/templates/)
+
+API credentials belong in a local `.env` copied from [`.env.example`](.env.example). Never commit a populated `.env`.
+
+---
+
+## Repository layout
 
 ```text
 CNT-PatSight/
-├── config/                     # Schemas, field dictionary, screening and extraction contracts
+├── config/                     # Schemas, dictionaries, and extraction contracts
 ├── data/
-│   ├── samples/                # Small, licensed, sanitized, evidence-reviewed examples
-│   ├── processed/templates/    # Blank eight-table CSV and Excel templates
-│   └── review/screening_benchmark/
-│                               # Reproducible screening and deduplication benchmark
-├── docs/                       # Scope, field definitions, structure, and release policy
-├── reports/                    # Public metrics, figures, and reports
-├── scripts/                    # Collection, full text, parsing, extraction, production, and validation
-└── tests/                      # Unit tests and small public fixtures
+│   ├── samples/                # Small licensed and sanitized examples
+│   ├── processed/templates/    # Blank eight-table templates
+│   └── review/                 # Public benchmark and audit artifacts
+├── docs/                       # Scope, field definitions, policies, and architecture
+├── reports/                    # Public reports and figures
+├── scripts/
+│   ├── collect_metadata/       # Metadata acquisition and normalization
+│   ├── fulltext/               # Full-text acquisition and coverage
+│   ├── extraction/             # Candidate and structured extraction
+│   ├── validation/             # Schema and evidence validation
+│   └── production/             # Queue, staging, recovery, and orchestration
+└── tests/                      # Unit tests and public fixtures
 ```
 
-Local runs also create `data/raw/`, `data/interim/`, `data/derived/`, and `output/`. These directories contain source caches, intermediate artifacts, or complete deliverables and are not part of the default GitHub release.
+Local runs may also create:
 
-## GitHub Release Boundary
+```text
+data/raw/
+data/interim/
+data/derived/
+output/
+```
 
-| Include by default | Exclude by default |
-|---|---|
-| Source code, tests, and secret-free configuration | `.env`, API keys, passwords, tokens, and private credentials |
-| Eight-table schemas, field definitions, and blank templates | Company experiments, unpublished R&D records, and unsanitized logs |
-| Benchmark metrics, audit tables, and public reports | Complete databases, SQLite files, queue state, and bulk intermediate output |
-| One to three licensed, sanitized, evidence-reviewed examples | Papers obtained through subscriptions, institutional access, or unauthorized sources |
-| DOI, title, OA URL, and license metadata | PDFs, supplements, or raw API responses without confirmed redistribution rights |
+These directories can contain source caches, full texts, intermediate artifacts, complete databases, or private deliverables and are excluded from the default public release.
 
-Open access does not automatically grant redistribution rights. Even when a source uses an open license, verify the exact terms and retain the title, authors, source, and license attribution. By default, this repository stores metadata and publishable structured derivatives rather than copies of source documents.
+---
 
-When the complete database is stable, publish it as a separately versioned dataset through GitHub Releases, Zenodo, or a dedicated dataset platform instead of adding it to normal Git history.
+## Data quality and formalization
 
-`.gitignore` only prevents untracked files from being added. Files already tracked by Git must be removed from the index and checked across repository history before publication. See [`docs/public_repository_policy.md`](docs/public_repository_policy.md) for the allowlist, review checklist, and safe migration guidance.
+First-pass extraction is not automatically treated as final data.
 
-## Project Boundaries
+A package becomes formal only after:
 
-- The main focus is CVD and CCVD CNT synthesis, especially catalysts, gas programs, process conditions, and experimental outcomes.
-- Patent collection adapters are currently reserved for later use; broad claims must not be treated as demonstrated experiments.
-- Yield values with different definitions are not treated as directly comparable.
-- Author-claimed scale is kept separate from experimentally demonstrated scale.
-- Missing and uncertain information remains explicit and is never guessed by the extraction layer.
-- First-pass output requires an independent evidence review; a completed Codex review is sufficient for formalization when all quality gates pass.
+- the source and runs pass the required review state;
+- all eight tables satisfy the schema and foreign-key rules;
+- catalyst, process, yield, and cost/scale records have linked evidence;
+- high-severity issues are resolved or represented without overstating the source;
+- normalization and inference remain distinguishable from directly reported values;
+- reviewer identity and review time are recorded where required.
 
-## License and Third-Party Rights
+See [`docs/review_and_formalization.md`](docs/review_and_formalization.md) for the full policy.
 
-This repository does not currently include a `LICENSE` file, so its code and data must not be assumed to be open-source licensed. Rights to third-party papers, patents, supplementary materials, and trademarks remain with their respective owners. CNT-PatSight does not grant redistribution rights for those materials.
+---
 
-Before public release, the repository owner should select separate, appropriate licenses for the project code and the published dataset.
+## Public release boundary
+
+This repository is intended to publish the **pipeline, schema, benchmark, documentation, and small legal examples**—not an uncontrolled dump of source documents.
+
+### Included by default
+
+- source code, tests, and secret-free configuration;
+- schemas, field definitions, and blank templates;
+- benchmark metrics and public reports;
+- a small number of licensed, sanitized, evidence-reviewed examples;
+- DOI, title, open-access URL, and license metadata.
+
+### Excluded by default
+
+- API keys, passwords, tokens, and populated `.env` files;
+- company experiments or unpublished R&D records;
+- subscription-only or unauthorized paper PDFs;
+- bulk full-text caches and raw API responses;
+- complete private databases, SQLite files, and queue state;
+- unsanitized logs or local paths containing personal information.
+
+Open access does not always mean that a PDF may be redistributed. The default release stores metadata and structured derivatives rather than copies of source papers.
+
+See [`docs/public_repository_policy.md`](docs/public_repository_policy.md).
+
+---
+
+## Roadmap
+
+- [x] Metadata collection and normalization
+- [x] Conservative screening and deduplication benchmark
+- [x] Eight-table run-level schema
+- [x] Evidence and review-state validation
+- [x] Public repository boundary
+- [ ] Thirty-paper end-to-end extraction benchmark
+- [ ] Stronger table and figure extraction
+- [ ] Reviewed multi-paper public sample release
+- [ ] Reproducible ML baseline dataset
+- [ ] Patent-specific acquisition and claim model
+- [ ] Versioned public dataset release
+
+---
+
+## Who this is for
+
+CNT-PatSight may be useful to:
+
+- CNT and catalyst researchers;
+- materials-informatics and scientific-ML researchers;
+- engineers building literature-to-data pipelines;
+- students studying evidence-grounded extraction;
+- teams preparing traceable experimental datasets for optimization.
+
+---
+
+## Contributing
+
+The project is still stabilizing its extraction and review contracts. Useful contributions include:
+
+- parser fixes for scientific PDFs and tables;
+- schema and validator tests;
+- evidence-review examples;
+- unit normalization rules;
+- CNT terminology and ontology mappings;
+- reproducible baseline models built from reviewed data.
+
+Please open an issue before making a large schema change so that backward compatibility and evidence traceability can be discussed first.
+
+---
+
+## License and third-party rights
+
+This repository currently does not include a project `LICENSE` file. Until a license is added, do not assume that the code or dataset may be reused or redistributed.
+
+Rights to third-party papers, patents, supplementary materials, and trademarks remain with their respective owners. CNT-PatSight does not grant redistribution rights for those materials.
+
+Before a wider release, the project should adopt separate licenses for:
+
+1. **source code**, and
+2. **published structured datasets**.
+
+---
+
+## Acknowledgment
+
+CNT-PatSight is an independent research-engineering project focused on making CNT synthesis literature more structured, auditable, and useful for future machine learning.
