@@ -204,6 +204,7 @@ def label_scientific_reports_frontmatter(page: Any, text: str) -> tuple[str, boo
     if author_index is None or author_index + 5 >= len(rows):
         return text, False
     abstract_start = author_index + 1
+    body_start: int | None
     keywords_index = next(
         (
             index
@@ -298,9 +299,9 @@ def extract_pdf_pages(path: Path) -> tuple[list[PageText], list[tuple[int, str]]
             raise RuntimeError("PDF parsing requires pdfplumber or pypdf; use the bundled workspace Python runtime") from exc
         reader = pypdf.PdfReader(str(path))
         pages = []
-        for page_number, page in enumerate(reader.pages, start=1):
+        for page_number, pdf_page in enumerate(reader.pages, start=1):
             try:
-                text = page.extract_text() or ""
+                text = pdf_page.extract_text() or ""
             except Exception as exc:
                 text = ""
                 warnings.append(f"page_{page_number}_text_error:{type(exc).__name__}")

@@ -14,18 +14,14 @@ from build_a_class_result_pdf import (
     BLUE,
     CASE_BASE,
     CORAL,
-    CYAN,
     FONT,
     FONT_BOLD,
     GREEN,
     H,
     INK,
-    LINE,
     M,
-    MASTER,
     MUTED,
     NAVY,
-    PAPER,
     PURPLE,
     SLATE,
     TEAL,
@@ -42,7 +38,6 @@ from build_a_class_result_pdf import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-MANIFEST = ROOT / "data/interim/extraction_batches/A_CLASS_208_20260716/manifest.csv"
 OUT = ROOT / "output/pdf/CNT-PatSight_A-Class_Result_Report_WangYang.pdf"
 RUN_ID = "LIT_DB283D1C5235DA93_EI_11"
 
@@ -188,14 +183,7 @@ def build() -> Path:
 
     sm = pd.read_csv(BASE / "source_master.csv", keep_default_na=False)
     sr = pd.read_csv(BASE / "source_run.csv", keep_default_na=False)
-    cat = pd.read_csv(BASE / "catalyst_system.csv", keep_default_na=False)
-    rpg = pd.read_csv(BASE / "reactor_process_gas.csv", keep_default_na=False)
-    yq = pd.read_csv(BASE / "yield_quality.csv", keep_default_na=False)
-    cost = pd.read_csv(BASE / "cost_scale_review.csv", keep_default_na=False)
     ev = pd.read_csv(BASE / "evidence_index.csv", keep_default_na=False)
-    issues = pd.read_csv(BASE / "review_issue_log.csv", keep_default_na=False)
-    manifest = pd.read_csv(MANIFEST, keep_default_na=False)
-    literature = pd.read_csv(MASTER, low_memory=False)
 
     case = {name: pd.read_csv(CASE_BASE / f"{name}.csv", keep_default_na=False) for name in [
         "source_master", "source_run", "catalyst_system", "reactor_process_gas",
@@ -208,8 +196,6 @@ def build() -> Path:
     case_yield = case["yield_quality"].query("run_id == @RUN_ID").iloc[0]
     case_cost = case["cost_scale_review"].query("run_id == @RUN_ID").iloc[0]
     case_ev = case["evidence_index"].query("run_id == @RUN_ID")
-    case_issue = case["review_issue_log"].iloc[0]
-
     c = canvas.Canvas(str(OUT), pagesize=A4, pageCompression=1)
     c.setTitle("CNT-PatSight 当前成果展示与 A 类文献数据说明")
     c.setAuthor("王扬")

@@ -130,7 +130,7 @@ def build_source_master(rows: list[dict[str, str]]) -> list[dict[str, str]]:
                 "supplement references S3-S8"
             ),
             "extraction_status": "needs_review",
-            "review_status": "pending_human_review",
+            "review_status": "pending_review",
             "notes": (
                 "Codex-authored five-run gold regression case; "
                 "domain_expert_verified=false; not formal_extract."
@@ -434,7 +434,7 @@ def build_cost_scale(rows: list[dict[str, str]]) -> list[dict[str, str]]:
                 "recommended_next_action": "",
                 "review_note": (
                     "Automated/LLM regression gold; industrial assessment "
-                    "fields intentionally left empty pending human review."
+                    "fields intentionally left empty pending independent evidence review."
                 ),
             }
         )
@@ -697,13 +697,13 @@ def build_review_issues() -> list[dict[str, str]]:
             "conflicting_values": "not_applicable",
             "evidence_ids": "EVID_P003_GOLD_0017",
             "severity": "medium",
-            "review_status": "pending_human_review",
+            "review_status": "pending_review",
             "reviewer": "not_assigned",
             "reviewed_at": "not_applicable",
-            "resolution": "pending_human_review",
+            "resolution": "pending_review",
             "notes": (
-                "Keep yield_original=not_reported unless a human digitizes the "
-                "figure or verifies the underlying supplementary/raw data."
+                "Keep yield_original=not_reported unless the figure or underlying "
+                "supplementary/raw data is independently digitized and reviewed."
             ),
         }
     ]

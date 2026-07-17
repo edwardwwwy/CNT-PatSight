@@ -10,7 +10,7 @@ from reportlab.pdfgen import canvas
 
 from build_a_class_result_pdf import (
     AMBER, BASE, BLUE, CASE_BASE, CORAL, FONT, FONT_BOLD, GREEN, H, INK,
-    M, MASTER, MUTED, NAVY, PURPLE, SLATE, TEAL, W, card, finish_page,
+    M, MUTED, NAVY, PURPLE, SLATE, TEAL, W, card, finish_page,
     kpi, page_base, pill, register_fonts, section_card, text_block,
 )
 from build_a_class_result_pdf_v2 import grid_table, kv_panel, narrative_panel
@@ -68,8 +68,6 @@ def build() -> Path:
     sm = pd.read_csv(BASE / "source_master.csv", keep_default_na=False)
     sr = pd.read_csv(BASE / "source_run.csv", keep_default_na=False)
     ev = pd.read_csv(BASE / "evidence_index.csv", keep_default_na=False)
-    literature = pd.read_csv(MASTER, low_memory=False)
-
     case = {name: pd.read_csv(CASE_BASE / f"{name}.csv", keep_default_na=False) for name in [
         "source_master", "source_run", "catalyst_system", "reactor_process_gas",
         "yield_quality", "cost_scale_review", "evidence_index"

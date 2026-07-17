@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from scripts.extraction.build_a_class_batch import (
+from scripts.extraction.batch_common import (
     BATCH_ID,
     ROOT,
     TABLES,
@@ -99,7 +99,7 @@ def append_pdf_figure_evidence(
             ),
             "notes": (
                 "Value visually transcribed from the locally stored PDF figure; "
-                "pending independent human verification."
+                "pending independent evidence review."
             ),
         }
     )
@@ -1064,7 +1064,7 @@ def build(
                 (
                     "A4-A6 and B4-B6 D/G area ratios are graph annotations, not "
                     "repeated numerically in prose. PDF pages 59 and 78 were "
-                    "visually checked; values remain pending human verification."
+                    "visually checked; values remain pending independent evidence review."
                 ),
                 f"EVD_{a4}_RAMAN;EVD_{SOURCE_ID}_B4_RAMAN",
             ),

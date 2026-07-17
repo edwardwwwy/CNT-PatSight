@@ -4,8 +4,19 @@ import json
 import os
 import time
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+
+def utc_now() -> str:
+    """Return a stable, second-precision UTC timestamp."""
+    return (
+        datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
 
 
 def unique_part_path(path: Path) -> Path:

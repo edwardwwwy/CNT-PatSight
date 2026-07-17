@@ -12,7 +12,7 @@ OpenAlex search
   -> SQLite canonical store + CSV export + per-run report
 ```
 
-这只是来源接收与筛选层，不创建 `source_run`，也不抽取催化剂、工艺或产率字段。自动评分只用于排序；API 元数据不会被自动标为 `formal_extract`。进入单篇八表复核包时，仍需人工确认并保持 `needs_review`。
+这只是来源接收与筛选层，不创建 `source_run`，也不抽取催化剂、工艺或产率字段。自动评分只用于排序；API 元数据不会被自动标为 `formal_extract`。进入单篇八表包时先保持 `needs_review`，完成独立证据复核后可正式化。
 
 ## 配置
 
@@ -120,7 +120,7 @@ data/raw/metadata/run_reports/<run_id>.json
   query、各 API 返回量、入库/更新、去重、评分和链接统计
 ```
 
-`literature_master.csv` 保留现有人工字段，并增加 `abstract`、`publisher`、`citation_count`、`open_access_status`、`pdf_url`、`html_url`、`source_api_ids`、采集时间和相关性说明。它是接收层导出，不是第九张正式业务表。
+`literature_master.csv` 保留现有复核字段，并增加 `abstract`、`publisher`、`citation_count`、`open_access_status`、`pdf_url`、`html_url`、`source_api_ids`、采集时间和相关性说明。它是接收层导出，不是第九张正式业务表。
 
 ## 去重与更新
 
@@ -162,7 +162,7 @@ data/raw/metadata/run_reports/<run_id>.json
 - `R`：规则拒绝或明显低相关。
 
 元数据筛选绝不自动授予 `formal_extract`，也不直接授予 `candidate_extract`。
-`A`、`B`、`M` 只进入 `screened_candidate`；必须查看全文后再由后续流程或人工分类。
+`A`、`B`、`M` 只进入 `screened_candidate`；必须查看全文后再由证据复核流程分类。
 
 ## API 约定
 

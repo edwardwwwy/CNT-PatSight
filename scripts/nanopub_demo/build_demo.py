@@ -796,7 +796,7 @@ table {{ width:100%; border-collapse:collapse; background:white; }} th,td {{ bor
 <div class="card"><div class="metric">{metrics['export_field_evidence_percent']:.1f}%</div><div>发布事实字段映射</div></div>
 <div class="card"><div class="metric">0</div><div>缺失值Assertion</div></div>
 </div>
-<div class="notice warning"><strong>证据口径：</strong>原始<code>evidence_index</code>仍是记录级证据，原表字段级比例为0%。本版没有修改它；而是在独立导出层用人工审定白名单，只把证据文本明确提到的字段绑定为核心事实。因此“发布事实字段映射率100%”不等于原始八表已经逐字段审完。</div>
+    <div class="notice warning"><strong>证据口径：</strong>原始<code>evidence_index</code>仍是记录级证据，原表字段级比例为0%。本版没有修改它；而是在独立导出层用证据审定白名单，只把证据文本明确提到的字段绑定为核心事实。因此“发布事实字段映射率100%”不等于原始八表已经逐字段审完。</div>
 <h2>紧凑性与完整性处理</h2>
 <div class="table-wrap"><table><thead><tr><th>口径</th><th>数量</th><th>处理</th></tr></thead><tbody>
 <tr><td>八表四张实验表全部单元格</td><td>{completeness['full_eight_table_cell_count']}</td><td>继续完整保留在正式CSV</td></tr>

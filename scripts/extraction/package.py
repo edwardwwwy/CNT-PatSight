@@ -170,7 +170,9 @@ def _merge_duplicate_spans(rows: list[dict[str, str]]) -> list[dict[str, Any]]:
             current["span_types"].append(row["span_type"])
         current["matched_keywords"] = sorted(set(current["matched_keywords"] + payload["matched_keywords"]))
         current["confidence_score"] = max(current["confidence_score"], payload["confidence_score"])
-        if _page_start(payload["page_range"]) < _page_start(current["page_range"]):
+        if _page_start(str(payload["page_range"])) < _page_start(
+            str(current["page_range"])
+        ):
             current["page_range"] = payload["page_range"]
     return list(merged.values())
 

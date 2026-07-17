@@ -9,6 +9,8 @@
 - `run_plan_v1.schema.json`: experiment/run planning contract.
 - `extraction_unit_rules_v1.json`: unit normalization and non-conversion rules.
 - `screening_rules.json`: metadata screening rules.
+- `review_policy.json`: first-pass states, agent-review formalization gates,
+  legacy status compatibility, and owner-escalation conditions.
 
 When the formal eight-table contract changes, update `schema.json`,
 `field_dictionary.csv`, validators, tests, documentation, and any required

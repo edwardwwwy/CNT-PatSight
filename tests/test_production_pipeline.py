@@ -164,7 +164,7 @@ class ProductionStoreTests(unittest.TestCase):
                 store.enqueue("T1", "S1", "a" * 64, "CFG", 1)
                 task = store.claim("worker")
                 rows = {name: [] for name in store.schema["tables"]}
-                rows["source_master"] = [{"source_id": "S1", "source_type": "paper", "source_title": "T", "publication_year": "2020", "doi_or_patent_no": "not_reported", "screening_class": "candidate_extract", "extraction_status": "needs_review", "review_status": "pending_human_review"}]
+                rows["source_master"] = [{"source_id": "S1", "source_type": "paper", "source_title": "T", "publication_year": "2020", "doi_or_patent_no": "not_reported", "screening_class": "candidate_extract", "extraction_status": "needs_review", "review_status": "pending_review"}]
                 with self.assertRaises(RuntimeError):
                     store.write_staging(task, "REV", rows, {}, fail_after_table="source_master")
                 self.assertEqual(store.connection.execute("SELECT COUNT(*) FROM source_master").fetchone()[0], 0)
@@ -526,7 +526,7 @@ class ProductionValidationTests(unittest.TestCase):
             "REV_TEST",
         )
         issue = rows["review_issue_log"][0]
-        self.assertEqual(issue["review_status"], "pending_human_review")
+        self.assertEqual(issue["review_status"], "pending_review")
         self.assertIn(issue["evidence_ids"], {row["evidence_id"] for row in rows["evidence_index"]})
         validate_rows_with_formal_validator(
             rows,

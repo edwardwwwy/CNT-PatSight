@@ -25,9 +25,9 @@ review_issue_log ──> 任一待复核记录，并可关联 evidence_id
 | `catalyst_system` | 催化剂组成、载体、制备、热处理与结构性质 |
 | `reactor_process_gas` | 分阶段反应器条件、温度、压力和角色化气体程序 |
 | `yield_quality` | 原始产率口径、CNT 类型、形貌、Raman、TGA 与后处理 |
-| `cost_scale_review` | 已展示规模、连续运行、寿命、成本事实与人工评价位 |
+| `cost_scale_review` | 已展示规模、连续运行、寿命、成本事实与复核阶段评价位 |
 | `evidence_index` | 原文证据、位置、对象、值状态、置信度及问题关联 |
-| `review_issue_log` | 冲突、数据缺口、质量警告及人工复核结论 |
+| `review_issue_log` | 冲突、数据缺口、质量警告及独立复核结论 |
 
 ## 字段管理原则
 

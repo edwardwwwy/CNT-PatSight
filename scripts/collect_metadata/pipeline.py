@@ -6,6 +6,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from scripts.io_utils import utc_now
+
 from .clients import (
     CrossrefClient,
     JsonHttpClient,
@@ -18,7 +20,7 @@ from .models import SourceBatch
 from .scoring import RelevanceScorer, ScreeningRules
 from .settings import Credentials, Paths, SearchSettings
 from .storage import MetadataStore
-from .utils import json_dumps, utc_now
+from .utils import json_dumps
 
 
 class CollectionPipeline:

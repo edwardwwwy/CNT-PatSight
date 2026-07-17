@@ -278,6 +278,7 @@ def hydrate_evidence_from_spans(
                         }
                     )
                     continue
+                assert span is not None
                 evidence["evidence_text"] = excerpt
                 page = (
                     span.get("page_start")
@@ -293,8 +294,10 @@ def detect_catalyst_labels(package: dict[str, Any]) -> list[str]:
     """Extract explicit compared catalyst labels from planning text."""
     planned = package.get("run_plan", {}).get("runs", [])
     if planned:
-        labels = [str(row.get("catalyst_label", "")).strip() for row in planned]
-        return [label for label in labels if label]
+        planned_labels = [
+            str(row.get("catalyst_label", "")).strip() for row in planned
+        ]
+        return [label for label in planned_labels if label]
     signaled = package.get("structure_signals", {}).get("catalyst_labels", [])
     if signaled:
         return [str(label) for label in signaled if str(label).strip()]
@@ -681,8 +684,8 @@ def build_staging_rows(
         "screening_class": "candidate_extract",
         "source_section_scope": "parsed_candidate_spans",
         "extraction_status": "needs_review",
-        "review_status": "pending_human_review",
-        "notes": f"First-pass staging revision {revision_id}; domain_expert_verified=false",
+        "review_status": "pending_review",
+        "notes": f"First-pass staging revision {revision_id}; independent evidence review required",
     })
     run_map: dict[str, str] = {}
     target_ids: dict[tuple[str, str], tuple[str, str]] = {}
@@ -817,8 +820,8 @@ def build_staging_rows(
             "issue_summary": issue_summary,
             "conflicting_values": fields.get("conflicting_values") or "",
             "evidence_ids": evidence_ids, "severity": severity,
-            "review_status": "pending_human_review", "reviewer": "", "reviewed_at": "", "resolution": "",
-            "notes": "domain_expert_verified=false",
+            "review_status": "pending_review", "reviewer": "", "reviewed_at": "", "resolution": "",
+            "notes": "Resolve during independent evidence review.",
         })
     # The formal contract requires interpretive fields to be explicit. These
     # sentinels mean the source did not report the value; they are not model

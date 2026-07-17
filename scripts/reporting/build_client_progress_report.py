@@ -21,7 +21,6 @@ from build_a_class_result_pdf import (
     MASTER,
     MUTED,
     NAVY,
-    PAPER,
     PURPLE,
     SLATE,
     TEAL,
@@ -369,7 +368,7 @@ def build() -> Path:
         ["GPT Sol全量两轮", "约$1,626", "约¥11,710", "高质量路线，成本明显提高"],
     ], font_size=7.0, max_lines=3)
     card(c, M, 105, W - 2 * M, 95, fill=NAVY, stroke=NAVY)
-    text_block(c, "API费用由输入长度、推理token、输出字段数、失败重试和二次证据核验共同决定。以上为可比口径，不包含OCR、向量检索、服务器存储、人工专家复核和文献版权费用；人民币按1 USD = 7.2 CNY作内部测算。", M + 16, 164, W - 2 * M - 32, size=7.7, color=white, leading=12.5, max_lines=5)
+    text_block(c, "API费用由输入长度、推理token、输出字段数、失败重试和二次证据核验共同决定。以上为可比口径，不包含OCR、向量检索、服务器存储、独立专家复核和文献版权费用；人民币按1 USD = 7.2 CNY作内部测算。", M + 16, 164, W - 2 * M - 32, size=7.7, color=white, leading=12.5, max_lines=5)
     source_note(c, [
         "价格来源（访问日期2026-07-17）：OpenAI Models - https://developers.openai.com/api/docs/models",
         "DeepSeek Models & Pricing - https://api-docs.deepseek.com/quick_start/pricing/",

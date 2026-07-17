@@ -7,7 +7,7 @@ import json
 import re
 from typing import Any
 
-from scripts.extraction.build_a_class_batch import (
+from scripts.extraction.batch_common import (
     BATCH_ID,
     ROOT,
     EvidenceStore,

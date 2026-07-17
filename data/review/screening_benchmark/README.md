@@ -19,6 +19,10 @@ decision. Valid `human_extractability` values are `extractable`,
 `possible_duplicate_missed` only when the screening review identifies another
 canonical record that may represent the same work.
 
+The `human_*` names are retained for backward compatibility. A designated
+evidence-review agent may complete them; they do not impose an owner-approval
+requirement.
+
 In `dedup_audit.csv`, complete `human_merge_correct` and `human_relation` for
 every row, including conflict-review rows. Valid merge decisions are `yes` and
 `no`; relations are `same_work`, `distinct_work`, `version_relation`, and
@@ -45,10 +49,10 @@ python scripts/screening_benchmark/benchmark.py summarize
 Only then assess the release thresholds. `benchmark_decision` is the stage gate:
 
 ```text
-pending_human_review
+pending_review
 fail_export_errors_and_revise_rules
 pass_freeze_and_start_30_fulltext_pilot
 ```
 
 Do not revise rules, rescore all works, or start the 30-paper OA pilot while the
-decision remains `pending_human_review`.
+decision remains `pending_review`.

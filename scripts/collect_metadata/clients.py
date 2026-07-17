@@ -11,6 +11,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
+from scripts.io_utils import utc_now
+
 from .models import ApiResponse, NormalizedWork, SourceBatch
 from .utils import (
     first_text,
@@ -20,8 +22,15 @@ from .utils import (
     redact_url,
     strip_markup,
     unique_text,
-    utc_now,
 )
+
+
+def _mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _items(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
 
 
 class RawArchive:
@@ -249,13 +258,13 @@ class OpenAlexClient:
                 },
                 headers={"User-Agent": self.user_agent},
             )
-            payload = response.data if isinstance(response.data, dict) else {}
-            results = payload.get("results") if isinstance(payload.get("results"), list) else []
+            payload = _mapping(response.data)
+            results = _items(payload.get("results"))
             response.returned_count = len(results)
             batch.responses.append(response)
             if response.error:
                 break
-            meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+            meta = _mapping(payload.get("meta"))
             if batch.api_total is None and isinstance(meta.get("count"), int):
                 batch.api_total = int(meta["count"])
             for item in results:
@@ -381,16 +390,18 @@ class UnpaywallClient:
 
 
 def normalize_openalex(item: dict[str, Any], collected_at: str) -> NormalizedWork:
-    primary = item.get("primary_location") if isinstance(item.get("primary_location"), dict) else {}
-    best_oa = item.get("best_oa_location") if isinstance(item.get("best_oa_location"), dict) else {}
-    source = primary.get("source") if isinstance(primary.get("source"), dict) else {}
-    open_access = item.get("open_access") if isinstance(item.get("open_access"), dict) else {}
+    primary = _mapping(item.get("primary_location"))
+    best_oa = _mapping(item.get("best_oa_location"))
+    source = _mapping(primary.get("source"))
+    open_access = _mapping(item.get("open_access"))
+    ids = _mapping(item.get("ids"))
     authors = []
-    for authorship in item.get("authorships") or []:
-        if isinstance(authorship, dict) and isinstance(authorship.get("author"), dict):
-            authors.append(authorship["author"].get("display_name"))
+    for authorship in _items(item.get("authorships")):
+        author = _mapping(authorship.get("author")) if isinstance(authorship, dict) else {}
+        if author:
+            authors.append(author.get("display_name"))
     external_id = str(item.get("id") or "").rsplit("/", 1)[-1]
-    doi = normalize_doi(item.get("doi") or (item.get("ids") or {}).get("doi"))
+    doi = normalize_doi(item.get("doi") or ids.get("doi"))
     return NormalizedWork(
         source_api="openalex",
         external_id=external_id or doi,
@@ -414,10 +425,14 @@ def normalize_openalex(item: dict[str, Any], collected_at: str) -> NormalizedWor
 
 
 def normalize_semantic_scholar(item: dict[str, Any], collected_at: str) -> NormalizedWork:
-    external_ids = item.get("externalIds") if isinstance(item.get("externalIds"), dict) else {}
-    pdf = item.get("openAccessPdf") if isinstance(item.get("openAccessPdf"), dict) else {}
-    journal = item.get("journal") if isinstance(item.get("journal"), dict) else {}
-    authors = [author.get("name") for author in item.get("authors") or [] if isinstance(author, dict)]
+    external_ids = _mapping(item.get("externalIds"))
+    pdf = _mapping(item.get("openAccessPdf"))
+    journal = _mapping(item.get("journal"))
+    authors = [
+        author.get("name")
+        for author in _items(item.get("authors"))
+        if isinstance(author, dict)
+    ]
     return NormalizedWork(
         source_api="semantic_scholar",
         external_id=first_text(item.get("paperId") or external_ids.get("DOI")),
@@ -440,10 +455,10 @@ def normalize_semantic_scholar(item: dict[str, Any], collected_at: str) -> Norma
 
 def normalize_crossref(item: dict[str, Any], collected_at: str) -> NormalizedWork:
     authors = []
-    for author in item.get("author") or []:
+    for author in _items(item.get("author")):
         if isinstance(author, dict):
             authors.append(" ".join(part for part in (author.get("given"), author.get("family")) if part))
-    links = item.get("link") if isinstance(item.get("link"), list) else []
+    links = _items(item.get("link"))
     pdf_url = ""
     html_url = ""
     for link in links:
@@ -456,7 +471,12 @@ def normalize_crossref(item: dict[str, Any], collected_at: str) -> NormalizedWor
         elif "html" in content_type and not html_url:
             html_url = url
     year = first_year(item.get("published-print"), item.get("published-online"), item.get("published"), item.get("created"))
-    date_parts = (item.get("published-print") or item.get("published-online") or item.get("published") or {}).get("date-parts", [])
+    date_record = _mapping(
+        item.get("published-print")
+        or item.get("published-online")
+        or item.get("published")
+    )
+    date_parts = _items(date_record.get("date-parts"))
     publication_date = "-".join(str(part).zfill(2) for part in date_parts[0]) if date_parts and date_parts[0] else ""
     doi = normalize_doi(item.get("DOI"))
     return NormalizedWork(
@@ -482,9 +502,9 @@ def normalize_crossref(item: dict[str, Any], collected_at: str) -> NormalizedWor
 
 
 def normalize_unpaywall(item: dict[str, Any], collected_at: str) -> NormalizedWork:
-    best = item.get("best_oa_location") if isinstance(item.get("best_oa_location"), dict) else {}
+    best = _mapping(item.get("best_oa_location"))
     authors = []
-    for author in item.get("z_authors") or []:
+    for author in _items(item.get("z_authors")):
         if isinstance(author, dict):
             authors.append(" ".join(part for part in (author.get("given"), author.get("family")) if part))
     doi = normalize_doi(item.get("doi"))

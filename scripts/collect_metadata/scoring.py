@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from .utils import utc_now
+from scripts.io_utils import utc_now
 
 
 SCREENING_RULE_VERSION = "v1.2"

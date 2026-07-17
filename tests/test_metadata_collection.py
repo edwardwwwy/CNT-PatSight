@@ -293,7 +293,7 @@ class StorageTests(unittest.TestCase):
         master = self.root / "literature_master.csv"
         master.write_text(
             "source_id,source_type,title,year,doi_or_patent_no,screening_class,pdf_status,extraction_status,review_status\n"
-            "P001,paper,Existing CNT paper,2020,10.1000/existing,formal_extract,downloaded,needs_review,pending_human_review\n",
+            "P001,paper,Existing CNT paper,2020,10.1000/existing,formal_extract,downloaded,needs_review,pending_review\n",
             encoding="utf-8",
         )
         self.store = MetadataStore(database)

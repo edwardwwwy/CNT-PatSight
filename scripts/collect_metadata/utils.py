@@ -5,19 +5,13 @@ import html
 import json
 import re
 import unicodedata
-from datetime import datetime, timezone
 from typing import Any, Iterable
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
-
 
 DOI_PREFIX_RE = re.compile(r"^(?:https?://(?:dx\.)?doi\.org/|doi:\s*)", re.I)
 TAG_RE = re.compile(r"<[^>]+>")
 SPACE_RE = re.compile(r"\s+")
 NON_WORD_RE = re.compile(r"[^a-z0-9]+")
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_doi(value: Any) -> str:
@@ -105,4 +99,3 @@ def redact_url(url: str) -> str:
     sensitive = {"api_key", "apikey", "key", "token", "access_token", "email", "mailto"}
     query = [(key, "<redacted>" if key.lower() in sensitive else value) for key, value in parse_qsl(parts.query)]
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
-

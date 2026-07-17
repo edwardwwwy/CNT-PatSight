@@ -7,9 +7,10 @@ import json
 import sqlite3
 from collections import Counter
 from contextlib import closing
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from scripts.io_utils import utc_now
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,10 +72,6 @@ DEDUP_COLUMNS = [
     "related_document_type", "related_authors", "related_journal", "dedup_reasons",
     "conflict_reasons", "dedup_rule_version", *DEDUP_HUMAN_COLUMNS,
 ]
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def portable_path(path: Path) -> str:
@@ -575,12 +572,14 @@ def summarize(
     )
     if not all_complete:
         r_action = "pending_review"
-    elif r_false_kill_sample_count >= 2:
-        r_action = "modify_rules_before_release"
-    elif r_false_kill_sample_count == 1:
-        r_action = "analyze_error_and_expand_R_sample"
     else:
-        r_action = "expand_R_boundary_sample_by_50_to_75_before_declaring_stable"
+        assert r_false_kill_sample_count is not None
+        if r_false_kill_sample_count >= 2:
+            r_action = "modify_rules_before_release"
+        elif r_false_kill_sample_count == 1:
+            r_action = "analyze_error_and_expand_R_sample"
+        else:
+            r_action = "expand_R_boundary_sample_by_50_to_75_before_declaring_stable"
 
     dedup_by_reason: dict[str, dict[str, Any]] = {}
     for match_type in ("external_id", "doi", "title_exact", "title_fuzzy"):
@@ -651,7 +650,7 @@ def summarize(
     if any(value == "fail" for value in required_gate_values):
         benchmark_decision = "fail_export_errors_and_revise_rules"
     elif any(value == "pending" for value in required_gate_values):
-        benchmark_decision = "pending_human_review"
+        benchmark_decision = "pending_review"
     else:
         benchmark_decision = "pass_freeze_and_start_30_fulltext_pilot"
     summary = {
@@ -758,7 +757,7 @@ def summarize(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Create and score a reproducible human screening benchmark.")
+    parser = argparse.ArgumentParser(description="Create and score a reproducible evidence-review screening benchmark.")
     parser.add_argument("--database", type=Path, default=ROOT / "data/raw/metadata/literature.sqlite3")
     parser.add_argument("--csv", type=Path, default=ROOT / "data/review/screening_benchmark/screening_benchmark.csv")
     parser.add_argument("--dedup-csv", type=Path, default=ROOT / "data/review/screening_benchmark/dedup_audit.csv")
@@ -770,7 +769,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--seed", default="cnt-patsight-benchmark-v1")
     create.add_argument("--doi-audit-count", type=int, default=15)
     create.add_argument("--external-id-audit-count", type=int, default=5)
-    sub.add_parser("refresh", help="Refresh automatic predictions without resampling or changing human labels.")
+    sub.add_parser("refresh", help="Refresh automatic predictions without resampling or changing reviewer labels.")
     sub.add_parser("summarize")
     return parser
 

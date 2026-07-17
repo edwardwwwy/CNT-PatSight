@@ -33,7 +33,7 @@ class NormalizedWork:
     pdf_status: str = ""
     pdf_path: str = ""
     extraction_status: str = "needs_review"
-    review_status: str = "pending_human_review"
+    review_status: str = "pending_review"
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:

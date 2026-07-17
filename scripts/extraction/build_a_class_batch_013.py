@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from scripts.extraction.build_a_class_batch import (
+from scripts.extraction.batch_common import (
     BATCH_ID,
     ROOT,
     TABLES,
@@ -1203,7 +1203,7 @@ def build(
                 (
                     "R2R width, speed and >200 micrometer carpet height were "
                     "visually checked on PDF page 15 and remain pending "
-                    "independent human verification."
+                    "independent evidence review."
                 ),
                 f"EVD_{r2r_id}_R2R_PDF",
             ),

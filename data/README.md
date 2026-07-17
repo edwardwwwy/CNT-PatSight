@@ -20,8 +20,8 @@ raw/metadata
 | `raw/` | 元数据、合法获取的全文与冻结输入 | 否 |
 | `interim/` | 解析结果、队列、批次、首轮八表包 | 否 |
 | `derived/` | 可重新生成的合并数据和分析产物 | 否 |
-| `review/extraction/` | 人工复核队列、决策和证据上下文 | 否 |
-| `processed/` | 人工确认后的完整数据库 | 否，单独发布版本 |
+| `review/extraction/` | 独立证据复核队列、决策和证据上下文 | 否 |
+| `processed/` | 通过正式化门禁的完整数据库 | 否，单独发布版本 |
 | `internal/` | 公司或实验室内部数据 | 绝不公开 |
 
 `raw/metadata/literature_master.csv` 是采集与下载流程登记，不是正式业务表。正式来源元数据进入 `source_master.csv`。
@@ -30,7 +30,7 @@ raw/metadata
 
 | 目录 | 内容 |
 |---|---|
-| `samples/` | 1–3 个经授权、脱敏并人工复核的小型八表样例 |
+| `samples/` | 1–3 个经授权、脱敏并通过证据复核的小型八表样例 |
 | `processed/templates/` | 八表 CSV 与 Excel 空白模板 |
 | `review/screening_benchmark/` | 可公开、可复现的筛选和去重 benchmark |
 
@@ -51,4 +51,4 @@ evidence_index.csv
 review_issue_log.csv
 ```
 
-公开样例另附不属于正式八表的 `source_rights.json`，记录来源链接、内容许可证、数据许可证和权利检查时间。本地复核包可以附带 `extraction_workbook.xlsx`；公开样例仅在确认其中不含受限原文、个人信息和本地路径后才能附带。空白模板位于 `processed/templates/`，只有人工复核通过的数据才能汇总进入正式数据层。
+公开样例另附不属于正式八表的 `source_rights.json`，记录来源链接、内容许可证、数据许可证和权利检查时间。本地复核包可以附带 `extraction_workbook.xlsx`；公开样例仅在确认其中不含受限原文、个人信息和本地路径后才能附带。空白模板位于 `processed/templates/`，只有通过独立证据复核和正式化门禁的数据才能汇总进入正式数据层。

@@ -4,18 +4,23 @@ import argparse
 import hashlib
 import json
 import os
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
+
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.parse_fulltext.extractor import PARSER_VERSION
-from scripts.io_utils import atomic_write_json
+from scripts.io_utils import atomic_write_json, utc_now
 from scripts.production.staging import export_staging_package
-from scripts.production.store import ProductionStore, utc_now
+from scripts.production.store import ProductionStore
 from scripts.production.workers import (
     fulltext_worker,
     monitor_worker,
@@ -23,6 +28,7 @@ from scripts.production.workers import (
     reconcile_candidate_queue,
     register_curated_source_exclusions,
 )
+from scripts.validation.validate_tables import validate_dictionary
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,6 +60,7 @@ def tracked_asset_paths() -> list[Path]:
         ROOT / "config/screening_rules.json",
         ROOT / "config/schema.json",
         ROOT / "config/field_dictionary.csv",
+        ROOT / "config/review_policy.json",
     ]
     for directory in sorted((ROOT / "data/interim").glob("P*")):
         if (directory / "source_master.csv").exists():
@@ -110,6 +117,7 @@ def build_config() -> dict[str, Any]:
         "extraction_schema": ROOT / "config/extraction_result_v0.2.schema.json",
         "run_plan_schema": ROOT / "config/run_plan_v1.schema.json",
         "unit_rules": ROOT / "config/extraction_unit_rules_v1.json",
+        "review_policy": ROOT / "config/review_policy.json",
     }
     versions = {
         name: {
@@ -140,6 +148,54 @@ def build_config() -> dict[str, Any]:
         "review_root": "data/review/extraction",
         "extractor": "reviewer",
         "config_manifest": manifest,
+    }
+
+
+def doctor() -> dict[str, Any]:
+    """Check public repository assets without requiring private/local data."""
+    errors: list[str] = []
+    config_files = sorted((ROOT / "config").glob("*.json"))
+    parsed_configs: dict[str, Any] = {}
+    schema_count = 0
+
+    for path in config_files:
+        try:
+            parsed = json.loads(path.read_text(encoding="utf-8-sig"))
+            parsed_configs[path.name] = parsed
+            if path.name.endswith(".schema.json"):
+                Draft202012Validator.check_schema(parsed)
+                schema_count += 1
+        except (OSError, ValueError, TypeError, SchemaError) as exc:
+            errors.append(f"{path.relative_to(ROOT).as_posix()}: {exc}")
+
+    formal_schema = parsed_configs.get("schema.json")
+    dictionary_path = ROOT / "config/field_dictionary.csv"
+    if not isinstance(formal_schema, dict):
+        errors.append("config/schema.json: missing or invalid")
+    elif not dictionary_path.is_file():
+        errors.append("config/field_dictionary.csv: missing")
+    else:
+        validate_dictionary(formal_schema, dictionary_path, errors)
+
+    temporary_database = "not_checked"
+    if isinstance(formal_schema, dict):
+        try:
+            with TemporaryDirectory(prefix="cnt_patsight_doctor_") as directory:
+                database = Path(directory) / "production.sqlite3"
+                with ProductionStore(database, ROOT / "config/schema.json") as store:
+                    store.integrity_check()
+            temporary_database = "ok"
+        except (OSError, ValueError, sqlite3.Error) as exc:
+            temporary_database = "failed"
+            errors.append(f"temporary_database: {exc}")
+
+    return {
+        "checked_at": utc_now(),
+        "valid": not errors,
+        "config_files": len(config_files),
+        "json_schemas": schema_count,
+        "temporary_database": temporary_database,
+        "errors": errors,
     }
 
 
@@ -325,7 +381,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="CNT-PatSight metadata/full-text production controller"
     )
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "smoke-test", "start", "status", "resume"):
+    for name in ("doctor", "prepare", "smoke-test", "start", "status", "resume"):
         sub.add_parser(name)
     stop = sub.add_parser("stop")
     stop.add_argument("--all", action="store_true")
@@ -338,7 +394,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command == "prepare":
+    if args.command == "doctor":
+        result = doctor()
+    elif args.command == "prepare":
         result = prepare()
     elif args.command == "smoke-test":
         result = smoke_test()
@@ -354,7 +412,7 @@ def main(argv: list[str] | None = None) -> int:
         worker(args.component)
         return 0
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0
+    return 0 if result.get("valid", True) else 1
 
 
 if __name__ == "__main__":

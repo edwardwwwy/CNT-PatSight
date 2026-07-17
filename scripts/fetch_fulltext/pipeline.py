@@ -10,11 +10,10 @@ import time
 import uuid
 from collections import deque
 from contextlib import closing
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from scripts.io_utils import replace_with_retry, unique_part_path
+from scripts.io_utils import replace_with_retry, unique_part_path, utc_now
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
@@ -29,10 +28,6 @@ from .storage import FulltextStore
 QUEUE_RULE_VERSION = "fulltext_queue_v3_legal_fallbacks"
 OPEN_ACCESS_STATES = {"open", "gold", "green", "hybrid", "bronze", "diamond"}
 PRODUCTION_LANES = {"A": "A", "B": "B", "C": "C", "M": "D"}
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def sha256_bytes(content: bytes) -> str:

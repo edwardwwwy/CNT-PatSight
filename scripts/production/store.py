@@ -3,9 +3,10 @@
 import json
 import sqlite3
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from scripts.io_utils import utc_now
 
 
 TASK_STATUSES = {
@@ -15,10 +16,6 @@ TASK_STATUSES = {
 DISPOSITIONS = {
     "candidate_extract", "needs_review", "reextract_required", "rejected_extract",
 }
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _q(name: str) -> str:

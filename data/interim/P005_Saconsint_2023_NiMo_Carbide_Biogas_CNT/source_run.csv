@@ -1,7 +1,0 @@
-﻿run_id,source_id,run_label,data_type,target_track,relevance_class,extraction_status,extraction_confidence,run_summary,notes
-P005_NMO_3H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-O oxide / 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-O oxide; 60/40 CH4/CO2 at 800 C for 3 h; product: no_CNT.,not_reported
-P005_NMR_3H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-R reduced / 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-R reduced; 60/40 CH4/CO2 at 800 C for 3 h; product: MWCNT.,not_reported
-P005_NMC_3H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-C carbide / 3 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-C carbide; 60/40 CH4/CO2 at 800 C for 3 h; product: MWCNT.,not_reported
-P005_NMO_24H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-O oxide / 24 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-O oxide; 60/40 CH4/CO2 at 800 C for 24 h; product: no_CNT.,not_reported
-P005_NMR_24H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-R reduced / 24 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-R reduced; 60/40 CH4/CO2 at 800 C for 24 h; product: MWCNT.,not_reported
-P005_NMC_24H,P005_Saconsint_2023_NiMo_Carbide_Biogas_CNT,NM-C carbide / 24 h,experimental_run,biogas_DRM_CDM_MWCNT,formal_extract,needs_review,high,NM-C carbide; 60/40 CH4/CO2 at 800 C for 24 h; product: MWCNT.,not_reported

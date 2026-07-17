@@ -14,7 +14,7 @@ source_master,pdf_status,文献/专利主表：PDF 获取状态。,categorical,n
 source_master,screening_class,文献/专利主表：筛选分类。,categorical,not_applicable,core,always,formal_extract|candidate_extract|source_observation_only|background_reference|reject,non_null,主键、外键或解释记录所需的核心字段。
 source_master,source_section_scope,文献/专利主表：已覆盖的来源章节范围。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
 source_master,extraction_status,文献/专利主表：提取状态。,categorical,not_applicable,core,always,needs_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
-source_master,review_status,文献/专利主表：复核状态。,categorical,not_applicable,core,always,pending_human_review|in_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
+source_master,review_status,文献/专利主表：复核状态。,categorical,not_applicable,core,always,pending_review|in_review|reviewed|pending_human_review,non_null,新数据使用 pending_review；pending_human_review 仅为历史兼容值。完成独立证据复核后可标记 reviewed。
 source_master,notes,文献/专利主表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
 source_run,run_id,实验运行主表：运行唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
 source_run,source_id,实验运行主表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
@@ -144,11 +144,11 @@ cost_scale_review,quantitative_cost_summary,成本、规模与工业适配表：
 cost_scale_review,cost_driver_summary,成本、规模与工业适配表：成本驱动因素摘要。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
 cost_scale_review,safety_risk,成本、规模与工业适配表：安全风险。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
 cost_scale_review,emission_or_waste,成本、规模与工业适配表：排放或废物。,text,not_applicable,conditional,rare_but_critical,free_text_or_reported_value,not_reported_allowed,报告频率可能较低，但对安全、规模、纯度、成本或可复现性判断关键。
-cost_scale_review,industrial_readiness_assessment,成本、规模与工业适配表：工业成熟度人工评估。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-cost_scale_review,reproduction_value,成本、规模与工业适配表：复现实验价值。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-cost_scale_review,reproduction_priority,成本、规模与工业适配表：复现优先级。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-cost_scale_review,industrial_value_score,成本、规模与工业适配表：工业价值评分。,number,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-cost_scale_review,recommended_next_action,成本、规模与工业适配表：建议后续动作。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,industrial_readiness_assessment,成本、规模与工业适配表：工业成熟度复核评估。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,仅在独立证据复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,reproduction_value,成本、规模与工业适配表：复现实验价值。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,仅在独立证据复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,reproduction_priority,成本、规模与工业适配表：复现优先级。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,仅在独立证据复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,industrial_value_score,成本、规模与工业适配表：工业价值评分。,number,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,仅在独立证据复核阶段填充，用于工业适配或问题闭环。
+cost_scale_review,recommended_next_action,成本、规模与工业适配表：建议后续动作。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,仅在独立证据复核阶段填充，用于工业适配或问题闭环。
 cost_scale_review,review_note,成本、规模与工业适配表：工业适配复核说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
 evidence_index,evidence_id,证据索引表：证据唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
 evidence_index,source_id,证据索引表：来源唯一标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
@@ -177,8 +177,8 @@ review_issue_log,issue_summary,复核与问题记录表：问题摘要。,text,n
 review_issue_log,conflicting_values,复核与问题记录表：冲突值或相互矛盾表述。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。
 review_issue_log,evidence_ids,复核与问题记录表：支持该问题的证据标识。,identifier,not_applicable,core,always,free_text_or_reported_value,non_null,主键、外键或解释记录所需的核心字段。
 review_issue_log,severity,复核与问题记录表：问题严重度。,categorical,not_applicable,core,always,low|medium|high|critical,non_null,主键、外键或解释记录所需的核心字段。
-review_issue_log,review_status,复核与问题记录表：复核状态。,categorical,not_applicable,core,always,pending_human_review|in_review|reviewed,non_null,主键、外键或解释记录所需的核心字段。
-review_issue_log,reviewer,复核与问题记录表：复核人。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-review_issue_log,reviewed_at,复核与问题记录表：复核时间。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
-review_issue_log,resolution,复核与问题记录表：复核结论。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_human_review,仅在人工复核阶段填充，用于工业适配或问题闭环。
+review_issue_log,review_status,复核与问题记录表：复核状态。,categorical,not_applicable,core,always,pending_review|in_review|reviewed|pending_human_review,non_null,新数据使用 pending_review；pending_human_review 仅为历史兼容值。复核 agent 可完成 reviewed 状态。
+review_issue_log,reviewer,复核与问题记录表：复核者。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,在独立证据复核阶段记录 agent 或人员标识，用于问题闭环与审计。
+review_issue_log,reviewed_at,复核与问题记录表：复核时间。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,在独立证据复核阶段填充，用于问题闭环与审计。
+review_issue_log,resolution,复核与问题记录表：复核结论。,text,not_applicable,conditional,review_stage_only,free_text_or_reported_value,not_assessed_until_review,在独立证据复核阶段填充，用于问题闭环与审计。
 review_issue_log,notes,复核与问题记录表：补充说明。,text,not_applicable,conditional,common,free_text_or_reported_value,not_reported_allowed,预计在数百篇 CNT 论文和专利中反复出现，适合稳定列化。

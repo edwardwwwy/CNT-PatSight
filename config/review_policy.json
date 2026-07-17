@@ -1,0 +1,30 @@
+{
+  "first_pass": {
+    "extraction_status": "needs_review",
+    "review_status": "pending_review"
+  },
+  "formalization": {
+    "agent_review_is_sufficient": true,
+    "screening_class": "formal_extract",
+    "extraction_status": "reviewed",
+    "review_status": "reviewed",
+    "blocking_issue_severities": ["high", "critical"],
+    "required_checks": [
+      "source_identity",
+      "run_boundaries",
+      "evidence_coverage",
+      "unit_and_yield_semantics",
+      "schema_and_foreign_keys",
+      "blocking_issue_resolution"
+    ]
+  },
+  "legacy_review_statuses": ["pending_human_review"],
+  "owner_escalation_only_for": [
+    "irreconcilable_source_or_run_identity",
+    "material_core_fact_conflict",
+    "confidentiality_or_personal_data",
+    "licensing_or_redistribution_rights",
+    "subjective_business_decision",
+    "required_source_unavailable"
+  ]
+}

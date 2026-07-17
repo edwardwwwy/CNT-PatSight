@@ -1,6 +1,6 @@
 # Screening benchmark
 
-This module creates a reproducible, stratified human-review sample from the
+This module creates a reproducible, stratified independent-review sample from the
 metadata registry. It does not change automatic tiers or any formal table.
 
 ```powershell
@@ -32,6 +32,10 @@ possible_duplicate_missed
 reviewer
 reviewed_at
 ```
+
+The legacy `human_*` column names are retained for dataset compatibility. A
+designated evidence-review agent may populate these fields; owner review is not
+required solely because of the column names.
 
 Use `yes`, `no`, or `indeterminate` in `human_is_target_synthesis`. In
 particular, an M-tier record that cannot be judged from available metadata

@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from scripts.extraction.build_a_class_batch import (
+from scripts.extraction.batch_common import (
     BATCH_ID,
     PACKAGE_ROOT,
     ROOT,
@@ -93,7 +93,7 @@ def add_common_process(
                 total_flow_sccm="25",
                 gas_composition_summary="CH4:N2 = 1.5:1",
                 GHSV_or_residence_time="5000 mL h-1 gcat-1",
-                process_note="Activity followed for up to 6 h on stream; exact figure endpoints require human confirmation.",
+                    process_note="Activity followed for up to 6 h on stream; exact figure endpoints require independent evidence confirmation.",
             ),
         ]
     )

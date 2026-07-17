@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 import re
 from collections import Counter
 from pathlib import Path
@@ -15,7 +14,6 @@ from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "data/interim/extraction_batches/A_CLASS_208_20260716/consolidated_eight_tables"
-MANIFEST = ROOT / "data/interim/extraction_batches/A_CLASS_208_20260716/manifest.csv"
 MASTER = ROOT / "data/raw/metadata/literature_master.csv"
 CASE_BASE = ROOT / "data/interim/eight_table_staging/codex_manual/A_CLASS_208_20260716/LIT_DB283D1C5235DA93"
 OUT = ROOT / "output/pdf/CNT-PatSight_A-Class_Result_Report_WangYang.pdf"
@@ -360,17 +358,12 @@ def build() -> Path:
     rpg = source_sets(sm, sr, pd.read_csv(BASE / "reactor_process_gas.csv", keep_default_na=False))
     yq = source_sets(sm, sr, pd.read_csv(BASE / "yield_quality.csv", keep_default_na=False))
     ev = pd.read_csv(BASE / "evidence_index.csv", keep_default_na=False)
-    issues = pd.read_csv(BASE / "review_issue_log.csv", keep_default_na=False)
-    manifest = pd.read_csv(MANIFEST, keep_default_na=False)
     literature = pd.read_csv(MASTER, low_memory=False)
     case_rows = parse_case()
 
     years = pd.to_numeric(sm["publication_year"], errors="coerce").dropna().astype(int).tolist()
     run_counts = sr.groupby("source_id").size()
     evidence_counts = ev.groupby("source_id").size()
-    quantitative = yq["yield_original"].str.contains(r"[-+]?\d+(?:\.\d+)?", regex=True, na=False)
-    standardized = yq["yield_value_standardized"].astype(str).str.strip().ne("")
-
     metals = ["Fe", "Ni", "Co", "Mo", "Cu", "Au", "La", "Ru"]
     metal_counts: dict[str, int] = {}
     for metal in metals:
@@ -465,7 +458,7 @@ def build() -> Path:
         "将 66 篇 A 类论文统一为来源、运行、催化剂、反应过程、产率质量、成本规模、证据与问题八张关联表。",
         "保留 870 条实验运行和 6,037 条字段级证据，语义审计未发现重复运行号、错误或警告。",
         "最佳展示案例完整覆盖 61 个贝叶斯优化实验点，可直接比较 Sobol、EI 与 OKG 三阶段结果。",
-        "全库已积累 1,487 篇元数据，但全文权利、解析成本与人工复核决定了可扩展上限。",
+        "全库已积累 1,487 篇元数据，但全文权利、解析成本与独立证据复核决定了可扩展上限。",
     ]
     yy = 594
     for body in bullets:
@@ -473,7 +466,7 @@ def build() -> Path:
         c.circle(M + 23, yy + 2, 2.7, fill=1, stroke=0)
         yy = text_block(c, body, M + 34, yy + 6, W - 2 * M - 52, size=8.2, color=SLATE, leading=13, max_lines=2) - 5
     section_card(c, M, 330, 246, 138, "A", "成果边界", "66 篇是当前统一合并、可按同一八表结构分析的成果集。它不等于 208 篇候选全部可获得全文，也不等于所有数值都可跨论文直接比较。", TEAL)
-    section_card(c, M + 263, 330, 246, 138, "B", "质量状态", "结构审计已通过；324 条审阅问题被显式保留，全部仍标记为待人工领域复核。这比把不确定信息隐藏为“完成”更可复核。", AMBER)
+    section_card(c, M + 263, 330, 246, 138, "B", "质量状态", "结构审计已通过；324 条审阅问题被显式保留，全部仍标记为待独立证据复核。这比把不确定信息隐藏为“完成”更可复核。", AMBER)
     card(c, M, 112, W - 2 * M, 194, fill=NAVY, stroke=NAVY)
     pill(c, "CORE MESSAGE", M + 18, 278, bg=TEAL)
     c.setFont(FONT_BOLD, 16)
@@ -927,7 +920,7 @@ def build() -> Path:
     c.setFillColor(WHITE)
     c.setFont(FONT_BOLD, 20)
     c.drawString(M + 264, 708, f"{len(literature):,} 篇全库元数据")
-    text_block(c, "扩大覆盖面不仅是“多跑一次脚本”，而是全文权利、模型调用、解析计算与人工审校同时增长。", M + 18, 670, W - 2 * M - 36, size=9, color=HexColor("#BFD0DA"), leading=14, max_lines=2)
+    text_block(c, "扩大覆盖面不仅是“多跑一次脚本”，而是全文权利、模型调用、解析计算与独立证据复核同时增长。", M + 18, 670, W - 2 * M - 36, size=9, color=HexColor("#BFD0DA"), leading=14, max_lines=2)
     needs = [
         ("01", "全文与许可", "出版社订阅、文献购买、馆际互借、合法开放版本发现。", CORAL),
         ("02", "大模型调用", "1,000+ 篇全文需要按长度、表格数和迭代轮次持续消耗 token / API 额度。", TEAL),
@@ -940,7 +933,7 @@ def build() -> Path:
     c.setFillColor(TEAL)
     c.setFont(FONT_BOLD, 8)
     c.drawString(M + 18, 239, "当前阶段结论")
-    text_block(c, "在无新增专项经费的情况下，项目已把合法可得来源、规则抽取、人工核对、证据链和语义审计组合到当前可达到的最好水平。进一步增加论文来源、突破付费全文覆盖，并开展超大规模结构化提取，需要持续经费与授权支持。", M + 18, 212, W - 2 * M - 36, size=9.1, font=FONT_BOLD, color=INK, leading=14.5, max_lines=5)
+    text_block(c, "在无新增专项经费的情况下，项目已把合法可得来源、规则抽取、独立证据复核、证据链和语义审计组合到当前可达到的最好水平。进一步增加论文来源、突破付费全文覆盖，并开展超大规模结构化提取，需要持续经费与授权支持。", M + 18, 212, W - 2 * M - 36, size=9.1, font=FONT_BOLD, color=INK, leading=14.5, max_lines=5)
     c.setFillColor(NAVY)
     c.setFont(FONT_BOLD, 10)
     c.drawString(M, 116, "制作人  王扬")

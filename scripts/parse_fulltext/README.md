@@ -64,4 +64,5 @@ write any of the eight formal tables.
 
 The parser deliberately produces candidate evidence rather than facts. Run
 splitting, field interpretation, evidence mapping, and transfer into the formal
-eight-table package remain human-reviewed downstream work.
+eight-table package require an independent downstream evidence review, which
+may be completed by Codex.

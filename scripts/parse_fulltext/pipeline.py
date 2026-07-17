@@ -5,18 +5,13 @@ import json
 import sqlite3
 import uuid
 from contextlib import closing
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from scripts.io_utils import replace_with_retry, unique_part_path
+from scripts.io_utils import replace_with_retry, unique_part_path, utc_now
 
 from .extractor import PARSER_VERSION, extract_document
 from .storage import CandidateStore
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def sha256_file(path: Path) -> str:

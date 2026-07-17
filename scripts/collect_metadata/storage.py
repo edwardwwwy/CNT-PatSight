@@ -8,9 +8,11 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Iterable
 
+from scripts.io_utils import utc_now
+
 from .models import ApiResponse, MatchDecision, NormalizedWork, UpsertResult
 from .scoring import DEDUP_RULE_VERSION, RelevanceScorer
-from .utils import json_dumps, normalize_doi, normalize_title, stable_source_id, utc_now
+from .utils import json_dumps, normalize_doi, normalize_title, stable_source_id
 
 
 CSV_COLUMNS = [
@@ -206,7 +208,7 @@ class MetadataStore:
                 pdf_status TEXT NOT NULL DEFAULT '',
                 pdf_path TEXT NOT NULL DEFAULT '',
                 extraction_status TEXT NOT NULL DEFAULT 'needs_review',
-                review_status TEXT NOT NULL DEFAULT 'pending_human_review',
+                review_status TEXT NOT NULL DEFAULT 'pending_review',
                 notes TEXT NOT NULL DEFAULT '',
                 created_run_id TEXT NOT NULL,
                 updated_run_id TEXT NOT NULL
@@ -451,7 +453,7 @@ class MetadataStore:
                     pdf_status=(row.get("pdf_status") or "").strip(),
                     pdf_path=(row.get("pdf_path") or row.get("local_file_path") or "").strip(),
                     extraction_status=(row.get("extraction_status") or "needs_review").strip(),
-                    review_status=(row.get("review_status") or "pending_human_review").strip(),
+                    review_status=(row.get("review_status") or "pending_review").strip(),
                     notes=(row.get("notes") or "").strip(),
                 )
                 self.upsert_work(work, run_id, "", scorer)
@@ -720,7 +722,7 @@ class MetadataStore:
             "pdf_status": pdf_status,
             "pdf_path": work.pdf_path,
             "extraction_status": work.extraction_status or "needs_review",
-            "review_status": work.review_status or "pending_human_review",
+            "review_status": work.review_status or "pending_review",
             "notes": work.notes,
             "created_run_id": run_id,
             "updated_run_id": run_id,

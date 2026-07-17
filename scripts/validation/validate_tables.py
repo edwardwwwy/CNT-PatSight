@@ -14,6 +14,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = PROJECT_ROOT / "config" / "schema.json"
 DEFAULT_DICTIONARY = PROJECT_ROOT / "config" / "field_dictionary.csv"
+DEFAULT_REVIEW_POLICY = PROJECT_ROOT / "config" / "review_policy.json"
 NULL_SENTINELS = {"", "not_applicable", "not_reported"}
 FACT_TABLES = {
     "source_master",
@@ -51,7 +52,7 @@ def read_schema(path: Path) -> dict:
 def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     with path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
-        headers = reader.fieldnames or []
+        headers = list(reader.fieldnames or [])
         rows = []
         for row in reader:
             cleaned = {
@@ -133,8 +134,14 @@ def validate_dictionary(
             errors.append(f"field_dictionary:{row_number}: inclusion_rationale 为空")
 
 
-def validate(data_dir: Path, schema_path: Path, dictionary_path: Path) -> int:
+def validate(
+    data_dir: Path,
+    schema_path: Path,
+    dictionary_path: Path,
+    review_policy_path: Path = DEFAULT_REVIEW_POLICY,
+) -> int:
     schema = read_schema(schema_path)
+    review_policy = read_schema(review_policy_path)
     errors: list[str] = []
     warnings: list[str] = []
     loaded: dict[str, list[dict[str, str]]] = {}
@@ -217,12 +224,58 @@ def validate(data_dir: Path, schema_path: Path, dictionary_path: Path) -> int:
     if source_ids and run_source_ids - source_ids:
         errors.append("source_run: 存在不属于本 source_master 的 source_id")
 
+    first_pass_review_status = review_policy["first_pass"]["review_status"]
+    formalization = review_policy["formalization"]
+    formal_review_status = formalization["review_status"]
+    legacy_review_statuses = set(review_policy.get("legacy_review_statuses", []))
+    allowed_review_statuses = {
+        first_pass_review_status,
+        "in_review",
+        formal_review_status,
+        *legacy_review_statuses,
+    }
+    blocking_issue_severities = set(formalization["blocking_issue_severities"])
+    formal_source_ids: set[str] = set()
+    master_extraction_statuses: dict[str, str] = {}
+
+    for row_number, row in enumerate(source_master_rows, start=2):
+        extraction_status = row.get("extraction_status", "")
+        review_status = row.get("review_status", "")
+        source_id = row.get("source_id", "")
+        master_extraction_statuses[source_id] = extraction_status
+        if extraction_status not in {"needs_review", "reviewed"}:
+            errors.append(
+                f"source_master:{row_number}: extraction_status={extraction_status!r} 非法"
+            )
+        if review_status not in allowed_review_statuses:
+            errors.append(
+                f"source_master:{row_number}: review_status={review_status!r} 非法"
+            )
+        if review_status in legacy_review_statuses:
+            warnings.append(
+                f"source_master:{row_number}: review_status={review_status!r} 为历史值；新数据使用 {first_pass_review_status!r}"
+            )
+        if (extraction_status == "reviewed") != (review_status == formal_review_status):
+            errors.append(
+                f"source_master:{row_number}: extraction_status 与 review_status 的 reviewed 状态不一致"
+            )
+        if (
+            row.get("screening_class") == formalization["screening_class"]
+            and extraction_status == formalization["extraction_status"]
+            and review_status == formal_review_status
+        ):
+            formal_source_ids.add(source_id)
+
     for row_number, row in enumerate(loaded.get("source_run", []), start=2):
         status = row.get("extraction_status", "")
         if status not in {"needs_review", "reviewed"}:
             errors.append(f"source_run:{row_number}: extraction_status={status!r} 非法")
-        if status == "reviewed":
-            warnings.append(f"source_run:{row_number}: 已标记 reviewed，请确认有人工作为依据")
+        source_id = row.get("source_id", "")
+        master_status = master_extraction_statuses.get(source_id, "")
+        if master_status and status != master_status:
+            errors.append(
+                f"source_run:{row_number}: extraction_status={status!r} 与 source_master 不一致"
+            )
 
     # Evidence target validation and row-level evidence coverage.
     target_keys = {
@@ -269,10 +322,30 @@ def validate(data_dir: Path, schema_path: Path, dictionary_path: Path) -> int:
 
     issue_rows = loaded.get("review_issue_log", [])
     issue_ids = {row.get("issue_id", "") for row in issue_rows}
-    allowed_issue_status = {"pending_human_review", "in_review", "reviewed"}
+    allowed_issue_status = allowed_review_statuses
     for row_number, row in enumerate(issue_rows, start=2):
-        if row.get("review_status") not in allowed_issue_status:
+        review_status = row.get("review_status", "")
+        if review_status not in allowed_issue_status:
             errors.append(f"review_issue_log:{row_number}: review_status 非法")
+        if review_status in legacy_review_statuses:
+            warnings.append(
+                f"review_issue_log:{row_number}: review_status={review_status!r} 为历史值；新数据使用 {first_pass_review_status!r}"
+            )
+        if review_status == formal_review_status:
+            for field in ("reviewer", "reviewed_at", "resolution"):
+                if row.get(field, "") in NULL_SENTINELS:
+                    errors.append(
+                        f"review_issue_log:{row_number}: reviewed 问题缺少 {field}"
+                    )
+        if row.get("source_id", "") in formal_source_ids and review_status != formal_review_status:
+            if row.get("severity", "") in blocking_issue_severities:
+                errors.append(
+                    f"review_issue_log:{row_number}: formal 数据仍有未关闭的 {row.get('severity')} 问题"
+                )
+            else:
+                warnings.append(
+                    f"review_issue_log:{row_number}: formal 数据保留未关闭的非阻断问题"
+                )
         target_table = row.get("target_table", "")
         target_run_id = row.get("run_id", "") or "not_applicable"
         target_record_id = row.get("target_record_id", "")
@@ -336,11 +409,18 @@ def main() -> int:
         default=DEFAULT_DICTIONARY,
         help="field_dictionary.csv 路径",
     )
+    parser.add_argument(
+        "--review-policy",
+        type=Path,
+        default=DEFAULT_REVIEW_POLICY,
+        help="review_policy.json 路径",
+    )
     args = parser.parse_args()
     return validate(
         args.data_dir.resolve(),
         args.schema.resolve(),
         args.dictionary.resolve(),
+        args.review_policy.resolve(),
     )
 
 

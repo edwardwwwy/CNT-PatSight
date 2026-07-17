@@ -96,8 +96,8 @@ def main(argv: list[str] | None = None) -> int:
             ]
         elif args.query_id:
             requested = set(args.query_id)
-            available = {item["query_id"] for item in settings.queries}
-            unknown = sorted(requested - available)
+            available_query_ids = {item["query_id"] for item in settings.queries}
+            unknown = sorted(requested - available_query_ids)
             if unknown:
                 print(f"Unknown query_id values: {', '.join(unknown)}", file=sys.stderr)
                 return 2
