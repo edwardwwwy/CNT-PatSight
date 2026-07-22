@@ -1,0 +1,70 @@
+{
+  "policy_id": "b_class_redo_v1",
+  "scope": {
+    "priority_tier": "B",
+    "parse_status": "success",
+    "frozen_available_source_count": 139,
+    "legacy_facts_allowed_as_evidence": false
+  },
+  "allowed_value_statuses": [
+    "reported",
+    "normalized",
+    "calculated",
+    "figure_digitized",
+    "inferred",
+    "review_assessment"
+  ],
+  "forbidden_defaults": {
+    "reactor_process_gas.pressure_original": ["atmospheric"],
+    "reactor_process_gas.pressure_kPa": ["101.325"],
+    "reactor_process_gas.scale_level": ["lab_batch"],
+    "catalyst_system.post_preparation_condition": ["fresh catalyst"]
+  },
+  "numeric_columns": {
+    "catalyst_system": [
+      "catalyst_particle_size_mean_nm",
+      "BET_surface_area_m2_g",
+      "pore_diameter_nm",
+      "pore_volume_cm3_g"
+    ],
+    "reactor_process_gas": [
+      "stage_order",
+      "catalyst_loading_mass_g",
+      "temperature_setpoint_C",
+      "holding_time_min",
+      "heating_rate_C_min",
+      "pressure_kPa",
+      "carbon_source_flow_sccm",
+      "reducing_gas_flow_sccm",
+      "inert_gas_flow_sccm",
+      "cofeed_flow_sccm",
+      "total_flow_sccm"
+    ],
+    "yield_quality": [
+      "yield_value_standardized",
+      "CNT_yield_per_catalyst_g_gcat",
+      "CNT_productivity_g_gcat_h",
+      "carbon_source_conversion_percent",
+      "carbon_conversion_to_solid_percent",
+      "outer_diameter_mean_nm",
+      "inner_diameter_mean_nm",
+      "Raman_ratio_value",
+      "Raman_laser_wavelength_nm",
+      "TGA_carbon_content_wt_percent",
+      "purified_product_purity_wt_percent",
+      "BET_surface_area_product_m2_g"
+    ],
+    "cost_scale_review": [
+      "continuous_operation_time_h",
+      "catalyst_reuse_cycles",
+      "industrial_value_score"
+    ]
+  },
+  "review_requirements": {
+    "pdf_visual_review_required": true,
+    "campaign_count_reconciliation_required": true,
+    "field_level_evidence_required": true,
+    "base_validator_required": true,
+    "redo_validator_required": true
+  }
+}

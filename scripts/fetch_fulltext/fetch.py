@@ -17,19 +17,19 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Fetch and register legal/local full text without modifying the eight-table data contract.")
-    parser.add_argument("--metadata-db", type=Path, default=ROOT / "data/raw/metadata/literature.sqlite3")
-    parser.add_argument("--fulltext-db", type=Path, default=ROOT / "data/raw/fulltext/fulltext.sqlite3")
-    parser.add_argument("--pdf-dir", type=Path, default=ROOT / "data/raw/fulltext/pdf")
-    parser.add_argument("--html-dir", type=Path, default=ROOT / "data/raw/fulltext/html")
-    parser.add_argument("--reports-dir", type=Path, default=ROOT / "data/raw/fulltext/reports")
-    parser.add_argument("--source-csv", type=Path, default=ROOT / "data/raw/fulltext/fulltext_source.csv")
-    parser.add_argument("--coverage-csv", type=Path, default=ROOT / "data/raw/fulltext/fulltext_coverage.csv")
-    parser.add_argument("--queue-csv", type=Path, default=ROOT / "data/raw/fulltext/fulltext_acquisition_queue.csv")
+    parser.add_argument("--metadata-db", type=Path, default=ROOT / "data/raw/literature/metadata/literature.sqlite3")
+    parser.add_argument("--fulltext-db", type=Path, default=ROOT / "data/raw/literature/metadata/fulltext_registry/fulltext.sqlite3")
+    parser.add_argument("--pdf-dir", type=Path, default=ROOT / "data/raw/literature/pdf")
+    parser.add_argument("--html-dir", type=Path, default=ROOT / "data/raw/literature/html")
+    parser.add_argument("--reports-dir", type=Path, default=ROOT / "runs/fulltext")
+    parser.add_argument("--source-csv", type=Path, default=ROOT / "data/raw/literature/metadata/fulltext_registry/fulltext_source.csv")
+    parser.add_argument("--coverage-csv", type=Path, default=ROOT / "data/raw/literature/metadata/fulltext_registry/fulltext_coverage.csv")
+    parser.add_argument("--queue-csv", type=Path, default=ROOT / "data/raw/literature/metadata/fulltext_registry/fulltext_acquisition_queue.csv")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     parser.add_argument(
         "--verified-candidates-csv",
         type=Path,
-        default=ROOT / "data/raw/fulltext/verified_oa_candidates.csv",
+        default=ROOT / "data/raw/literature/metadata/fulltext_registry/verified_oa_candidates.csv",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     run = subparsers.add_parser("run")

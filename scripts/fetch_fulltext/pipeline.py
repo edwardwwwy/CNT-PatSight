@@ -15,7 +15,7 @@ from typing import Any
 
 from scripts.io_utils import replace_with_retry, unique_part_path, utc_now
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from scripts.collect_metadata.settings import load_dotenv
@@ -53,6 +53,26 @@ def sniff_type(content: bytes, media_type: str) -> str:
     return "unknown"
 
 
+def request_url(url: str) -> str:
+    """Encode spaces/control characters while preserving an already-escaped URL.
+
+    Metadata occasionally contains an otherwise valid legal repository URL
+    whose filename has literal spaces.  ``urllib`` rejects such URLs before a
+    request is made, so normalize the path/query for transport while retaining
+    the original candidate URL in the evidence registry.
+    """
+    parts = urlsplit(url.strip())
+    return urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            quote(parts.path, safe="/%:@!$&'()*+,;=-._~"),
+            quote(parts.query, safe="%=&?/:;,+@!$'()*-._~"),
+            quote(parts.fragment, safe="%=&?/:;,+@!$'()*-._~"),
+        )
+    )
+
+
 class Downloader:
     RETRY_STATUS = {408, 425, 429, 500, 502, 503, 504}
 
@@ -63,13 +83,17 @@ class Downloader:
         self.max_bytes = max_bytes
 
     def fetch(self, url: str) -> FetchResult:
-        if urlsplit(url).scheme not in {"http", "https"}:
+        try:
+            transport_url = request_url(url)
+        except ValueError as exc:
+            return FetchResult(url, url, 0, "", b"", f"invalid_url:{exc}")
+        if urlsplit(transport_url).scheme not in {"http", "https"}:
             return FetchResult(url, url, 0, "", b"", "unsupported_url_scheme")
         last = FetchResult(url, url, 0, "", b"", "request_not_attempted")
         for attempt in range(1, self.retries + 1):
             try:
                 request = Request(
-                    url,
+                    transport_url,
                     headers={
                         "User-Agent": self.user_agent,
                         "Accept": "application/pdf,text/html,application/xhtml+xml;q=0.9,*/*;q=0.2",
@@ -1072,9 +1096,13 @@ class FulltextPipeline:
         if existing and self._resolve(existing).exists():
             return existing, content_hash, True
         directory = self.pdf_dir if extension == "pdf" else self.html_dir
-        path = directory / f"{source_id}_{content_hash[:12]}.{extension}"
+        path = directory / f"{source_id}.{extension}"
         if path.exists():
-            return self._rel(path), content_hash, True
+            if sha256_file(path) == content_hash:
+                return self._rel(path), content_hash, True
+            raise FileExistsError(
+                f"canonical source file already has different content; archive it before replacement: {path}"
+            )
         temp_path = unique_part_path(path)
         temp_path.write_bytes(content)
         if sha256_file(temp_path) != content_hash:

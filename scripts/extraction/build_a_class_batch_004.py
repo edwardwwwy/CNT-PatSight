@@ -25,7 +25,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 4
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_02606F92F0B40447"
 
 
@@ -633,7 +635,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += " Source document is a university thesis."
 
@@ -797,7 +799,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

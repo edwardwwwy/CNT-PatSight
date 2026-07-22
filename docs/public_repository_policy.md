@@ -12,7 +12,7 @@ CNT-PatSight/
 ├── config/                       # 不含真实密钥
 ├── data/
 │   ├── samples/                  # 1–3 个审核后样例
-│   ├── processed/templates/      # 空白模板
+│   ├── reference/templates/      # 空白模板
 │   └── review/screening_benchmark/
 ├── docs/
 ├── reports/                      # 仅公开、汇总后的报告和图表
@@ -66,7 +66,7 @@ CNT-PatSight/
 
 ## 已被 Git 跟踪的数据
 
-`.gitignore` 对已经跟踪的文件无效。若现有仓库准备首次公开，应在保存当前工作后，用 `git rm --cached` 将 `data/raw/`、`data/interim/`、`data/derived/`、`data/review/extraction/` 和 `output/` 中的非公开内容移出 Git 索引，再单独加入白名单目录。`--cached` 会保留本地文件，但会改变暂存区，因此必须先确认没有需要保留的暂存改动，并逐项检查 `git status`。
+`.gitignore` 对已经跟踪的文件无效。若现有仓库准备首次公开，应在保存当前工作后，用 `git rm --cached` 将 `data/raw/`、`data/interim/`、`data/processed/analysis/derived/`、`runs/`、`cache/` 和 `output/` 中的非公开内容移出 Git 索引，再单独加入白名单目录。公司数据必须先迁移到 `CNT_COMPANY_DATA_DIR` 指向的仓库外目录。`--cached` 会保留本地文件，但会改变暂存区，因此必须先确认没有需要保留的暂存改动，并逐项检查 `git status`。
 
 如果非公开内容只存在于**尚未推送**的本地提交中，应先重写该本地提交，再 push；仅在后续提交中删除文件，仍会把含数据的早期提交上传到远端。重写前应保存工作目录和暂存区状态，并确认基准分支与目标文件清单。不要在存在未确认改动时直接执行 reset、rebase 或强制删除索引。
 

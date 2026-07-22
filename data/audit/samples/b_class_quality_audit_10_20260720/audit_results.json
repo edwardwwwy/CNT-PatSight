@@ -1,0 +1,143 @@
+{
+  "audit_id": "B_CLASS_QA_10_20260720",
+  "audit_date": "2026-07-20",
+  "population": {
+    "class": "B",
+    "registered_sources": 371,
+    "eight_table_included_sources": 93,
+    "population_filter": "eight_table_included=yes",
+    "population_file": "data/interim/candidate_extracts/B_class/delivery_candidates/B_CLASS_COMPLETE_20260720/source_coverage.csv"
+  },
+  "sampling": {
+    "method": "Sort ascending by SHA256(seed + '|' + source_id), then take the first 10",
+    "seed": "20260720-B-QA-v1",
+    "sample_size": 10,
+    "reproducible": true
+  },
+  "review_scope": {
+    "pdf_sources": 8,
+    "html_sources": 2,
+    "source_runs": 59,
+    "process_rows": 64,
+    "evidence_rows": 270,
+    "existing_issue_rows": 27,
+    "new_audit_findings": 29,
+    "methods": [
+      "full-text close reading",
+      "PDF page and key figure/table visual inspection",
+      "cross-check of all eight delivered CSV tables",
+      "run-boundary, units, values, completeness, and provenance review"
+    ]
+  },
+  "overall_assessment": {
+    "decision": "not_ready_for_unreviewed_formal_or_gold_use",
+    "summary": "Core explicit table values are generally recognizable and often accurate, but systematic unsupported defaults, cross-run contamination, missing experiments, conflict suppression, unit violations, and weak field-level provenance require correction.",
+    "verdict_counts": {
+      "pass": 0,
+      "limited_pass": 4,
+      "needs_correction": 5,
+      "major_correction": 1
+    },
+    "headline_metrics": {
+      "unsupported_atmospheric_pressure_sources": 6,
+      "unsupported_atmospheric_pressure_process_rows": 40,
+      "clear_cross_run_or_cross_sample_contamination_sources": 3,
+      "unit_or_field_type_critical_violation_sources": 1,
+      "sources_with_missing_experiment_campaign": 1,
+      "sources_with_suppressed_same_condition_conflict": 1
+    },
+    "finding_severity_counts": {
+      "critical": 5,
+      "high": 11,
+      "medium": 10,
+      "low": 3
+    }
+  },
+  "sample_results": [
+    {
+      "rank": 1,
+      "source_id": "LIT_0C298FD36DDDBFF2",
+      "verdict": "needs_correction",
+      "strength": "Mn-series conditions, carbon yields, diameter ranges, and Raman trend match the paper.",
+      "finding_ids": ["BQA-001", "BQA-002"]
+    },
+    {
+      "rank": 2,
+      "source_id": "LIT_29053831AED49C65",
+      "verdict": "limited_pass",
+      "strength": "The main PECVD catalyst, gas ratio, bias, time, and growth-window concepts match the paper.",
+      "finding_ids": ["BQA-003", "BQA-004", "BQA-005"]
+    },
+    {
+      "rank": 3,
+      "source_id": "LIT_70C62F9DC9DF53B4",
+      "verdict": "needs_correction",
+      "strength": "Tail-gas composition and the principal FCNT/RCNT yield and property values are supported.",
+      "finding_ids": ["BQA-006", "BQA-007", "BQA-008", "BQA-009"]
+    },
+    {
+      "rank": 4,
+      "source_id": "LIT_66DB00E917C24EAC",
+      "verdict": "needs_correction",
+      "strength": "Composite preparation and the main M-pCNT mechanical property values are correct.",
+      "finding_ids": ["BQA-010", "BQA-011", "BQA-012"]
+    },
+    {
+      "rank": 5,
+      "source_id": "LIT_0B337E3E2AB8B340",
+      "verdict": "needs_correction",
+      "strength": "Most time, temperature, feed-flow, yield, BET, and diameter grid values are accurately transcribed.",
+      "finding_ids": ["BQA-013", "BQA-014", "BQA-015"]
+    },
+    {
+      "rank": 6,
+      "source_id": "LIT_CA678F825E54BE45",
+      "verdict": "needs_correction",
+      "strength": "The atmospheric plasma-reactor concept, substrate, power, speed, and general MWCNT outcome are supported.",
+      "finding_ids": ["BQA-016", "BQA-017", "BQA-018"]
+    },
+    {
+      "rank": 7,
+      "source_id": "LIT_308D1442E521B6DD",
+      "verdict": "limited_pass",
+      "strength": "Substrate, gas composition, temperature ramp, catalyst size, and Raman/RBM data match the paper.",
+      "finding_ids": ["BQA-019"]
+    },
+    {
+      "rank": 8,
+      "source_id": "LIT_436402DA7A57D194",
+      "verdict": "limited_pass",
+      "strength": "Small and scale-up fluidized-bed table values are transcribed with high numerical fidelity.",
+      "finding_ids": ["BQA-020", "BQA-021", "BQA-022"]
+    },
+    {
+      "rank": 9,
+      "source_id": "LIT_BD24584C41DAE4DD",
+      "verdict": "limited_pass",
+      "strength": "The repeated-run setup and three catalyst-phase pathway groups are substantially correct.",
+      "finding_ids": ["BQA-023", "BQA-024", "BQA-025"]
+    },
+    {
+      "rank": 10,
+      "source_id": "LIT_87B8240D8CDFE77C",
+      "verdict": "major_correction",
+      "strength": "The general conclusion that diverse hydrocarbon feeds can grow SWCNT forests is represented.",
+      "finding_ids": ["BQA-026", "BQA-027", "BQA-028", "BQA-029"]
+    }
+  ],
+  "recommended_actions": [
+    "Block automatic filling of atmospheric/101.325 kPa when pressure is not explicitly reported.",
+    "Introduce run-level inheritance allowlists and prevent result fields from crossing run or sample boundaries.",
+    "Retain original units, approximation markers, and reported/normalized/calculated/figure_digitized status.",
+    "Preserve series-specific conflicting observations instead of silently deduplicating them.",
+    "Reconcile paper table or legend member counts against source_run to detect missing and failed campaigns.",
+    "Bind each critical field group to the actual page, table, figure, or paragraph that supports it.",
+    "Separate composite-performance studies from CNT-synthesis schema semantics."
+  ],
+  "artifacts": {
+    "report": "reports/b_class_quality_audit_10_20260720.md",
+    "sample_csv": "data/review/b_class_quality_audit_10_20260720/random_sample.csv",
+    "issue_log_csv": "data/review/b_class_quality_audit_10_20260720/audit_issue_log.csv"
+  },
+  "source_data_modified": false
+}

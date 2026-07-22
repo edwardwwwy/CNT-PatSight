@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import hashlib
 import json
@@ -25,7 +25,7 @@ CURATED_EXCLUSION_REASON = "existing_curated_eight_table_package"
 def curated_source_packages(root: Path) -> dict[str, str]:
     """Return direct per-source packages that must not be re-enqueued."""
     packages: dict[str, str] = {}
-    for source_master in sorted((root / "data/interim").glob("P*/source_master.csv")):
+    for source_master in sorted((root / "data/benchmark/fixtures/six_papers").glob("P*/source_master.csv")):
         source_id = source_master.parent.name
         packages[source_id] = source_master.parent.relative_to(root).as_posix()
     return packages
@@ -274,7 +274,7 @@ def release_fulltext(fulltext_db: Path, source_id: str, retry_delay_seconds: int
 
 
 def _active_enqueue_config(root: Path, fallback: dict[str, Any]) -> dict[str, Any]:
-    path = root / "data/interim/runtime/active_config.json"
+    path = root / "runs/production/runtime/active_config.json"
     if not path.is_file():
         return fallback
     active = json.loads(path.read_text(encoding="utf-8"))
@@ -334,7 +334,7 @@ def reconcile_candidate_queue(root: Path, config: dict[str, Any]) -> int:
 
 
 def fulltext_worker(root: Path, config: dict[str, Any]) -> None:
-    runtime = ComponentRuntime(root / "data/interim/runtime", "fulltext_producer")
+    runtime = ComponentRuntime(root / "runs/production/runtime", "fulltext_producer")
     runtime.acquire()
     worker_id = runtime.component + f":{runtime.pid}"
     fulltext_db = root / config["fulltext_db"]
@@ -343,11 +343,11 @@ def fulltext_worker(root: Path, config: dict[str, Any]) -> None:
         register_curated_source_exclusions(root, store)
     fetcher = FulltextPipeline(
         root, root / config["metadata_db"], fulltext_db,
-        root / "data/raw/fulltext/pdf", root / "data/raw/fulltext/html",
-        root / "data/raw/fulltext/reports", root / "data/raw/fulltext/fulltext_source.csv",
-        root / "data/raw/fulltext/fulltext_coverage.csv", root / ".env",
-        queue_csv=root / "data/raw/fulltext/fulltext_acquisition_queue.csv",
-        max_queue_attempts=3, verified_candidates_csv=root / "data/raw/fulltext/verified_oa_candidates.csv",
+        root / "data/raw/literature/pdf", root / "data/raw/literature/html",
+        root / "runs/fulltext", root / "data/raw/literature/metadata/fulltext_registry/fulltext_source.csv",
+        root / "data/raw/literature/metadata/fulltext_registry/fulltext_coverage.csv", root / ".env",
+        queue_csv=root / "data/raw/literature/metadata/fulltext_registry/fulltext_acquisition_queue.csv",
+        max_queue_attempts=3, verified_candidates_csv=root / "data/raw/literature/metadata/fulltext_registry/verified_oa_candidates.csv",
     )
     queue_plan = fetcher.build_queue()
     assign_batches(fulltext_db)
@@ -371,12 +371,12 @@ def fulltext_worker(root: Path, config: dict[str, Any]) -> None:
                 fetcher.run([source_id], 1, from_queue=True)
                 parser = ParsePipeline(
                     root, root / config["metadata_db"], fulltext_db, candidate_db,
-                    root / "data/raw/fulltext/text", root / "data/interim/parsed_text",
-                    root / "data/interim/extraction_candidates/paper_text_section.csv",
-                    root / "data/interim/extraction_candidates/candidate_experiment_span.csv",
-                    root / "data/interim/extraction_candidates/parse_source_status.csv",
-                    root / "data/interim/extraction_candidates/reports",
-                    ocr_queue_csv=root / "data/interim/extraction_candidates/ocr_queue.csv",
+                    root / "data/interim/parsed_text/by_source", root / "data/interim/parsed_text/by_source",
+                    root / "cache/exports/paper_text_section.csv",
+                    root / "cache/exports/candidate_experiment_span.csv",
+                    root / "cache/exports/parse_source_status.csv",
+                    root / "runs/parse",
+                    ocr_queue_csv=root / "cache/exports/ocr_queue.csv",
                 )
                 parser.run([source_id], 1)
                 sync_parse_status(root, fulltext_db, candidate_db)
@@ -396,13 +396,13 @@ def fulltext_worker(root: Path, config: dict[str, Any]) -> None:
 
 
 def _request_component_stop(root: Path, component: str, reason: str) -> None:
-    stop = root / "data/interim/runtime/stop" / f"{component}.stop"
+    stop = root / "runs/production/runtime/stop" / f"{component}.stop"
     stop.parent.mkdir(parents=True, exist_ok=True)
     stop.write_text(f"{utc_now()} {reason}", encoding="utf-8")
 
 
 def _verify_frozen_assets(root: Path) -> list[str]:
-    manifest_path = root / "data/interim/runtime/production_freeze_manifest.json"
+    manifest_path = root / "runs/production/runtime/production_freeze_manifest.json"
     if not manifest_path.exists():
         return ["freeze_manifest_missing"]
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -445,12 +445,12 @@ def _new_repeated_log_error(log_path: Path, offset: int) -> tuple[str, int, int]
 
 def monitor_worker(root: Path, config: dict[str, Any], interval_seconds: int = 600) -> None:
     """Local ten-minute watchdog; pauses systemic failures, never edits facts."""
-    runtime = ComponentRuntime(root / "data/interim/runtime", "pipeline_monitor")
+    runtime = ComponentRuntime(root / "runs/production/runtime", "pipeline_monitor")
     runtime.acquire()
-    report_dir = root / "data/interim/runtime/monitor"
+    report_dir = root / "runs/production/runtime/monitor"
     report_dir.mkdir(parents=True, exist_ok=True)
     previous: dict[str, int] = {}
-    producer_log = root / "data/interim/runtime/logs/fulltext_producer.log"
+    producer_log = root / "runs/production/runtime/logs/fulltext_producer.log"
     producer_offset = producer_log.stat().st_size if producer_log.exists() else 0
     try:
         runtime.log("pipeline monitor started interval_seconds=600")

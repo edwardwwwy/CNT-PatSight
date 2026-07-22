@@ -26,7 +26,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 14
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_0682357008FA0412"
 
 
@@ -82,7 +84,7 @@ def append_contact_angle_pdf_evidence(
             "source_section": "Application of VACNTs; Figure 9d",
             "source_locator": "PDF page 15",
             "source_object_ref": (
-                f"data/raw/fulltext/pdf/{SOURCE_ID}_dc85e16355b1.pdf#page=15"
+                f"data/raw/literature/pdf/{SOURCE_ID}_dc85e16355b1.pdf#page=15"
             ),
             "evidence_text": (
                 f"Figure 9d reports a water contact angle of {angle} degrees "
@@ -350,7 +352,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += (
         " PDF pages 4, 8, 9, 15 and 16 were visually inspected for the "
@@ -1072,7 +1074,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -119,7 +119,7 @@ class Paths:
 
     @classmethod
     def defaults(cls, root: Path = ROOT) -> "Paths":
-        metadata = root / "data" / "raw" / "metadata"
+        metadata = root / "data" / "raw" / "literature" / "metadata"
         return cls(
             root=root,
             env_file=root / ".env",
@@ -127,6 +127,6 @@ class Paths:
             screening_rules_file=root / "config" / "screening_rules.json",
             database=metadata / "literature.sqlite3",
             master_csv=metadata / "literature_master.csv",
-            raw_responses=metadata / "api_responses",
-            run_reports=metadata / "run_reports",
+            raw_responses=root / "data/raw/api_responses",
+            run_reports=root / "runs/metadata",
         )

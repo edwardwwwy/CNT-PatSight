@@ -30,12 +30,14 @@ from scripts.extraction.batch_common import (
     master_row,
     process_row,
     run_row,
-    write_table,
     yield_row,
 )
+from scripts.extraction.package_io import write_extraction_package
 
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
-MANUAL_DISPOSITIONS_PATH = BATCH_ROOT / "manual_dispositions.csv"
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = BATCH_ROOT
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
+MANUAL_DISPOSITIONS_PATH = ROOT / "data/interim/review_queue/A_manual_dispositions.csv"
 
 FIRST_BATCH_IDS = (
     "LIT_0705FD92BBA5C6D2",
@@ -81,22 +83,21 @@ def load_manual_dispositions() -> dict[str, dict[str, str]]:
 
 def existing_manual_source_ids() -> set[str]:
     result: set[str] = set()
-    root = ROOT / "data/interim/eight_table_staging/codex_manual"
+    root = ROOT / "data/interim/extraction/A"
     if not root.exists():
         return result
-    for path in root.rglob("source_master.csv"):
+    for path in root.glob("*.extraction.json"):
         try:
-            with path.open(encoding="utf-8-sig", newline="") as handle:
-                first = next(csv.DictReader(handle), None)
-            if first and first.get("source_id"):
-                result.add(first["source_id"])
-        except (OSError, UnicodeError):
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if payload.get("source_id"):
+                result.add(str(payload["source_id"]))
+        except (OSError, UnicodeError, ValueError):
             continue
     return result
 
 
 def has_direct_package(source_id: str) -> bool:
-    package = ROOT / "data/interim" / source_id
+    package = ROOT / "data/benchmark/fixtures/six_papers" / source_id
     return all((package / f"{table}.csv").exists() for table in TABLES)
 
 
@@ -1423,16 +1424,19 @@ def build_first_batch() -> dict[str, Any]:
     try:
         for source_id in FIRST_BATCH_IDS:
             package = BUILDERS[source_id](metadata[source_id], store)
-            out = PACKAGE_ROOT / source_id
-            for table in TABLES:
-                write_table(out, table, package[table])
+            out = write_extraction_package(
+                source_id,
+                "A",
+                package,
+                extraction_status="needs_review",
+            )
             metric = {
                 "source_id": source_id,
                 "output_path": str(out.relative_to(ROOT)).replace("\\", "/"),
                 "row_counts": {table: len(package[table]) for table in TABLES},
                 "status": "needs_review",
             }
-            (out / "package_metrics.json").write_text(
+            (REPORT_ROOT / f"{source_id}_package_metrics.json").write_text(
                 json.dumps(metric, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
@@ -1446,7 +1450,7 @@ def build_first_batch() -> dict[str, Any]:
         "total_runs": sum(item["row_counts"]["source_run"] for item in package_metrics),
         "status": "completed_needs_review",
     }
-    (BATCH_ROOT / "batch_001_metrics.json").write_text(
+    (REPORT_ROOT / "batch_001_metrics.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )

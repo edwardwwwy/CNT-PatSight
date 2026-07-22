@@ -44,10 +44,18 @@ temp/
 *.tmp
 *.log
 ~$*
+/runs/
+/cache/
+/archive/
+*.confidential.*
 
 # Generated deliverables are local until deliberately curated for reports/.
 /output/
+/outputs/
 /exports/
+
+# Company-specific report builders may contain private experiment metadata.
+/scripts/reporting/build_248_experiment_eight_tables_pdf.py
 
 # Local model weights and runtimes are never repository content.
 /models/**
@@ -62,35 +70,37 @@ temp/
 *.db-shm
 *.db-wal
 
-# Confidential or internal R&D data. Keep only the policy file.
-/data/internal/**
-!/data/internal/README.md
-/data/private/
-/data/company/
-
-# Downloaded papers, patents, supplementary files, raw API responses, complete
-# metadata, and faithful full-text derivatives stay local. README files may
-# document how to obtain or rebuild them without redistributing the content.
+# data/ follows the raw/interim/processed/benchmark lifecycle. Private,
+# licensed, generated, and mutable data stay local; policy files and approved
+# public benchmark assets remain trackable.
 /data/raw/**
 !/data/raw/**/
 !/data/raw/**/README.md
 
-# Interim, derived, review-queue, and delivery data are local by default.
-# Approved examples belong in data/samples/, not in these runtime directories.
 /data/interim/**
 !/data/interim/**/
 !/data/interim/**/README.md
-/data/interim/legacy_audit/
-/data/derived/
+!/data/interim/**/CANDIDATE_PIPELINE.md
+
 /data/processed/**
 !/data/processed/**/
-!/data/processed/templates/**
-/data/review/extraction/
+!/data/processed/**/README.md
 
-# Sample data never includes source documents or bundled archives.
-/data/samples/**/*.pdf
-/data/samples/**/*.docx
-/data/samples/**/*.zip
+/data/benchmark/**
+!/data/benchmark/**/
+!/data/benchmark/**/README.md
+!/data/benchmark/samples/templates/**
+!/data/benchmark/samples/public/**
+!/data/benchmark/results/screening_benchmark/**
+
+/data/company/**
+!/data/company/README.md
+/data/private/
+
+# Public sample data never includes source documents or bundled archives.
+/data/benchmark/samples/public/**/*.pdf
+/data/benchmark/samples/public/**/*.docx
+/data/benchmark/samples/public/**/*.zip
 
 # Generated page renders and OCR/debug assets outside the standard runtime dirs.
 /rendered_*.png

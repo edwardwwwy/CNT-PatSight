@@ -775,15 +775,12 @@ class PipelineIntegrationTests(unittest.TestCase):
             self.assertEqual(first["parsed_sources"], 1)
             self.assertGreater(first["span_rows"], 0)
             self.assertEqual(second["cache_hits"], 1)
-            package = root / "parsed_text" / "S1"
-            self.assertEqual(
-                {path.name for path in package.iterdir()},
-                {
-                    "document_metadata.json", "full_text.txt", "sections.json",
-                    "tables.json", "figures_captions.json", "parse_report.json",
-                },
-            )
-            parse_report = json.loads((package / "parse_report.json").read_text(encoding="utf-8"))
+            package = root / "parsed_text" / "S1.parsed.json"
+            payload = json.loads(package.read_text(encoding="utf-8"))
+            self.assertEqual(payload["source_id"], "S1")
+            self.assertIn("full_text", payload)
+            self.assertIn("sections", payload)
+            parse_report = payload["parse_report"]
             self.assertEqual(parse_report["source_id"], "S1")
             self.assertEqual(parse_report["parser_version"], PARSER_VERSION)
             with CandidateStore(root / "candidate.sqlite3") as store:

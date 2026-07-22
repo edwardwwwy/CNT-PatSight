@@ -25,7 +25,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 39
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def rec(code: str, label: str, **values: Any) -> dict[str, Any]:
@@ -35,7 +37,7 @@ def rec(code: str, label: str, **values: Any) -> dict[str, Any]:
 SOURCES: dict[str, dict[str, Any]] = {
     "LIT_7F0D271A0CEB3037": {
         "scope": "Ni-film and catalyst-free Si temperature-series comparison.",
-        "file": "data/raw/fulltext/html/LIT_7F0D271A0CEB3037_f0e15e141158.html",
+            "file": "data/raw/literature/html/LIT_7F0D271A0CEB3037.html",
         "common": {
             "catalyst": "10 nm Ni film",
             "active_metals": "Ni",
@@ -70,7 +72,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_697F549224B22272": {
         "scope": "Fe, Fe-Cu, Fe-Co and Fe-Ni methane-CVD catalyst comparison.",
-        "file": "data/raw/fulltext/html/LIT_697F549224B22272_95c719f38e91.html",
+            "file": "data/raw/literature/html/LIT_697F549224B22272.html",
         "common": {
             "support": "Si strip",
             "prep": "10 mmol metal-chloride solutions in 20 mL DI water, sonicated 10 min and deposited on Si; bimetallic solutions were equimolar.",
@@ -126,7 +128,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_B001742209BFB7A3": {
         "scope": "Alcohol catalytic CVD temperature series on cobalt-acetate-coated Si.",
-        "file": "data/raw/fulltext/pdf/LIT_B001742209BFB7A3_700c5f7722a7.pdf",
+        "file": "data/raw/literature/pdf/LIT_B001742209BFB7A3_700c5f7722a7.pdf",
         "common": {
             "catalyst": "cobalt acetate-derived Co",
             "active_metals": "Co",
@@ -171,7 +173,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_3B5A2676F1FE1646": {
         "scope": "Table-1 natural-gas:H2 ratio and temperature matrix on 2 wt% Ni/gamma-Al2O3.",
-        "file": "data/raw/fulltext/pdf/LIT_3B5A2676F1FE1646_93a73cbd3a65.pdf",
+        "file": "data/raw/literature/pdf/LIT_3B5A2676F1FE1646_93a73cbd3a65.pdf",
         "common": {
             "catalyst": "2 wt% Ni/gamma-Al2O3",
             "active_metals": "Ni",
@@ -254,7 +256,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_7CABEA170695D083": {
         "scope": "Three-temperature Cu-filled VACNT PECVD matrix on thin Cu foil.",
-        "file": "data/raw/fulltext/pdf/LIT_7CABEA170695D083_6e369704e8db.pdf",
+        "file": "data/raw/literature/pdf/LIT_7CABEA170695D083_6e369704e8db.pdf",
         "common": {
             "catalyst": "in-situ Cu islands from 0.1 mm Cu foil",
             "active_metals": "Cu",
@@ -301,7 +303,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_E949264AD5000FE1": {
         "scope": "Fast-CVD acetylene and ethylene carbon-input/residence-time comparison.",
-        "file": "data/raw/fulltext/html/LIT_E949264AD5000FE1_4c03e67b32ce.html",
+            "file": "data/raw/literature/html/LIT_E949264AD5000FE1.html",
         "common": {
             "catalyst": "aerosol/floating catalyst used in Fast-CVD",
             "active_metals": "Fe",
@@ -335,7 +337,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_FBC1DDD86139179A": {
         "scope": "Gold-supported catalyst screens across support, loading and hydrocarbon.",
-        "file": "data/raw/fulltext/pdf/LIT_FBC1DDD86139179A_bc7b53adb2fa.pdf",
+        "file": "data/raw/literature/pdf/LIT_FBC1DDD86139179A_bc7b53adb2fa.pdf",
         "common": {
             "active_metals": "Au",
             "prep": "Gold salt or colloidal Au deposited on oxide support at 0.1 or 0.5 wt% loading.",
@@ -394,7 +396,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_FB76AA75976322C2": {
         "scope": "In-situ Raman comparison of ethanol CNT growth at 725 and 875 C.",
-        "file": "data/raw/fulltext/pdf/LIT_FB76AA75976322C2_02b54e4c1e57.pdf",
+        "file": "data/raw/literature/pdf/LIT_FB76AA75976322C2_02b54e4c1e57.pdf",
         "common": {
             "catalyst": "approximately 1 nm Co film",
             "active_metals": "Co",
@@ -426,7 +428,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_71A66ACE3835B00D": {
         "scope": "Five Fe-Co-Mo/MgO total-metal loadings for LPG CVD.",
-        "file": "data/raw/fulltext/pdf/LIT_71A66ACE3835B00D_993a74362b45.pdf",
+        "file": "data/raw/literature/pdf/LIT_71A66ACE3835B00D_993a74362b45.pdf",
         "common": {
             "catalyst": "Fe-Co-Mo/MgO",
             "active_metals": "Fe; Co; Mo",
@@ -484,7 +486,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_82A4395696545B8B": {
         "scope": "Five green plant extracts at 575 C plus walnut at 800 C.",
-        "file": "data/raw/fulltext/pdf/LIT_82A4395696545B8B_f528eaed35a7.pdf",
+        "file": "data/raw/literature/pdf/LIT_82A4395696545B8B_f528eaed35a7.pdf",
         "common": {
             "active_metals": "none reported",
             "support": "oxygen-plasma-cleaned p-Si",
@@ -552,7 +554,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_97B977951A7C653F": {
         "scope": "Conventional versus sudden-initiation Co3O4/MgO acetylene CVD.",
-        "file": "data/raw/fulltext/pdf/LIT_97B977951A7C653F_6acf5407590f.pdf",
+        "file": "data/raw/literature/pdf/LIT_97B977951A7C653F_6acf5407590f.pdf",
         "common": {
             "catalyst": "Co3O4/MgO",
             "active_metals": "Co",
@@ -596,7 +598,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_94D32BA662BC711A": {
         "scope": "Fe versus Ni catalyst comparison under identical propane APCVD.",
-        "file": "data/raw/fulltext/pdf/LIT_94D32BA662BC711A_27b562cb73bb.pdf",
+        "file": "data/raw/literature/pdf/LIT_94D32BA662BC711A_27b562cb73bb.pdf",
         "common": {
             "support": "Si(111)",
             "prep": "Approximately 20 nm evaporated metal film; H2 annealed at 900 C for 10 min.",
@@ -632,7 +634,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_35CC6817563FC3B9": {
         "scope": "Direct versus 35 nm Pt-assisted growth on Ni-alloy substrate.",
-        "file": "data/raw/fulltext/html/LIT_35CC6817563FC3B9_3ca7c7722abc.html",
+            "file": "data/raw/literature/html/LIT_35CC6817563FC3B9.html",
         "common": {
             "active_metals": "Ni; Fe; Co",
             "support": "0.2 mm Ni-Cr-Fe-Co alloy",
@@ -954,7 +956,7 @@ def main() -> None:
         "total_runs": sum(item["row_counts"]["source_run"] for item in metrics),
         "status": "completed_needs_review",
     }
-    (BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json").write_text(
+    (REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )

@@ -15,10 +15,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 BATCH_ID = "A_CLASS_208_20260716"
-PACKAGE_ROOT = ROOT / "data/interim/eight_table_staging/codex_manual" / BATCH_ID
-META_DB = ROOT / "data/raw/metadata/snapshots/screening_rules_v1.2/literature.sqlite3"
-FULLTEXT_DB = ROOT / "data/raw/fulltext/fulltext.sqlite3"
-CANDIDATE_DB = ROOT / "data/interim/extraction_candidates/extraction_candidates.sqlite3"
+PACKAGE_ROOT = ROOT / "data/interim/extraction/A"
+META_DB = ROOT / "data/raw/literature/metadata/snapshots/screening_rules_v1.2/literature.sqlite3"
+FULLTEXT_DB = ROOT / "data/raw/literature/metadata/fulltext_registry/fulltext.sqlite3"
+CANDIDATE_DB = ROOT / "cache/databases/extraction_candidates.sqlite3"
 SCHEMA_PATH = ROOT / "config/schema.json"
 
 TABLES = (
@@ -62,13 +62,20 @@ def write_table(path: Path, table: str, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
-def load_metadata() -> dict[str, dict[str, Any]]:
+def load_metadata(priority_tier: str = "A") -> dict[str, dict[str, Any]]:
+    """Load canonical metadata for a single screened priority tier.
+
+    Existing A-class batch builders retain the default.  Manual B-class review
+    builders pass ``"B"`` explicitly so their evidence packages cannot
+    accidentally draw source metadata from the A-tier queue.
+    """
     with sqlite3.connect(META_DB) as connection:
         connection.row_factory = sqlite3.Row
         return {
             item["source_id"]: dict(item)
             for item in connection.execute(
-                "SELECT * FROM works WHERE priority_tier = 'A'"
+                "SELECT * FROM works WHERE priority_tier = ?",
+                (priority_tier,),
             )
         }
 
@@ -109,7 +116,7 @@ def master_row(meta: dict[str, Any], scope: str) -> dict[str, str]:
         source_link=meta["source_link"] or "not_reported",
         source_database="local_metadata_snapshot",
         source_language=meta["language"] or "en",
-        local_file_path=f"data/interim/parsed_text/{meta['source_id']}.txt",
+        local_file_path=f"data/interim/parsed_text/by_source/{meta['source_id']}.parsed.json",
         pdf_status=meta["pdf_status"] or "legal_url_found",
         screening_class="candidate_extract",
         source_section_scope=scope,

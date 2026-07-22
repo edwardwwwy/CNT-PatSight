@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate one CNT-PatSight eight-table source package."""
+"""Validate a source package or the combined formal CNT-PatSight eight tables."""
 
 from __future__ import annotations
 
@@ -139,6 +139,8 @@ def validate(
     schema_path: Path,
     dictionary_path: Path,
     review_policy_path: Path = DEFAULT_REVIEW_POLICY,
+    *,
+    combined: bool = False,
 ) -> int:
     schema = read_schema(schema_path)
     review_policy = read_schema(review_policy_path)
@@ -214,7 +216,7 @@ def validate(
                     )
 
     source_master_rows = loaded.get("source_master", [])
-    if len(source_master_rows) != 1:
+    if not combined and len(source_master_rows) != 1:
         errors.append(
             f"source_master: 单篇复核包应有且仅有 1 行，当前为 {len(source_master_rows)} 行"
         )
@@ -415,12 +417,18 @@ def main() -> int:
         default=DEFAULT_REVIEW_POLICY,
         help="review_policy.json 路径",
     )
+    parser.add_argument(
+        "--combined",
+        action="store_true",
+        help="validate the multi-source formal dataset instead of a one-source package",
+    )
     args = parser.parse_args()
     return validate(
         args.data_dir.resolve(),
         args.schema.resolve(),
         args.dictionary.resolve(),
         args.review_policy.resolve(),
+        combined=args.combined,
     )
 
 

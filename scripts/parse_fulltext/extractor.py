@@ -557,6 +557,7 @@ def chunk_text(text: str, max_chars: int = 1200) -> list[str]:
 
 def build_candidate_spans(sections: list[TextSection]) -> list[CandidateSpan]:
     spans: list[CandidateSpan] = []
+    seen_span_ids: set[str] = set()
     experimental_sections = {"methods", "experimental", "catalyst_preparation", "cvd_growth", "characterization", "tables"}
     for section in sections:
         if section.section_name_normalized in {"title", "references"}:
@@ -597,6 +598,13 @@ def build_candidate_spans(sections: list[TextSection]) -> list[CandidateSpan]:
                     "SPAN", section.source_id, section.input_content_hash,
                     section.section_id, span_type, chunk,
                 )
+                # PDF/table extraction can repeat an identical chunk within the
+                # same section. It has the same evidence locator and should be
+                # represented once; duplicate primary keys otherwise abort the
+                # entire source parse.
+                if span_id in seen_span_ids:
+                    continue
+                seen_span_ids.add(span_id)
                 spans.append(
                     CandidateSpan(
                         section.source_id,

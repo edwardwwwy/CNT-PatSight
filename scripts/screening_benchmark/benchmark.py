@@ -758,12 +758,12 @@ def summarize(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create and score a reproducible evidence-review screening benchmark.")
-    parser.add_argument("--database", type=Path, default=ROOT / "data/raw/metadata/literature.sqlite3")
-    parser.add_argument("--csv", type=Path, default=ROOT / "data/review/screening_benchmark/screening_benchmark.csv")
-    parser.add_argument("--dedup-csv", type=Path, default=ROOT / "data/review/screening_benchmark/dedup_audit.csv")
-    parser.add_argument("--summary", type=Path, default=ROOT / "data/review/screening_benchmark/benchmark_metrics.json")
-    parser.add_argument("--manifest", type=Path, default=ROOT / "data/review/screening_benchmark/benchmark_manifest.json")
-    parser.add_argument("--errors-csv", type=Path, default=ROOT / "data/review/screening_benchmark/benchmark_errors.csv")
+    parser.add_argument("--database", type=Path, default=ROOT / "data/raw/literature/metadata/literature.sqlite3")
+    parser.add_argument("--csv", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/screening_benchmark.csv")
+    parser.add_argument("--dedup-csv", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/dedup_audit.csv")
+    parser.add_argument("--summary", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/benchmark_metrics.json")
+    parser.add_argument("--manifest", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/benchmark_manifest.json")
+    parser.add_argument("--errors-csv", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/benchmark_errors.csv")
     sub = parser.add_subparsers(dest="command", required=True)
     create = sub.add_parser("generate")
     create.add_argument("--seed", default="cnt-patsight-benchmark-v1")

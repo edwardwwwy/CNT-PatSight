@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -13,9 +14,9 @@ from reportlab.pdfgen import canvas
 
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = ROOT / "data/interim/extraction_batches/A_CLASS_208_20260716/consolidated_eight_tables"
-MASTER = ROOT / "data/raw/metadata/literature_master.csv"
-CASE_BASE = ROOT / "data/interim/eight_table_staging/codex_manual/A_CLASS_208_20260716/LIT_DB283D1C5235DA93"
+EXTRACTION_ROOT = ROOT / "data/interim/extraction/A"
+MASTER = ROOT / "data/raw/literature/metadata/literature_master.csv"
+CASE_PATH = EXTRACTION_ROOT / "LIT_DB283D1C5235DA93.extraction.json"
 OUT = ROOT / "output/pdf/CNT-PatSight_A-Class_Result_Report_WangYang.pdf"
 
 W, H = A4
@@ -317,7 +318,8 @@ def scatter_chart(c: canvas.Canvas, x: float, y: float, w: float, h: float, rows
 
 
 def parse_case() -> list[dict]:
-    df = pd.read_csv(CASE_BASE / "yield_quality.csv", keep_default_na=False)
+    payload = json.loads(CASE_PATH.read_text(encoding="utf-8"))
+    df = pd.DataFrame(payload["tables"]["yield_quality"])
     rows: list[dict] = []
     pattern = re.compile(
         r"(SOBOL|EI|OKG) experimental point (\d+): total metal ([-\d.]+) wt%, Co ([-\d.]+) wt%, "
@@ -352,12 +354,14 @@ def build() -> Path:
     register_fonts()
     OUT.parent.mkdir(parents=True, exist_ok=True)
 
-    sm = pd.read_csv(BASE / "source_master.csv", keep_default_na=False)
-    sr = pd.read_csv(BASE / "source_run.csv", keep_default_na=False)
-    cat = source_sets(sm, sr, pd.read_csv(BASE / "catalyst_system.csv", keep_default_na=False))
-    rpg = source_sets(sm, sr, pd.read_csv(BASE / "reactor_process_gas.csv", keep_default_na=False))
-    yq = source_sets(sm, sr, pd.read_csv(BASE / "yield_quality.csv", keep_default_na=False))
-    ev = pd.read_csv(BASE / "evidence_index.csv", keep_default_na=False)
+    packages = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(EXTRACTION_ROOT.glob("*.extraction.json"))]
+    frame = lambda table: pd.DataFrame([row for package in packages for row in package["tables"][table]])
+    sm = frame("source_master")
+    sr = frame("source_run")
+    cat = source_sets(sm, sr, frame("catalyst_system"))
+    rpg = source_sets(sm, sr, frame("reactor_process_gas"))
+    yq = source_sets(sm, sr, frame("yield_quality"))
+    ev = frame("evidence_index")
     literature = pd.read_csv(MASTER, low_memory=False)
     case_rows = parse_case()
 

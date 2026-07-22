@@ -33,14 +33,14 @@ databases described below.
 Active control state is stored under:
 
 ```text
-data/interim/extraction_control/
-data/interim/runtime/
+data/interim/review_queue/extraction_control/
+data/interim/review_queue/runtime/
 ```
 
 Validated review-layer exports are stored under:
 
 ```text
-data/interim/eight_table_staging/review_packages/
+cache/production/eight_table_staging/review_packages/
 ```
 
 Formalization is a separate review step. A designated evidence-review agent may

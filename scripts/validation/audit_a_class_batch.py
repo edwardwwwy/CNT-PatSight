@@ -2,20 +2,19 @@
 """Run batch-level semantic guardrails over A-class eight-table packages."""
 from __future__ import annotations
 
-import csv
 import json
 import re
 from collections import Counter
 from pathlib import Path
 
+from scripts.extraction.package_io import read_extraction_package
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BATCH_ID = "A_CLASS_208_20260716"
-PACKAGE_ROOT = (
-    ROOT / "data/interim/eight_table_staging/codex_manual" / BATCH_ID
-)
+PACKAGE_ROOT = ROOT / "data/interim/extraction/A"
 REPORT_PATH = (
-    ROOT / "data/interim/extraction_batches" / BATCH_ID / "semantic_audit.json"
+    ROOT / "runs/extraction/A/batches" / BATCH_ID / "semantic_audit.json"
 )
 NULLS = {"", "not_reported", "not_applicable"}
 NUMERIC_GROUNDED_FIELDS = {
@@ -48,11 +47,6 @@ NUMERIC_GROUNDED_FIELDS = {
         "purified_product_purity_wt_percent",
     },
 }
-
-
-def read_csv(path: Path) -> list[dict[str, str]]:
-    with path.open(encoding="utf-8-sig", newline="") as handle:
-        return list(csv.DictReader(handle))
 
 
 def record_id(table: str, item: dict[str, str]) -> str:
@@ -128,24 +122,16 @@ def main() -> None:
     global_run_ids: list[str] = []
     package_summaries: list[dict[str, object]] = []
 
-    for package in sorted(path for path in PACKAGE_ROOT.iterdir() if path.is_dir()):
-        tables = {
-            name: read_csv(package / f"{name}.csv")
-            for name in (
-                "source_run",
-                "catalyst_system",
-                "reactor_process_gas",
-                "yield_quality",
-                "cost_scale_review",
-                "evidence_index",
-            )
-        }
+    for package in sorted(PACKAGE_ROOT.glob("*.extraction.json")):
+        payload = read_extraction_package(package)
+        source_id = payload["source_id"]
+        tables = payload["tables"]
         run_ids = [item["run_id"] for item in tables["source_run"]]
         global_run_ids.extend(run_ids)
         if len(run_ids) != len(set(run_ids)):
             errors.append(
                 {
-                    "source_id": package.name,
+                    "source_id": source_id,
                     "error_code": "duplicate_run_candidate_id",
                     "detail": "Duplicate run_id within source package.",
                 }
@@ -155,7 +141,7 @@ def main() -> None:
             if Counter(table_runs) != Counter(run_ids):
                 errors.append(
                     {
-                        "source_id": package.name,
+                        "source_id": source_id,
                         "error_code": "run_split_failure",
                         "detail": f"{table} does not have exactly one row per run.",
                     }
@@ -190,7 +176,7 @@ def main() -> None:
                     if not applicable:
                         errors.append(
                             {
-                                "source_id": package.name,
+                                "source_id": source_id,
                                 "error_code": "evidence_value_not_grounded",
                                 "detail": f"{table}.{field}={value!r} has no field-linked evidence.",
                             }
@@ -209,7 +195,7 @@ def main() -> None:
                     if missing:
                         errors.append(
                             {
-                                "source_id": package.name,
+                                "source_id": source_id,
                                 "error_code": "evidence_value_not_grounded",
                                 "detail": (
                                     f"{table}.{field}={value!r} numeric token(s) "
@@ -225,7 +211,7 @@ def main() -> None:
             ):
                 warnings.append(
                     {
-                        "source_id": package.name,
+                        "source_id": source_id,
                         "warning_code": "catalyst_particle_size_requires_context_review",
                         "detail": item["run_id"],
                     }
@@ -233,7 +219,7 @@ def main() -> None:
 
         package_summaries.append(
             {
-                "source_id": package.name,
+                "source_id": source_id,
                 "run_count": len(run_ids),
                 "evidence_count": len(tables["evidence_index"]),
             }

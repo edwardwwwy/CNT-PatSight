@@ -26,11 +26,13 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 23
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_5D2B63B0DDC58EBA"
-PDF_REF = "data/raw/fulltext/pdf/LIT_5D2B63B0DDC58EBA_semantic_scholar.pdf"
-PMC_XML_REF = "data/raw/fulltext/supplementary/LIT_5D2B63B0DDC58EBA/PMC10385283.xml"
-FIGURE_ROOT = "data/raw/fulltext/supplementary/LIT_5D2B63B0DDC58EBA/PMC10385283_files"
+PDF_REF = "data/raw/literature/pdf/LIT_5D2B63B0DDC58EBA_semantic_scholar.pdf"
+PMC_XML_REF = "data/raw/literature/supplements/LIT_5D2B63B0DDC58EBA/PMC10385283.xml"
+FIGURE_ROOT = "data/raw/literature/supplements/LIT_5D2B63B0DDC58EBA/PMC10385283_files"
 FIG4_REF = f"{FIGURE_ROOT}/micromachines-14-01288-g004.jpg"
 FIG6_REF = f"{FIGURE_ROOT}/micromachines-14-01288-g006.jpg"
 
@@ -930,7 +932,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

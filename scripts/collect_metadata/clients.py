@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import json
 import random
 import re
@@ -35,8 +36,9 @@ def _items(value: Any) -> list[Any]:
 
 class RawArchive:
     def __init__(self, base_dir: Path, root: Path, run_id: str):
-        self.base_dir = base_dir / run_id
+        self.base_dir = base_dir
         self.root = root
+        self.run_id = run_id
         self._counter = 0
         self._lock = threading.Lock()
 
@@ -54,13 +56,9 @@ class RawArchive:
         error: str,
         collected_at: str,
     ) -> str:
-        with self._lock:
-            self._counter += 1
-            counter = self._counter
         target_dir = self.base_dir / source_api
         target_dir.mkdir(parents=True, exist_ok=True)
-        safe_kind = re.sub(r"[^a-zA-Z0-9_-]+", "_", request_kind).strip("_")[:60] or "request"
-        path = target_dir / f"{counter:05d}_{safe_kind}.json"
+        path = target_dir / f"{self.run_id}.jsonl.gz"
         sensitive_names = {"api_key", "apikey", "key", "token", "access_token", "email", "mailto"}
         secrets = [
             value
@@ -95,7 +93,11 @@ class RawArchive:
             },
             "collected_at": collected_at,
         }
-        path.write_text(json.dumps(artifact, ensure_ascii=False, indent=2), encoding="utf-8")
+        with self._lock:
+            self._counter += 1
+            artifact["request_index"] = self._counter
+            with gzip.open(path, "at", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps(artifact, ensure_ascii=False, separators=(",", ":")) + "\n")
         try:
             return path.relative_to(self.root).as_posix()
         except ValueError:

@@ -26,9 +26,11 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 18
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_7D549B9B7575FB0C"
-PDF_REF = "data/raw/fulltext/pdf/LIT_7D549B9B7575FB0C_895a8f2f9800.pdf"
+PDF_REF = "data/raw/literature/pdf/LIT_7D549B9B7575FB0C_895a8f2f9800.pdf"
 
 
 def append_evidence(
@@ -1084,7 +1086,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

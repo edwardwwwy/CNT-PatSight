@@ -18,12 +18,14 @@ from scripts.extraction.build_a_class_batch_039 import build_source, rec
 
 BATCH_NUMBER = 40
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def bo_records() -> list[dict[str, Any]]:
-    path = ROOT / "data/interim/parsed_text/LIT_DB283D1C5235DA93/tables.json"
-    tables = json.loads(path.read_text(encoding="utf-8"))
+    path = ROOT / "data/interim/parsed_text/by_source/LIT_DB283D1C5235DA93.parsed.json"
+    tables = json.loads(path.read_text(encoding="utf-8"))["tables"]
     records: list[dict[str, Any]] = []
     labels = ("SOBOL", "EI", "OKG")
     for label, table in zip(labels, tables[1:4], strict=True):
@@ -108,7 +110,7 @@ def diatomite_records() -> list[dict[str, Any]]:
 SOURCES: dict[str, dict[str, Any]] = {
     "LIT_DB283D1C5235DA93": {
         "scope": "All 61 physical experiments in the Sobol, EI and OKG catalyst-optimization tables.",
-        "file": "data/raw/fulltext/html/LIT_DB283D1C5235DA93_3628fcfd2587.html",
+            "file": "data/raw/literature/html/LIT_DB283D1C5235DA93.html",
         "common": {
             "support": "porous Al2O3, 200 m2/g",
             "precursor": "cobalt nitrate hexahydrate; ammonium heptamolybdate tetrahydrate",
@@ -130,7 +132,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_9B1D9A7023DB7A6C": {
         "scope": "Complete 2-metal x 3-concentration x 4-temperature diatomite screen.",
-        "file": "data/raw/fulltext/html/LIT_9B1D9A7023DB7A6C_fe1cb0ba500b.html",
+            "file": "data/raw/literature/html/LIT_9B1D9A7023DB7A6C.html",
         "common": {
             "support": "natural diatomite",
             "prep": "0.5 g diatomite impregnated with alcohol solution of metal nitrate; dried 13-15 min at 80-100 C and heated under Ar.",
@@ -147,7 +149,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_09E1F558A5050320": {
         "scope": "Baseline, fixed-ferrocene and optimized-ferrocene VA-CNT growth conditions.",
-        "file": "data/raw/fulltext/pdf/LIT_09E1F558A5050320_b7b6566ff764.pdf",
+        "file": "data/raw/literature/pdf/LIT_09E1F558A5050320_b7b6566ff764.pdf",
         "common": {
             "catalyst": "Al/Fe/Mo multilayer on Si(100)",
             "active_metals": "Fe; Mo",
@@ -193,7 +195,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_619441B609804F78": {
         "scope": "Bithiophene-free, low-pressure optimum, composite-forming and pyrolysis regimes.",
-        "file": "data/raw/fulltext/html/LIT_619441B609804F78_454b1db478f8.html",
+            "file": "data/raw/literature/html/LIT_619441B609804F78.html",
         "common": {
             "catalyst": "ferrocene-derived Fe aerosol",
             "active_metals": "Fe",
@@ -243,7 +245,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_54330E2C79FE4C21": {
         "scope": "Pretreatment-temperature and 850 C pretreatment-time comparisons on stainless-steel foil.",
-        "file": "data/raw/fulltext/html/LIT_54330E2C79FE4C21_062251a78b1b.html",
+            "file": "data/raw/literature/html/LIT_54330E2C79FE4C21.html",
         "common": {
             "catalyst": "40 micrometre commercial stainless-steel foil",
             "active_metals": "Fe; Cr",
@@ -299,7 +301,7 @@ SOURCES: dict[str, dict[str, Any]] = {
     },
     "LIT_77C8EA9D8BC34BDB": {
         "scope": "Low-temperature SWCNT catalyst-film and pretreatment comparisons.",
-        "file": "data/raw/fulltext/pdf/LIT_77C8EA9D8BC34BDB_9880b53c0fdf.pdf",
+        "file": "data/raw/literature/pdf/LIT_77C8EA9D8BC34BDB_9880b53c0fdf.pdf",
         "common": {
             "active_metals": "Fe",
             "support": "Si/SiO2 or Si3N4",
@@ -378,7 +380,7 @@ def main() -> None:
         "total_runs": sum(item["row_counts"]["source_run"] for item in metrics),
         "status": "completed_needs_review",
     }
-    (BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json").write_text(
+    (REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )

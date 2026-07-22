@@ -26,15 +26,17 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 29
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_6B3D416B1699661A"
-PDF_REF = "data/raw/fulltext/pdf/LIT_6B3D416B1699661A_9514e4d34e96.pdf"
+PDF_REF = "data/raw/literature/pdf/LIT_6B3D416B1699661A_9514e4d34e96.pdf"
 SI_REF = (
-    "data/raw/fulltext/supplementary/LIT_6B3D416B1699661A/"
+        "data/raw/literature/supplements/LIT_6B3D416B1699661A/"
     "41467_2026_69501_MOESM1_ESM.pdf"
 )
 SOURCE_DATA_REF = (
-    "data/raw/fulltext/supplementary/LIT_6B3D416B1699661A/"
+        "data/raw/literature/supplements/LIT_6B3D416B1699661A/"
     "41467_2026_69501_MOESM4_ESM.xlsx"
 )
 
@@ -1371,7 +1373,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -25,14 +25,14 @@ rules. Caching is keyed by source content hash and parser version.
 
 ## Outputs
 
-- Candidate registry: `data/interim/extraction_candidates/extraction_candidates.sqlite3`
-- Faithful raw text: `data/raw/fulltext/text/<source_id>.txt`
-- Per-source structured package: `data/interim/parsed_text/<source_id>/`
-- Section export: `data/interim/extraction_candidates/paper_text_section.csv`
-- Candidate export: `data/interim/extraction_candidates/candidate_experiment_span.csv`
-- Per-source status: `data/interim/extraction_candidates/parse_source_status.csv`
-- OCR queue: `data/interim/extraction_candidates/ocr_queue.csv`
-- Run reports: `data/interim/extraction_candidates/reports/`
+- Candidate registry: `cache/databases/extraction_candidates.sqlite3`
+- Faithful raw text: the `full_text` field in `data/interim/parsed_text/by_source/<source_id>.parsed.json`
+- Per-source structured package: `data/interim/parsed_text/by_source/<source_id>.parsed.json`
+- Section export: `cache/parse_exports/paper_text_section.csv`
+- Candidate export: `cache/parse_exports/candidate_experiment_span.csv`
+- Per-source status: `cache/parse_exports/parse_source_status.csv`
+- OCR queue: `cache/parse_exports/ocr_queue.csv`
+- Run reports: `runs/parse/`
 
 Each per-source package contains `document_metadata.json`, `full_text.txt`,
 `sections.json`, `tables.json`, `figures_captions.json`, and

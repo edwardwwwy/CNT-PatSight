@@ -31,7 +31,10 @@ python scripts/production/pipeline.py doctor
 python -m pytest -q
 python -m ruff check scripts tests
 python -m mypy scripts
-python scripts/validation/validate_tables.py data/interim/<source_id>
+python scripts/validation/validate_tables.py data/benchmark/fixtures/six_papers/<source_id>
+
+# 唯一正式合并八表
+python scripts/validation/validate_tables.py data/processed/eight_tables --combined
 ```
 
 See [`docs/codebase_maintenance.md`](../docs/codebase_maintenance.md) for the

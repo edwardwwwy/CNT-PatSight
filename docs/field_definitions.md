@@ -43,14 +43,14 @@ review_issue_log ──> 任一待复核记录，并可关联 evidence_id
 
 ## 文件位置与校验
 
-- CSV/Excel 空白模板：`data/processed/templates/`
-- 单篇抽取包：`data/interim/<source_id>/`
+- CSV/Excel 空白模板：`data/benchmark/templates/`
+- 单篇测试包：`data/benchmark/fixtures/six_papers/<source_id>/`
 - 校验脚本：`scripts/validation/validate_tables.py`
 
 校验一个已经抽取的数据包：
 
 ```powershell
-python scripts/validation/validate_tables.py data/interim/<source_id>
+python scripts/validation/validate_tables.py data/benchmark/fixtures/six_papers/<source_id>
 ```
 
 空白模板仅用于录入起点，不按“完整来源包”规则执行校验。

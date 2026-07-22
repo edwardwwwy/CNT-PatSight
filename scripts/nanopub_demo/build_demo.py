@@ -28,8 +28,8 @@ from rdflib.namespace import DCTERMS, PROV, RDF, XSD
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ID = "P003_Pan_2025_FeMo_MgO_Methane_CNT"
-INPUT_DIR = ROOT / "data" / "interim" / SOURCE_ID
-OUTPUT_DIR = ROOT / "data" / "derived" / "nanopub_demo"
+INPUT_DIR = ROOT / "data" / "benchmark" / "samples" / "six_papers" / SOURCE_ID
+OUTPUT_DIR = ROOT / "data" / "processed" / "analysis" / "derived" / "nanopub_demo"
 RUN_OUTPUT_DIR = OUTPUT_DIR / "runs"
 REPORT_PATH = ROOT / "reports" / "nanopub_demo.html"
 
@@ -356,7 +356,7 @@ def build_core_facts(
                 "source_id": SOURCE_ID,
                 "run_id": run_id,
                 "source_table": table,
-                "source_file": f"data/interim/{SOURCE_ID}/{table}.csv",
+                "source_file": f"data/benchmark/fixtures/six_papers/{SOURCE_ID}/{table}.csv",
                 "source_row_number": row_number,
                 "source_record_id": record_id,
                 "source_field": field,
@@ -856,7 +856,7 @@ def main() -> None:
                 "run_id": run_id,
                 "run_label": run["run_label"],
                 "nanopub_uri": str(nanopub.metadata.np_uri),
-                "nanopub_file": f"data/derived/nanopub_demo/runs/{run_path.name}",
+                "nanopub_file": f"data/processed/analysis/derived/nanopub_demo/runs/{run_path.name}",
                 "fact_count": len(by_run[run_id]),
                 "facts": by_run[run_id],
             }
@@ -917,13 +917,13 @@ def main() -> None:
             "server_upload_attempted": False,
             "formal_tables_modified": False,
             "join_key": "run_id",
-            "combined_trig_file": f"data/derived/nanopub_demo/{TRIG_PATH.name}",
+            "combined_trig_file": f"data/processed/analysis/derived/nanopub_demo/{TRIG_PATH.name}",
             "policy": "key_reported_or_normalized_facts_with_audited_field_bindings",
         },
         "input_files": [
             {
                 "table": name,
-                "path": f"data/interim/{SOURCE_ID}/{name}.csv",
+                    "path": f"data/benchmark/fixtures/six_papers/{SOURCE_ID}/{name}.csv",
                 "sha256": hashes_before[name],
                 "row_count": len(table_data[name][1]),
             }

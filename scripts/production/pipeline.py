@@ -32,15 +32,15 @@ from scripts.validation.validate_tables import validate_dictionary
 
 
 ROOT = Path(__file__).resolve().parents[2]
-RUNTIME_DIR = ROOT / "data/interim/runtime"
+RUNTIME_DIR = ROOT / "runs/production/runtime"
 ACTIVE_CONFIG = RUNTIME_DIR / "active_config.json"
 FREEZE_MANIFEST = RUNTIME_DIR / "production_freeze_manifest.json"
 SMOKE_REPORT = RUNTIME_DIR / "smoke_test_report.json"
-PRODUCTION_DB = Path("data/interim/extraction_control/extraction.sqlite3")
-FULLTEXT_DB = Path("data/raw/fulltext/fulltext.sqlite3")
-CANDIDATE_DB = Path("data/interim/extraction_candidates/extraction_candidates.sqlite3")
-METADATA_DB = Path("data/raw/metadata/snapshots/screening_rules_v1.2/literature.sqlite3")
-SNAPSHOT_DIR = Path("data/raw/metadata/snapshots/screening_rules_v1.2")
+PRODUCTION_DB = Path("cache/databases/extraction_control.sqlite3")
+FULLTEXT_DB = Path("data/raw/literature/metadata/fulltext_registry/fulltext.sqlite3")
+CANDIDATE_DB = Path("cache/databases/extraction_candidates.sqlite3")
+METADATA_DB = Path("data/raw/literature/metadata/snapshots/screening_rules_v1.2/literature.sqlite3")
+SNAPSHOT_DIR = Path("data/raw/literature/metadata/snapshots/screening_rules_v1.2")
 COMPONENTS = ("fulltext_producer", "pipeline_monitor")
 
 
@@ -62,7 +62,8 @@ def tracked_asset_paths() -> list[Path]:
         ROOT / "config/field_dictionary.csv",
         ROOT / "config/review_policy.json",
     ]
-    for directory in sorted((ROOT / "data/interim").glob("P*")):
+    seed_root = ROOT / "data/benchmark/fixtures/six_papers"
+    for directory in sorted(seed_root.glob("P*")):
         if (directory / "source_master.csv").exists():
             paths.extend(sorted(path for path in directory.iterdir() if path.is_file()))
     return list(dict.fromkeys(path.resolve() for path in paths if path.exists()))
@@ -144,8 +145,8 @@ def build_config() -> dict[str, Any]:
         "fulltext_db": FULLTEXT_DB.as_posix(),
         "candidate_db": CANDIDATE_DB.as_posix(),
         "production_db": PRODUCTION_DB.as_posix(),
-        "staging_root": "data/interim/eight_table_staging",
-        "review_root": "data/review/extraction",
+        "staging_root": "cache/staging/eight_tables",
+        "review_root": "data/interim/review_queue/extraction",
         "extractor": "reviewer",
         "config_manifest": manifest,
     }

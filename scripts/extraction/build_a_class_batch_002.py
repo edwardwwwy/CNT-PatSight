@@ -7,9 +7,6 @@ full text. Every package remains ``needs_review``.
 from __future__ import annotations
 
 import json
-import shutil
-import tempfile
-from pathlib import Path
 from typing import Any
 
 from scripts.extraction.batch_common import (
@@ -26,19 +23,14 @@ from scripts.extraction.batch_common import (
     master_row,
     process_row,
     run_row,
-    write_table,
     yield_row,
 )
-from scripts.validation.validate_tables import (
-    DEFAULT_DICTIONARY,
-    DEFAULT_SCHEMA,
-    validate,
-)
-
-
+from scripts.extraction.package_io import write_extraction_package
 BATCH_NUMBER = 2
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = BATCH_ROOT
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_IDS = ("LIT_3D8F9EFA937173D0",)
 
 
@@ -115,7 +107,7 @@ def build_3d8(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{source_id}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{source_id}.parsed.json"
     )
 
     configurations = [
@@ -618,26 +610,15 @@ def publish_package(
     source_id: str,
     package: dict[str, list[dict[str, str]]],
 ) -> dict[str, Any]:
-    output_dir = PACKAGE_ROOT / source_id
-    if output_dir.exists():
-        raise FileExistsError(f"Package already exists: {output_dir}")
-    output_dir.parent.mkdir(parents=True, exist_ok=True)
-    temporary = Path(
-        tempfile.mkdtemp(prefix=f".{source_id}.", dir=output_dir.parent)
+    output_path = write_extraction_package(
+        source_id,
+        "A",
+        package,
+        extraction_status="needs_review",
     )
-    try:
-        for table in TABLES:
-            write_table(temporary, table, package[table])
-        result = validate(temporary, DEFAULT_SCHEMA, DEFAULT_DICTIONARY)
-        if result:
-            raise RuntimeError(f"Eight-table validation failed for {source_id}")
-        shutil.move(str(temporary), str(output_dir))
-    finally:
-        if temporary.exists():
-            shutil.rmtree(temporary)
     return {
         "source_id": source_id,
-        "output_path": output_dir.relative_to(ROOT).as_posix(),
+        "output_path": output_path.relative_to(ROOT).as_posix(),
         "row_counts": {table: len(package[table]) for table in TABLES},
         "status": "needs_review",
     }
@@ -665,7 +646,7 @@ def main() -> None:
         ),
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

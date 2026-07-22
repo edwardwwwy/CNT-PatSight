@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import json
 import tempfile
 import unittest
@@ -354,7 +355,8 @@ class ArchiveTests(unittest.TestCase):
                 "",
                 "2026-01-01T00:00:00Z",
             )
-            payload = json.loads((root / relative).read_text(encoding="utf-8"))
+            with gzip.open(root / relative, "rt", encoding="utf-8") as handle:
+                payload = json.loads(handle.readline())
             rendered = json.dumps(payload)
             self.assertNotIn("secret", rendered)
             self.assertNotIn("person@example.com", rendered)

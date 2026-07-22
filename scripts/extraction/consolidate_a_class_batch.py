@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Consolidate all available A-class eight-table packages into eight CSV files."""
+"""Consolidate canonical A extraction packages into a disposable run artifact."""
 
 from __future__ import annotations
 
@@ -10,73 +10,51 @@ import tempfile
 from pathlib import Path
 
 from scripts.extraction.build_a_class_batch import BATCH_ID, ROOT, TABLES
+from scripts.extraction.package_io import read_extraction_package
 
-PACKAGE_ROOT = ROOT / "data/interim/eight_table_staging/codex_manual" / BATCH_ID
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+
+PACKAGE_ROOT = ROOT / "data/interim/extraction/A"
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
 OUTPUT = BATCH_ROOT / "consolidated_eight_tables"
-MANIFEST = BATCH_ROOT / "manifest.csv"
-
-
-def read_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
-    with path.open(encoding="utf-8-sig", newline="") as handle:
-        reader = csv.DictReader(handle)
-        return list(reader.fieldnames or []), list(reader)
-
-
-def package_dirs() -> list[Path]:
-    directories = sorted(item for item in PACKAGE_ROOT.iterdir() if item.is_dir())
-    with MANIFEST.open(encoding="utf-8-sig", newline="") as handle:
-        for item in csv.DictReader(handle):
-            if item["extraction_state"] == "existing_curated_package":
-                directories.append(ROOT / "data/interim" / item["source_id"])
-    return directories
 
 
 def main() -> None:
-    packages = package_dirs()
+    packages = [
+        read_extraction_package(path)
+        for path in sorted(PACKAGE_ROOT.glob("*.extraction.json"))
+    ]
+    if not packages:
+        raise FileNotFoundError(f"No A extraction packages found under {PACKAGE_ROOT}")
+    BATCH_ROOT.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=".a_class_consolidated.", dir=BATCH_ROOT))
     counts: dict[str, int] = {}
     try:
         for table in TABLES:
-            header: list[str] | None = None
-            rows: list[dict[str, str]] = []
-            for package in packages:
-                current_header, current_rows = read_rows(package / f"{table}.csv")
-                if header is None:
-                    header = current_header
-                elif current_header != header:
-                    raise ValueError(f"Header mismatch: {package}/{table}.csv")
-                rows.extend(current_rows)
-            with (temporary / f"{table}.csv").open(
-                "w", encoding="utf-8-sig", newline=""
-            ) as handle:
-                writer = csv.DictWriter(handle, fieldnames=header or [])
+            rows = [row for package in packages for row in package["tables"][table]]
+            columns = list(json.loads((ROOT / "config/schema.json").read_text(encoding="utf-8"))["tables"][table]["columns"])
+            with (temporary / f"{table}.csv").open("w", encoding="utf-8-sig", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="raise")
                 writer.writeheader()
                 writer.writerows(rows)
             counts[table] = len(rows)
 
-        source_ids = {
-            row["source_id"]
-            for _, rows in [read_rows(temporary / "source_master.csv")]
-            for row in rows
-        }
-        _, runs = read_rows(temporary / "source_run.csv")
-        run_ids = [row["run_id"] for row in runs]
+        source_ids = [package["source_id"] for package in packages]
+        run_ids = [row["run_id"] for package in packages for row in package["tables"]["source_run"]]
+        if len(source_ids) != len(set(source_ids)):
+            raise ValueError("Duplicate source_id in A extraction packages")
         if len(run_ids) != len(set(run_ids)):
             raise ValueError("Duplicate run_id in consolidated output")
-
         summary = {
             "batch_id": BATCH_ID,
             "package_count": len(packages),
             "source_count": len(source_ids),
             "run_count": len(run_ids),
             "row_counts": counts,
-            "manual_package_root": PACKAGE_ROOT.relative_to(ROOT).as_posix(),
-            "includes_existing_curated_packages": True,
+            "canonical_package_root": PACKAGE_ROOT.relative_to(ROOT).as_posix(),
+            "artifact_class": "rebuildable_run_output",
         }
         (temporary / "summary.json").write_text(
-            json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
+            json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
         if OUTPUT.exists():
             raise FileExistsError(f"Output already exists: {OUTPUT}")

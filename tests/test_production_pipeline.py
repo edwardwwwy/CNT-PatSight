@@ -148,7 +148,7 @@ class ProductionStoreTests(unittest.TestCase):
                 store.register_config("CFG", {})
                 self.assertTrue(store.enqueue("T1", "CURATED", "a" * 64, "CFG", 1))
                 self.assertTrue(store.exclude_source(
-                    "CURATED", "existing_curated_eight_table_package", "data/interim/CURATED",
+                "CURATED", "existing_curated_eight_table_package", "data/benchmark/fixtures/six_papers/CURATED",
                 ))
                 self.assertFalse(store.enqueue("T2", "CURATED", "b" * 64, "CFG", 2))
                 self.assertIsNone(store.claim("worker", "CFG"))

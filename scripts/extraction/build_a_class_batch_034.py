@@ -26,9 +26,11 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 34
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_11E2BBB5F0B2D893"
-PDF_REF = "data/raw/fulltext/pdf/LIT_11E2BBB5F0B2D893_921dff6692b3.pdf"
+PDF_REF = "data/raw/literature/pdf/LIT_11E2BBB5F0B2D893_921dff6692b3.pdf"
 
 ABSTRACT_SPAN = "SPAN_1AD014F92F7F0BE2A686"
 MATERIAL_SPAN = "SPAN_B0DFDAE28064DA47B260"
@@ -1170,7 +1172,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

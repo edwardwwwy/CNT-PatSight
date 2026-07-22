@@ -1,44 +1,42 @@
 # CNT-PatSight repository structure
 
-## Active data flow
+## Data lifecycle
 
 ```text
-data/raw/metadata/
-  -> data/raw/fulltext/
-  -> data/interim/parsed_text/
-  -> data/interim/extraction_candidates/
-  -> data/interim/extraction_batches/
-  -> data/interim/eight_table_staging/
-  -> data/review/extraction/
-  -> data/processed/
+raw -> interim -> processed -> benchmark -> audit
 ```
 
-## Directory responsibilities
+```text
+data/
+├─ raw/
+│  ├─ literature/{pdf,html,metadata,supplements}/
+│  ├─ api_responses/<provider>/<run>.jsonl.gz
+│  └─ source_manifest.csv
+├─ interim/
+│  ├─ parsed_text/by_source/<source_id>.parsed.json
+│  ├─ extraction/{A,B,C}/<source_id>.extraction.json
+│  ├─ evidence/evidence_candidates.jsonl
+│  └─ review_queue/{pending,resolved}.jsonl
+├─ processed/{eight_tables,analysis,snapshots}/
+├─ benchmark/{gold,fixtures,templates,results}/
+└─ audit/{samples,issues,summaries}/
+```
 
-| Path | Purpose |
-|---|---|
-| `config/` | Eight-table schema, field dictionary, extraction contracts, screening rules |
-| `data/raw/metadata/` | API responses, normalized metadata, frozen screening snapshots |
-| `data/raw/fulltext/` | Legal OA acquisition registry and verified PDF/HTML/text assets |
-| `data/interim/parsed_text/` | Regenerable parsed full text |
-| `data/interim/extraction_candidates/` | Sections, candidate experiment spans, parse status |
-| `data/interim/extraction_control/` | Generic extraction queue and transactional staging database |
-| `data/interim/extraction_batches/` | Bounded extraction batch manifests and cost metrics |
-| `data/interim/eight_table_staging/` | First-pass eight-table packages awaiting independent evidence review |
-| `data/interim/regression/gold/` | Reviewer-authored regression gold packages |
-| `data/interim/legacy_audit/` | Retired immutable attempts retained only for audit |
-| `data/review/extraction/` | Current evidence-review queues and decisions |
-| `data/processed/` | Agent-reviewed data that passed the formalization gate |
-| `scripts/extraction/` | Evidence-package selection, shared batch helpers, and curated batch builders |
-| `scripts/production/` | Metadata/full-text/candidate queue, extraction validation, and staging control |
-| `scripts/validation/` | Eight-table schema, relation, evidence, and issue validation |
-| `scripts/regression/` | Reproducible regression package builders |
-| `tmp/` | Deletable rendering, parsing, and debugging files |
+Top-level `runs/` holds execution logs, `cache/` holds renders and mutable
+databases, and `reports/` holds curated final reports. These directories are
+not alternate data sources.
 
 ## Invariants
 
-- Source truth remains the eight formal tables.
-- First-pass packages remain `needs_review`.
-- A designated review agent may set `formal_extract` and `reviewed` after the formalization gate passes.
-- Retired audit artifacts are not imported, queued, or executed.
-- Local model binaries and runtimes are not part of the repository.
+- Each source has at most one extraction package, under exactly one A/B/C tier.
+- A parsed source has exactly one `<source_id>.parsed.json` artifact.
+- `data/processed/eight_tables/` is the only formal eight-table source.
+- A/B/C are record attributes; they do not create separate formal datasets.
+- Company data is outside this repository and is located with
+  `CNT_COMPANY_DATA_DIR`.
+- Historical runs and superseded artifacts are kept in the external archive,
+  not under `data/`.
+
+Run `python -m scripts.validation.validate_data_layout` after changing a data
+boundary. The safe migration entrypoint is
+`python -m scripts.migration.restructure_data --help`.

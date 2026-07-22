@@ -26,7 +26,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 15
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_A7E485A52DA7BA40"
 PDF_NAME = f"{SOURCE_ID}_182bb37c7d0b.pdf"
 SUPPLEMENT_NAME = "catalysts-2569843-supplementary.pdf"
@@ -88,13 +90,13 @@ def append_pdf_evidence(
     )
     if supplement:
         source_ref = (
-            "data/raw/fulltext/supplementary/"
+        "data/raw/literature/supplements/"
             f"{SOURCE_ID}/catalysts-13-01259-s001/{SUPPLEMENT_NAME}#page={page}"
         )
         source_section = f"Supplementary Figure S{3 if page == 2 else 5}"
         source_locator = f"supplementary PDF page {page}"
     else:
-        source_ref = f"data/raw/fulltext/pdf/{PDF_NAME}#page={page}"
+        source_ref = f"data/raw/literature/pdf/{PDF_NAME}#page={page}"
         source_section = f"Main-article PDF page {page}"
         source_locator = f"PDF page {page}"
     evidence.update(
@@ -267,7 +269,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += (
         " Main PDF pages 5 and 9 and official supplementary PDF pages 2 and "
@@ -869,7 +871,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

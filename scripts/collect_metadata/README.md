@@ -107,16 +107,16 @@ python scripts/collect_metadata/collect.py `
 ## 产物
 
 ```text
-data/raw/metadata/literature.sqlite3
+data/raw/literature/metadata/literature.sqlite3
   canonical works、API 别名、字段来源、request/run/query 统计
 
-data/raw/metadata/literature_master.csv
+data/raw/literature/metadata/literature_master.csv
   面向检查和后续 source_master 登记的 UTF-8-BOM 平面导出
 
-data/raw/metadata/api_responses/<run_id>/<source_api>/*.json
+data/raw/literature/metadata/api_responses/<run_id>/<source_api>/*.json
   不含明文凭据的逐请求原始返回
 
-data/raw/metadata/run_reports/<run_id>.json
+data/raw/literature/metadata/run_reports/<run_id>.json
   query、各 API 返回量、入库/更新、去重、评分和链接统计
 ```
 

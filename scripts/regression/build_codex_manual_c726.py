@@ -21,8 +21,9 @@ from scripts.extraction.package import build_slotted_package
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ID = "LIT_C726D1011E035C35"
-OUT = ROOT / "data/interim/eight_table_staging/codex_manual/C726_NiMo_MgO_biogas"
-TEMPLATE = ROOT / "data/interim/P003_Pan_2025_FeMo_MgO_Methane_CNT"
+OUT = ROOT / "cache/regression/eight_table_staging/codex_manual/C726_NiMo_MgO_biogas"
+REPORT_PATH = ROOT / "runs/regression/codex_manual/C726_NiMo_MgO_biogas_metrics.json"
+TEMPLATE = ROOT / "data/benchmark/fixtures/six_papers/P003_Pan_2025_FeMo_MgO_Methane_CNT"
 TABLES = (
     "source_master",
     "source_run",
@@ -92,8 +93,8 @@ def main() -> int:
     started = time.perf_counter()
     package = build_slotted_package(
         SOURCE_ID,
-        ROOT / "data/interim/extraction_candidates/paper_text_section.csv",
-        ROOT / "data/interim/extraction_candidates/candidate_experiment_span.csv",
+        ROOT / "cache/parse_exports/paper_text_section.csv",
+        ROOT / "cache/parse_exports/candidate_experiment_span.csv",
     )
     global SPAN_MAP
     SPAN_MAP = {span["span_id"]: span for span in package["spans"]}
@@ -107,7 +108,7 @@ def main() -> int:
     scale = "SPAN_60CCE5157908C94C8E6F"
 
     runs = RATIO_RUNS + LOADING_RUNS
-    source_master = [row("source_master", source_id=SOURCE_ID, source_type="paper", source_title="Dual function NiMo/MgO catalyst for biogas valorization to syngas and carbon nanotubes", publication_year="2025", authors_or_assignee="Pichawee Aieamsam-Aung; Narissara Simma; Sornsawan Juntala; Atthapon Srifa; Wanida Koo-Amornpattana; Prasert Reubroycharoen; Phorndranrat Suchamalawong; Choji Fukuhara; Sakhon Ratchahat", publication_venue="Scientific Reports", doi_or_patent_no="10.1038/s41598-025-99439-1", source_link="https://doi.org/10.1038/s41598-025-99439-1", source_database="local_metadata_snapshot", source_language="en", local_file_path="data/raw/fulltext/text/LIT_C726D1011E035C35.txt", pdf_status="legal_url_found", screening_class="candidate_extract", source_section_scope="Experimental catalyst preparation and main ratio/loading series; secondary temperature/flow/biogas-ratio/stability series flagged for review", extraction_status="needs_review", review_status="pending_review", notes="Codex first-pass extraction; independent evidence review required.")]
+    source_master = [row("source_master", source_id=SOURCE_ID, source_type="paper", source_title="Dual function NiMo/MgO catalyst for biogas valorization to syngas and carbon nanotubes", publication_year="2025", authors_or_assignee="Pichawee Aieamsam-Aung; Narissara Simma; Sornsawan Juntala; Atthapon Srifa; Wanida Koo-Amornpattana; Prasert Reubroycharoen; Phorndranrat Suchamalawong; Choji Fukuhara; Sakhon Ratchahat", publication_venue="Scientific Reports", doi_or_patent_no="10.1038/s41598-025-99439-1", source_link="https://doi.org/10.1038/s41598-025-99439-1", source_database="local_metadata_snapshot", source_language="en", local_file_path="data/interim/parsed_text/by_source/LIT_C726D1011E035C35.parsed.json", pdf_status="legal_url_found", screening_class="candidate_extract", source_section_scope="Experimental catalyst preparation and main ratio/loading series; secondary temperature/flow/biogas-ratio/stability series flagged for review", extraction_status="needs_review", review_status="pending_review", notes="Codex first-pass extraction; independent evidence review required.")]
 
     source_run = []
     catalysts = []
@@ -166,7 +167,8 @@ def main() -> int:
         "status": "needs_review",
         "notes": "Token figure is an estimate from selected package chars; Codex internal generation-token telemetry is not exposed by the desktop runtime.",
     }
-    (OUT / "codex_manual_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    REPORT_PATH.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(metrics, ensure_ascii=False))
     return 0
 

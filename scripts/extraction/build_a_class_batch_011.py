@@ -26,7 +26,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 11
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_9A3617C1B429A8F2"
 
 
@@ -88,7 +90,7 @@ def append_pdf_figure_evidence(
             "source_section": f"Figure {figure}, combined Raman spectra",
             "source_locator": f"PDF page {page}",
             "source_object_ref": (
-                f"data/raw/fulltext/pdf/{SOURCE_ID}_f693f3e87d7e.pdf#page={page}"
+                f"data/raw/literature/pdf/{SOURCE_ID}_f693f3e87d7e.pdf#page={page}"
             ),
             "evidence_text": (
                 f"Figure {figure} annotation for recipe {code}: R = A_D/A_G = {ratio}."
@@ -713,7 +715,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += (
         " PDF pages 59 and 78 were visually checked to read graph-embedded "
@@ -1115,7 +1117,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -51,7 +51,7 @@ class ParsePipeline:
         self.reports_dir = reports_dir
         self.force = force
         self.ocr_queue_csv = ocr_queue_csv or status_csv.parent / "ocr_queue.csv"
-        for directory in (raw_text_dir, parsed_text_dir, section_csv.parent, reports_dir):
+        for directory in (parsed_text_dir, section_csv.parent, reports_dir):
             directory.mkdir(parents=True, exist_ok=True)
 
     def run(self, source_ids: list[str] | None = None, limit: int | None = None) -> dict[str, Any]:
@@ -83,12 +83,10 @@ class ParsePipeline:
                         counters["failed_sources"] += 1
                         continue
                     actual_hash = sha256_file(path)
-                    raw_text_path = self.raw_text_dir / f"{source_id}.txt"
-                    parsed_text_path = self.parsed_text_dir / f"{source_id}.txt"
+                    parsed_text_path = self.parsed_text_dir / f"{source_id}.parsed.json"
                     if (
                         not self.force
                         and store.is_cached(source_id, actual_hash, PARSER_VERSION)
-                        and raw_text_path.exists()
                         and parsed_text_path.exists()
                     ):
                         counters["cache_hits"] += 1
@@ -120,14 +118,8 @@ class ParsePipeline:
                         counters["failed_sources"] += 1
                         continue
                     warnings.extend(output.warnings)
-                    self._write_if_changed(raw_text_path, output.raw_text)
-                    rendered_sections = "\n\n".join(
-                        f"## {section.section_order}. {section.section_name_normalized} | {section.section_name_raw}\n"
-                        f"pages: {section.page_start or ''}-{section.page_end or ''}\n\n{section.text}"
-                        for section in output.sections
-                    )
-                    self._write_if_changed(parsed_text_path, rendered_sections)
-                    self._write_source_package(
+                    self._write_source_file(
+                        parsed_text_path,
                         record,
                         artifact,
                         actual_hash,
@@ -142,7 +134,7 @@ class ParsePipeline:
                         output.sections,
                         output.spans,
                         warnings,
-                        self._rel(raw_text_path),
+                        self._rel(parsed_text_path),
                         self._rel(parsed_text_path),
                         now,
                         parse_quality=output.parse_quality,
@@ -222,16 +214,16 @@ class ParsePipeline:
     def _write_json_if_changed(self, path: Path, value: Any) -> None:
         self._write_if_changed(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
-    def _write_source_package(
+    def _write_source_file(
         self,
+        path: Path,
         metadata: dict[str, Any],
         artifact: dict[str, Any],
         actual_hash: str,
         output: Any,
         parsed_at: str,
     ) -> None:
-        """Write the auditable per-source intermediate package requested by the pipeline contract."""
-        package_dir = self.parsed_text_dir / str(metadata["source_id"])
+        """Write the only parsed-text artifact retained for a source."""
         section_rows = [
             {
                 "section_id": section.section_id,
@@ -246,9 +238,19 @@ class ParsePipeline:
             }
             for section in output.sections
         ]
-        self._write_json_if_changed(
-            package_dir / "document_metadata.json",
-            {
+        payload = {
+            "source_id": metadata["source_id"],
+            "full_text": output.raw_text,
+            "sections": section_rows,
+            "tables": [
+                row for row in section_rows if row["section_name_normalized"] == "tables"
+            ],
+            "figure_captions": [
+                row
+                for row in section_rows
+                if row["section_name_normalized"] == "figure_captions"
+            ],
+            "document_metadata": {
                 "source_id": metadata["source_id"],
                 "doi": metadata.get("doi") or "",
                 "title": metadata.get("title") or "",
@@ -261,20 +263,7 @@ class ParsePipeline:
                 "parser_version": PARSER_VERSION,
                 "parsed_at": parsed_at,
             },
-        )
-        self._write_if_changed(package_dir / "full_text.txt", output.raw_text)
-        self._write_json_if_changed(package_dir / "sections.json", section_rows)
-        self._write_json_if_changed(
-            package_dir / "tables.json",
-            [row for row in section_rows if row["section_name_normalized"] == "tables"],
-        )
-        self._write_json_if_changed(
-            package_dir / "figures_captions.json",
-            [row for row in section_rows if row["section_name_normalized"] == "figure_captions"],
-        )
-        self._write_json_if_changed(
-            package_dir / "parse_report.json",
-            {
+            "parse_report": {
                 "source_id": metadata["source_id"],
                 "parser_version": PARSER_VERSION,
                 "parse_quality": output.parse_quality,
@@ -292,7 +281,8 @@ class ParsePipeline:
                 "candidate_span_count": len(output.spans),
                 "parsed_at": parsed_at,
             },
-        )
+        }
+        self._write_json_if_changed(path, payload)
 
     def _write_report(self, run_id: str, summary: dict[str, Any]) -> None:
         content = json.dumps(summary, ensure_ascii=False, indent=2)

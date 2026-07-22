@@ -17,9 +17,10 @@ if str(Path(__file__).resolve().parents[2]) not in sys.path:
 from scripts.extraction.package import build_slotted_package
 
 ROOT = Path(__file__).resolve().parents[2]
-TEMPLATE = ROOT / "data/interim/P003_Pan_2025_FeMo_MgO_Methane_CNT"
-SPAN_CSV = ROOT / "data/interim/extraction_candidates/candidate_experiment_span.csv"
-SECTION_CSV = ROOT / "data/interim/extraction_candidates/paper_text_section.csv"
+REPORT_ROOT = ROOT / "runs/regression/codex_manual"
+TEMPLATE = ROOT / "data/benchmark/fixtures/six_papers/P003_Pan_2025_FeMo_MgO_Methane_CNT"
+SPAN_CSV = ROOT / "cache/parse_exports/candidate_experiment_span.csv"
+SECTION_CSV = ROOT / "cache/parse_exports/paper_text_section.csv"
 
 TABLES = ("source_master", "source_run", "catalyst_system", "reactor_process_gas", "yield_quality", "cost_scale_review", "evidence_index", "review_issue_log")
 
@@ -66,11 +67,11 @@ def make_package(source_id: str, cfg: dict) -> dict:
     started = time.perf_counter()
     pkg = build_slotted_package(source_id, SECTION_CSV, SPAN_CSV)
     spans = {s["span_id"]: s for s in pkg["spans"]}
-    outdir = ROOT / "data/interim/eight_table_staging/codex_manual" / cfg["folder"]
+    outdir = ROOT / "cache/regression/eight_table_staging/codex_manual" / cfg["folder"]
     def ev(eid: str, rid: str, table: str, record: str, fields: str, sid: str) -> dict[str, str]:
         s = spans[sid]
         return mkrow("evidence_index", evidence_id=eid, source_id=source_id, run_id=rid, target_table=table, target_record_id=record, target_fields=fields.replace("|", ";"), evidence_type="reported_text_or_table", value_status="reported", source_section="Experimental/Results", source_locator=s.get("page_range") or s.get("page_start") or "local_span", source_object_ref=sid, evidence_text=s["text"], evidence_summary=f"Local parsed span {sid} supports {fields}.", confidence="medium", linked_issue_id="not_applicable", notes="Codex manual first pass; needs_review.")
-    master = [mkrow("source_master", source_id=source_id, source_type="paper", source_title=cfg["title"], publication_year=cfg["year"], authors_or_assignee=cfg["authors"], publication_venue=cfg["venue"], doi_or_patent_no=cfg["doi"], source_link=f"https://doi.org/{cfg['doi']}", source_database="local_metadata_snapshot", source_language="en", local_file_path=f"data/raw/fulltext/text/{source_id}.txt", pdf_status="legal_url_found", screening_class="candidate_extract", source_section_scope="Main catalyst comparison/optimum series transcribed from local candidate spans; secondary series flagged", extraction_status="needs_review", review_status="pending_review", notes="Codex first-pass extraction; independent evidence review required.")]
+    master = [mkrow("source_master", source_id=source_id, source_type="paper", source_title=cfg["title"], publication_year=cfg["year"], authors_or_assignee=cfg["authors"], publication_venue=cfg["venue"], doi_or_patent_no=cfg["doi"], source_link=f"https://doi.org/{cfg['doi']}", source_database="local_metadata_snapshot", source_language="en", local_file_path=f"data/interim/parsed_text/by_source/{source_id}.parsed.json", pdf_status="legal_url_found", screening_class="candidate_extract", source_section_scope="Main catalyst comparison/optimum series transcribed from local candidate spans; secondary series flagged", extraction_status="needs_review", review_status="pending_review", notes="Codex first-pass extraction; independent evidence review required.")]
     runs, cats, procs, yqs, costs, evs = [], [], [], [], [], []
     for code, label, metals, ratio, y, yunit, summary, dmean, drange, walls in cfg["runs"]:
         rid = f"{source_id}_{code}"
@@ -103,7 +104,8 @@ def make_package(source_id: str, cfg: dict) -> dict:
             writer.writeheader()
             writer.writerows(vals)
     metrics = {"source_id": source_id, "batch_id": "CODEX_MANUAL_5_20260716", "input_selected_chars": pkg["selection_stats"]["selected_text_chars"], "input_candidate_spans": len(pkg["spans"]), "estimated_input_tokens_chars_div_4": round(pkg["selection_stats"]["selected_text_chars"] / 4), "output_fact_rows": {"source_run": len(runs), "catalyst_system": len(cats), "reactor_process_gas": len(procs), "yield_quality": len(yqs), "cost_scale_review": len(costs), "evidence_index": len(evs), "review_issue_log": len(issues)}, "elapsed_generation_seconds": round(time.perf_counter() - started, 3), "status": "needs_review", "notes": "Input tokens are estimated selected chars/4; Codex internal generation-token telemetry is not exposed by desktop runtime."}
-    (outdir / "codex_manual_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    REPORT_ROOT.mkdir(parents=True, exist_ok=True)
+    (REPORT_ROOT / f"{cfg['folder']}_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return metrics
 
 if __name__ == "__main__":

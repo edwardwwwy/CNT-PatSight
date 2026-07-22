@@ -27,11 +27,11 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 10
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_4BDFD588A5A5F5AA"
-TABLES_PATH = (
-    ROOT / f"data/interim/parsed_text/{SOURCE_ID}/tables.json"
-)
+PARSED_PATH = ROOT / f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
 
 REACTOR_SPANS = {
     82: "SPAN_702727879343154F1754",
@@ -97,7 +97,7 @@ def load_compiled_data() -> tuple[
     dict[int, dict[str, Any]],
     list[dict[str, Any]],
 ]:
-    items = json.loads(TABLES_PATH.read_text(encoding="utf-8"))
+    items = json.loads(PARSED_PATH.read_text(encoding="utf-8"))["tables"]
     reactors: dict[int, dict[str, Any]] = {}
     for item in extracted_rows(items, 82, 86, 5):
         order, catalyst, geometry, dimensions, reactor_type = item["columns"][:5]
@@ -516,7 +516,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += (
         " All source_run rows are secondary literature-compiled conditions, "
@@ -817,7 +817,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

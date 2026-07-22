@@ -6,11 +6,11 @@ tables.
 
 ## Inputs and configuration
 
-- Metadata registry: `data/raw/metadata/literature.sqlite3`
-- Local PDFs already registered in metadata: `data/raw/papers/`
+- Metadata registry: `data/raw/literature/metadata/literature.sqlite3`
+- Local PDFs already registered in metadata: `data/raw/literature/pdf/local_papers/`
 - Candidate PDF/HTML URLs, DOI, paper ID, and OA metadata from phase one
 - Optional manually verified OA candidates:
-  `data/raw/fulltext/verified_oa_candidates.csv`
+`data/raw/literature/metadata/fulltext_registry/verified_oa_candidates.csv`
 - `UNPAYWALL_EMAIL` from `.env` for DOI lookups
 
 Credentials and email addresses are never written to reports. The `.env` file
@@ -64,14 +64,14 @@ rename. `--no-unpaywall` disables the DOI lookup.
 
 ## Outputs
 
-- SQLite registry: `data/raw/fulltext/fulltext.sqlite3`
-- PDF cache: `data/raw/fulltext/pdf/`
-- HTML cache: `data/raw/fulltext/html/`
-- Per-attempt reports: `data/raw/fulltext/reports/`
-- Detailed export: `data/raw/fulltext/fulltext_source.csv`
-- Acquisition queue: `data/raw/fulltext/fulltext_acquisition_queue.csv`
-- One-row-per-source acceptance view: `data/raw/fulltext/fulltext_coverage.csv`
-- Verified OA fallback input: `data/raw/fulltext/verified_oa_candidates.csv`
+- SQLite registry: `data/raw/literature/metadata/fulltext_registry/fulltext.sqlite3`
+- PDF cache: `data/raw/literature/pdf/`
+- Raw HTML: `data/raw/literature/html/`
+- Per-attempt reports: `runs/fulltext/`
+- Detailed export: `data/raw/literature/metadata/fulltext_registry/fulltext_source.csv`
+- Acquisition queue: `data/raw/literature/metadata/fulltext_registry/fulltext_acquisition_queue.csv`
+- One-row-per-source acceptance view: `data/raw/literature/metadata/fulltext_registry/fulltext_coverage.csv`
+- Verified OA fallback input: `data/raw/literature/metadata/fulltext_registry/verified_oa_candidates.csv`
 
 `fulltext_source` records successes and failures separately. A successful local
 or downloaded file is never downgraded by a later failed URL. Local PDFs remain

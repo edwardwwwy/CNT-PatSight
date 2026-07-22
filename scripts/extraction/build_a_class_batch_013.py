@@ -26,7 +26,9 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 13
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_427378A0096D943B"
 
 
@@ -80,7 +82,7 @@ def append_r2r_pdf_evidence(
             "source_section": "Section 3.3 and Figure 7",
             "source_locator": "PDF page 15",
             "source_object_ref": (
-                f"data/raw/fulltext/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=15"
+                f"data/raw/literature/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=15"
             ),
             "evidence_text": (
                 "Continuous 30 cm-wide roll-to-roll pilot line; 615 C; "
@@ -163,7 +165,7 @@ def append_baseline_scan_pdf_evidence(
             "source_section": "Section 3.1.1 and Figure 1",
             "source_locator": "PDF page 5",
             "source_object_ref": (
-                f"data/raw/fulltext/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=5"
+                f"data/raw/literature/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=5"
             ),
             "evidence_text": condition_text,
             "evidence_summary": ("PDF page 5 grounds the 580 C and 20 min condition."),
@@ -195,7 +197,7 @@ def append_optimized_pdf_evidence(
             "source_section": "Sections 3.1.1-3.1.2 and Figure 2",
             "source_locator": "PDF page 6",
             "source_object_ref": (
-                f"data/raw/fulltext/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=6"
+                f"data/raw/literature/pdf/{SOURCE_ID}_f8e072dd7343.pdf#page=6"
             ),
             "evidence_text": (
                 "At 580 C and 20 min the VACNT carpet reaches 50 "
@@ -736,7 +738,7 @@ def build(
         )
     )
     tables["source_master"][0]["local_file_path"] = (
-        f"data/interim/parsed_text/{SOURCE_ID}/full_text.txt"
+        f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
     )
     tables["source_master"][0]["notes"] += (
         " PDF page 15 was visually checked for the 30 cm-wide pilot-line "
@@ -1225,7 +1227,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

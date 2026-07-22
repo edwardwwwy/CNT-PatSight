@@ -26,12 +26,14 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 32
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_CC1837EDE2344C3D"
-HTML_REF = f"data/interim/parsed_text/{SOURCE_ID}.txt"
-XML_REF = f"data/raw/fulltext/supplementary/{SOURCE_ID}/PMC9057708.xml"
-SI_REF = f"data/raw/fulltext/supplementary/{SOURCE_ID}/RA-010-D0RA07440C-s001.pdf"
-SI_RENDER_REF = f"data/raw/fulltext/supplementary/{SOURCE_ID}/rendered/si-14.png"
+HTML_REF = f"data/interim/parsed_text/by_source/{SOURCE_ID}.parsed.json"
+XML_REF = f"data/raw/literature/supplements/{SOURCE_ID}/PMC9057708.xml"
+SI_REF = f"data/raw/literature/supplements/{SOURCE_ID}/RA-010-D0RA07440C-s001.pdf"
+SI_RENDER_REF = f"data/raw/literature/supplements/{SOURCE_ID}/rendered/si-14.png"
 
 PREP_SPAN = "SPAN_3D8C3EE03FC1EDA64140"
 PROCESS_SPAN = "SPAN_9E6925641D9BFB66CECB"
@@ -1014,7 +1016,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

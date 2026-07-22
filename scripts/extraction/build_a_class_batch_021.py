@@ -27,9 +27,11 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 21
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_3BDCD8F9895BE659"
-PDF_REF = "data/raw/fulltext/pdf/LIT_3BDCD8F9895BE659_ad8a37d0aa53.pdf"
+PDF_REF = "data/raw/literature/pdf/LIT_3BDCD8F9895BE659_ad8a37d0aa53.pdf"
 
 BASE_RECIPE = (
     "Co or Fe films 0.3 nm thick were evaporated onto either 100 nm SiO2 "
@@ -682,7 +684,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

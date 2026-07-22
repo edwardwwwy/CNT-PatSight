@@ -26,11 +26,13 @@ from scripts.extraction.build_a_class_batch_002 import publish_package
 
 BATCH_NUMBER = 26
 BATCH_NAME = f"{BATCH_ID}_BATCH_{BATCH_NUMBER:03d}"
-BATCH_ROOT = ROOT / "data/interim/extraction_batches" / BATCH_ID
+BATCH_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT = ROOT / "runs/extraction/A/batches" / BATCH_ID
+REPORT_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_ID = "LIT_BA29B44179EB3783"
-PDF_REF = "data/raw/fulltext/pdf/LIT_BA29B44179EB3783_414357a3b135.pdf"
+PDF_REF = "data/raw/literature/pdf/LIT_BA29B44179EB3783_414357a3b135.pdf"
 SI_REF = (
-    "data/raw/fulltext/supplementary/LIT_BA29B44179EB3783/S0008622319312588_mmc1.pdf"
+        "data/raw/literature/supplements/LIT_BA29B44179EB3783/S0008622319312588_mmc1.pdf"
 )
 
 METHOD_SPAN = "SPAN_5C6098B25CDF8BF45F66"
@@ -1010,7 +1012,7 @@ def main() -> None:
         "total_runs": metric["row_counts"]["source_run"],
         "status": "completed_needs_review",
     }
-    output = BATCH_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
+    output = REPORT_ROOT / f"batch_{BATCH_NUMBER:03d}_metrics.json"
     output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -9,11 +9,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ID = "P003_Pan_2025_FeMo_MgO_Methane_CNT"
-BASE_DIR = ROOT / "data" / "interim" / SOURCE_ID
+BASE_DIR = ROOT / "data" / "benchmark" / "samples" / "six_papers" / SOURCE_ID
 OUTPUT_DIR = (
     ROOT
     / "data"
-    / "interim"
+    / "benchmark"
+    / "gold"
     / "regression"
     / "gold"
     / SOURCE_ID
@@ -470,7 +471,7 @@ def evidence_row(
         "value_status": value_status,
         "source_section": section,
         "source_locator": locator,
-        "source_object_ref": "data/raw/papers/d4cp04231j.pdf",
+        "source_object_ref": "data/raw/literature/pdf/local_papers/d4cp04231j.pdf",
         "evidence_text": text,
         "evidence_summary": summary,
         "confidence": confidence,
