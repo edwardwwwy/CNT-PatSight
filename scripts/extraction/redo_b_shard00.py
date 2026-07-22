@@ -3369,6 +3369,3283 @@ def build_lit_60168627(context: SourceContext) -> Path:
     return package
 
 
+def build_lit_87b8240d(context: SourceContext) -> Path:
+    """Kimura et al. 2013, feedstock matrix plus TDN/benzaldehyde demo."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    campaigns = [
+        ("ACETYLENE", "acetylene", "3.23", "823", "10.8", "0.039", "3.1"),
+        ("ETHYLENE", "ethylene", "3.09", "938", "12.4", "0.033", "3.0"),
+        ("BUTADIENE", "1,3-butadiene", "3.29", "817", "15", "0.040", "2.5"),
+        ("PROPANE", "propane", "4.67", "1352", "5.4", "0.035", "2.8"),
+        ("BUTANE", "butane", "4.98", "1508", "7.8", "0.033", "2.9"),
+        ("N_HEXANE", "n-hexane", "2.75", "971", "6.2", "0.028", "3.0"),
+        ("T_DN", "trans-decahydronaphthalene", "1.36", "400", "15.2", "0.034", "2.8"),
+        ("P_XYLENE", "p-xylene", "0.76", "163", "5.7", "0.046", ""),
+        ("DICYCLOPENTADIENE", "dicyclopentadiene", "2.03", "655", "14.0", "0.031", ""),
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Ten-feedstock water-assisted CVD matrix (including the failed methane campaign), Table 2, Figures 1-4, Methods, and the separate TDN/benzaldehyde demonstration.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+
+    def add_common_rows(
+        run: dict[str, str], carbon_source: str
+    ) -> tuple[dict[str, str], list[dict[str, str]], dict[str, str]]:
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="sputtered Al2O3/Fe thin-film catalyst",
+            active_metals="Fe",
+            support_material="40 nm Al2O3 layer",
+            preparation_method="sequential sputtering",
+            preparation_detail="40 nm Al2O3 / 1.5 nm Fe",
+            activation_condition="nanoparticle formation at 750 C under He/H2 = 1/9",
+            phase_or_state_summary="Fe nanoparticles formed in situ before feedstock-specific growth",
+        )
+        stages = [
+            process_row(
+                run_id,
+                1,
+                "nanoparticle_formation",
+                reactor_type="1 inch fully automated CVD system with exchange chamber",
+                temperature_setpoint_C="750",
+                gas_composition_summary="He/H2 = 1/9",
+                process_note="Common catalyst nanoparticle-formation step used to remove catalyst formation as a variable.",
+            ),
+            process_row(
+                run_id,
+                2,
+                "water_assisted_CVD_growth",
+                reactor_type="1 inch fully automated CVD system with exchange chamber",
+                temperature_range_reported_C="725-900",
+                temperature_program_summary="Adjusted from the common 750 C nanoparticle-formation condition to a feedstock-specific optimized growth temperature; the per-feedstock setting is not tabulated.",
+                holding_time_min="10",
+                carbon_source=carbon_source,
+                inert_gas="He",
+                cofeed_or_reactive_gas="water growth enhancer",
+                cofeed_flow_original="50-500 ppm water; feedstock-specific optimized level not reported",
+                gas_composition_summary="Feedstock level and water level were optimized separately; feedstock-specific flows are not reported.",
+                process_note="The paper gives conflicting common total flows (1 L/min in Results and 500 sccm in Methods), so no total-flow value is selected.",
+            ),
+        ]
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="1 inch automated CVD research system",
+            scale_level_claimed="not_reported",
+            quantitative_cost_reported="not_reported",
+            review_note="The article reports an automated research system and about 2000 optimization syntheses; no quantitative cost is reported.",
+        )
+        return catalyst, stages, cost
+
+    for index, (code, feedstock, yield_value, height, gd, density, diameter) in enumerate(
+        campaigns, start=1
+    ):
+        run = source_run_row(
+            source_id,
+            code,
+            f"water-assisted CVD with {feedstock}",
+            f"Feedstock-specific optimized water-assisted CVD campaign producing a vertically aligned SWCNT forest; Table 2 reports {yield_value} mg/cm2 forest yield.",
+        )
+        run_id = run["run_id"]
+        catalyst, stages, cost = add_common_rows(run, feedstock)
+        product = yield_row(
+            run_id,
+            primary_yield_metric="CNT forest mass per substrate area",
+            yield_original=f"{yield_value} mg/cm2",
+            yield_definition_original="mass of the CNT forest per substrate area",
+            yield_value_standardized=yield_value,
+            yield_unit_standardized="mg/cm2",
+            yield_standardization_note="Direct transcription from Table 2; no conversion performed.",
+            secondary_result_summary=f"forest height {height} um; bulk forest density {density} g/cm3",
+            CNT_type_reported="single-wall carbon nanotube forest",
+            CNT_type_confirmed="forest primarily composed of SWCNTs (>90%); any DWCNT occurrence was not feedstock-resolved",
+            product_mixture_summary="vertically aligned forest primarily composed of SWCNTs; non-CNT impurity fraction not quantified per feedstock",
+            CNT_type_evidence="RBM Raman profiles and TEM; Table 2 feedstock-specific characterization",
+            outer_diameter_mean_nm=diameter or "not_reported",
+            length_summary=f"forest height {height} um",
+            morphology="vertically aligned SWCNT forest",
+            alignment_or_array="vertically aligned forest",
+            Raman_ratio_type="G/D",
+            Raman_ratio_value=gd,
+            Raman_laser_wavelength_nm="532",
+            characterization_methods="gravimetric forest yield; height; bulk density; Raman spectroscopy; FTIR; TEM",
+            notes="A dash in the Table 2 diameter column is retained as not_reported, never as zero.",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].extend(stages)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].extend(
+            [
+                evidence_row(source_id, f"{prefix}_CAT", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the common sputtered 40 nm Al2O3 / 1.5 nm Fe catalyst and 750 C He/H2 nanoparticle-formation step."),
+                evidence_row(source_id, f"{prefix}_FORM", run_id, "reactor_process_gas", stages[0]["process_stage_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the 1 inch automated CVD system and common 750 C, He/H2 = 1/9 nanoparticle-formation step."),
+                evidence_row(source_id, f"{prefix}_GROW", run_id, "reactor_process_gas", stages[1]["process_stage_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report 10 min growth, 725-900 C optimized temperatures, water at 50-500 ppm, He carrier gas, and feedstock-specific optimization."),
+                evidence_row(source_id, f"{prefix}_FLOW_CONFLICT", run_id, "reactor_process_gas", stages[1]["process_stage_id"], "record_level", "SPAN_0AA8EE9FE744693B6657", "Results describe a 1 L/min standard process while Methods state 500 sccm; the output retains the conflict and leaves total flow blank."),
+                evidence_row(source_id, f"{prefix}_TABLE2", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_D031297F17756C4E70AF", "Table 2 supplies feedstock-specific yield, height, G/D, density and, where reported, diameter."),
+                evidence_row(source_id, f"{prefix}_IDENTITY", run_id, "yield_quality", product["product_id"], "CNT_type_reported;CNT_type_confirmed;product_mixture_summary;CNT_type_evidence;morphology;alignment_or_array;characterization_methods", "SPAN_7EF4C227D6BFD58CF8D8", "Results report SWCNT forests for all feedstocks except methane and describe RBM Raman and TEM confirmation."),
+                evidence_row(source_id, f"{prefix}_PURITY", run_id, "yield_quality", product["product_id"], "CNT_type_confirmed;product_mixture_summary", "SPAN_93ECAF269AB8D297E018", "Results report that each forest was primarily SWCNT (>90%); any double-wall contribution was not assigned to individual feedstocks."),
+                evidence_row(source_id, f"{prefix}_RAMAN", run_id, "yield_quality", product["product_id"], "Raman_laser_wavelength_nm", "SPAN_841C0F564742832EDE65", "Methods report Raman excitation at 532 nm."),
+                evidence_row(source_id, f"{prefix}_COST", run_id, "cost_scale_review", run_id, "record_level", "SPAN_36246A46423A464D69BE", "Methods demonstrate a 1 inch automated CVD research system; cost fields are not reported.", value_status="review_assessment"),
+            ]
+        )
+
+    methane = source_run_row(
+        source_id,
+        "METHANE_FAILED",
+        "water-assisted CVD methane campaign",
+        "Methane was tested as the tenth feedstock but did not form a SWCNT forest in this catalyst/growth system.",
+        data_type="negative_control",
+        target_track="CNT_production_control",
+    )
+    methane_id = methane["run_id"]
+    catalyst, stages, cost = add_common_rows(methane, "methane")
+    methane_product = yield_row(
+        methane_id,
+        primary_yield_metric="qualitative forest-growth outcome",
+        yield_original="no SWCNT forest formed",
+        yield_definition_original="forest presence/absence in Figure 1 and Results",
+        yield_standardization_note="No numeric yield is inferred for the failed methane campaign.",
+        CNT_type_reported="not_observed",
+        CNT_type_confirmed="no SWCNT forest formed",
+        product_mixture_summary="failed forest-growth campaign; no successful CNT product fields inherited",
+        CNT_type_evidence="Results explicitly identify methane as the sole exception among the ten feedstocks.",
+        morphology="no forest observed",
+        characterization_methods="Figure 1 digital sample image and result narrative",
+        notes="Success-only Table 2 values, diameter, density, Raman and aligned-forest fields are intentionally absent.",
+    )
+    tables["source_run"].append(methane)
+    tables["catalyst_system"].append(catalyst)
+    tables["reactor_process_gas"].extend(stages)
+    tables["yield_quality"].append(methane_product)
+    tables["cost_scale_review"].append(cost)
+    prefix = f"{source_id}_EV_10"
+    tables["evidence_index"].extend(
+        [
+            evidence_row(source_id, f"{prefix}_CAT", methane_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the common catalyst and nanoparticle-formation step."),
+            evidence_row(source_id, f"{prefix}_FORM", methane_id, "reactor_process_gas", stages[0]["process_stage_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the common 750 C He/H2 nanoparticle-formation step."),
+            evidence_row(source_id, f"{prefix}_GROW", methane_id, "reactor_process_gas", stages[1]["process_stage_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the water-assisted feedstock-optimization process; methane is one of the ten feedstocks in Figure 1."),
+            evidence_row(source_id, f"{prefix}_FLOW_CONFLICT", methane_id, "reactor_process_gas", stages[1]["process_stage_id"], "record_level", "SPAN_0AA8EE9FE744693B6657", "Results and Methods conflict on common total flow, so total flow remains blank."),
+            evidence_row(source_id, f"{prefix}_FAIL", methane_id, "yield_quality", methane_product["product_id"], "record_level", "SPAN_CA968277D41EFA251DFD", "Results explicitly state that forests were grown from all investigated feedstocks except methane."),
+            evidence_row(source_id, f"{prefix}_COST", methane_id, "cost_scale_review", methane_id, "record_level", "SPAN_36246A46423A464D69BE", "Methods demonstrate a 1 inch automated CVD research system; cost is not reported.", value_status="review_assessment"),
+        ]
+    )
+
+    combo = source_run_row(
+        source_id,
+        "TDN_BENZALDEHYDE_DEMO",
+        "TDN carbon source with benzaldehyde growth enhancer",
+        "Separate two-CVD-process demonstration that a TDN/benzaldehyde ambient can form a CNT forest; the individual gases alone did not form forests.",
+        data_type="demonstration_run",
+    )
+    combo_id = combo["run_id"]
+    combo_catalyst = catalyst_row(
+        combo_id,
+        catalyst_label="sputtered Al2O3/Fe thin-film catalyst",
+        active_metals="Fe",
+        support_material="40 nm Al2O3 layer",
+        preparation_method="sequential sputtering",
+        preparation_detail="40 nm Al2O3 / 1.5 nm Fe",
+        activation_condition="nanoparticle formation under standard conditions before growth",
+        phase_or_state_summary="Fe nanoparticles formed in situ",
+    )
+    combo_process = process_row(
+        combo_id,
+        1,
+        "TDN_benzaldehyde_CVD_demonstration",
+        reactor_type="1 inch fully automated CVD system with exchange chamber",
+        temperature_setpoint_C="750",
+        carbon_source="trans-decahydronaphthalene (TDN)",
+        cofeed_or_reactive_gas="benzaldehyde (BA) growth enhancer",
+        cofeed_flow_original="BA concentration approximately 1/1500 of TDN",
+        total_flow_original="approximately 1000 sccm",
+        total_flow_sccm="~1000",
+        gas_composition_summary="TDN supplies carbon; oxygen-containing benzaldehyde is the growth enhancer.",
+        process_note="Two CVD processes were used to adjust the relative TDN/BA level; other conditions were described as similar to the standard process.",
+    )
+    combo_product = yield_row(
+        combo_id,
+        primary_yield_metric="qualitative CNT forest formation",
+        yield_original="CNT forest synthesized; numeric yield not reported",
+        yield_definition_original="demonstration of forest formation from the combined TDN/benzaldehyde ambient",
+        yield_standardization_note="No numeric yield, diameter or selectivity is inferred.",
+        CNT_type_reported="carbon nanotube forest",
+        CNT_type_confirmed="not_reported",
+        product_mixture_summary="CNT forest from combined TDN and benzaldehyde; individual-gas controls did not form forests",
+        CNT_type_evidence="main-text demonstration narrative",
+        morphology="CNT forest",
+        characterization_methods="main-text forest observation; sample was not quantitatively characterized",
+        notes="The article only expects similarity to the separately characterized TDN/water forest; expected 2.8 nm and 93% values are not copied into this run.",
+    )
+    combo_cost = cost_row(
+        combo_id,
+        scale_level_demonstrated="1 inch automated CVD research system",
+        scale_level_claimed="not_reported",
+        quantitative_cost_reported="not_reported",
+        review_note="Two CVD trials were required to adjust the TDN/benzaldehyde ratio; no cost is reported.",
+    )
+    tables["source_run"].append(combo)
+    tables["catalyst_system"].append(combo_catalyst)
+    tables["reactor_process_gas"].append(combo_process)
+    tables["yield_quality"].append(combo_product)
+    tables["cost_scale_review"].append(combo_cost)
+    tables["evidence_index"].extend(
+        [
+            evidence_row(source_id, f"{source_id}_EV_11_CAT", combo_id, "catalyst_system", combo_catalyst["catalyst_id"], "record_level", "SPAN_36246A46423A464D69BE", "Methods report the common sputtered Al2O3/Fe catalyst used for the study."),
+            evidence_row(source_id, f"{source_id}_EV_11_PROCESS", combo_id, "reactor_process_gas", combo_process["process_stage_id"], "record_level", "SPAN_CE51C41B28482F1770E2", "The demonstration uses TDN as carbon source and benzaldehyde at approximately 1/1500 of TDN as growth enhancer, with standard-like 750 C and 1000 sccm conditions."),
+            evidence_row(source_id, f"{source_id}_EV_11_RESULT", combo_id, "yield_quality", combo_product["product_id"], "record_level", "SPAN_CE51C41B28482F1770E2", "The combined TDN/benzaldehyde ambient formed a CNT forest, while either gas alone did not."),
+            evidence_row(source_id, f"{source_id}_EV_11_LIMIT", combo_id, "yield_quality", combo_product["product_id"], "record_level", "SPAN_3D258EA5C74EDA933CF6", "The sample was not quantitatively characterized; diameter and selectivity are expectations from a separate TDN/water case and are not transferred."),
+            evidence_row(source_id, f"{source_id}_EV_11_COST", combo_id, "cost_scale_review", combo_id, "record_level", "SPAN_CE51C41B28482F1770E2", "The demonstration required two CVD processes and reports no cost.", value_status="review_assessment"),
+        ]
+    )
+    first_growth = tables["reactor_process_gas"][1]
+    tables["review_issue_log"].extend(
+        [
+            issue_row(
+                f"{source_id}_ISS_TOTAL_FLOW_CONFLICT",
+                source_id,
+                tables["source_run"][0]["run_id"],
+                "conflicting_reported_value",
+                "reactor_process_gas",
+                first_growth["process_stage_id"],
+                "total_flow_original",
+                "Results state a 1 L/min standard total flow, while Methods state 500 sccm. No value is selected for the feedstock matrix.",
+                evidence_ids=f"{source_id}_EV_01_GROW;{source_id}_EV_01_FLOW_CONFLICT",
+                severity="high",
+                conflicting_values="1 L/min | 500 sccm",
+            ),
+            issue_row(
+                f"{source_id}_ISS_COMBO_CHARACTERIZATION",
+                source_id,
+                combo_id,
+                "expected_value_not_measured",
+                "yield_quality",
+                combo_product["product_id"],
+                "outer_diameter_mean_nm",
+                "The TDN/benzaldehyde forest was not quantitatively characterized. The paper only expects similarity to a separate TDN/water case, so 2.8 nm and 93% selectivity remain absent.",
+                evidence_ids=f"{source_id}_EV_11_LIMIT",
+                severity="medium",
+                conflicting_values="expected ~2.8 nm and ~93% | not measured for combo",
+            ),
+        ]
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 11,
+                "extracted_runs": 11,
+                "negative_runs_preserved": 1,
+                "matrix_note": "All ten Figure 1 feedstocks are retained, including failed methane and the previously omitted successful p-xylene row. The separate TDN/benzaldehyde demonstration is an eleventh run.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [2, 3, 4, 5, 6],
+                "objects_checked": ["Table 1 feedstock matrix", "Figure 1 ten feedstocks and methane failure", "Table 2 nine successful feedstock rows", "Figures 2-4 Raman/TEM/trend plots", "Methods catalyst and CVD conditions", "TDN/benzaldehyde demonstration narrative"],
+            },
+            "pressure_policy_check": "The 1 atm value on page 6 belongs to a standard gas-flow-to-molar-input calculation, not a reported reactor pressure. All reactor pressure fields remain blank.",
+            "cross_run_inheritance_check": "Methane retains no successful forest, alignment, diameter, density or Raman values. Table 2 values are assigned only to their feedstock rows; dash diameters remain not_reported.",
+            "unit_policy_check": "Table 2 units were visually checked on page 4: yield mg/cm2, height um, density g/cm3 and diameter nm. Values are transcribed without conversion.",
+            "conflict_check": "The 1 L/min versus 500 sccm common total-flow conflict is logged and neither value is selected for the matrix. Expected TDN/benzaldehyde diameter/selectivity are not treated as measurements.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_bd24584c(context: SourceContext) -> Path:
+    """Wirth et al. 2012, three in-situ XRD routes plus ETEM nucleation."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    groups = [
+        {
+            "code": "FIG2_MIXED_METALLIC",
+            "label": "Figure 2 mixed-metallic Fe route",
+            "summary": "Representative member of the 12-run in-situ XRD series: alpha/gamma metallic Fe remains active during CNT growth without detected carbide.",
+            "phase": "mixed alpha-Fe/gamma-Fe metallic route during growth; no carbide detected",
+            "result_span": "SPAN_E930D3421D08A0FED2BC",
+            "diameter_mean": "",
+            "diameter_range": "",
+            "diameter_note": "No figure-specific tube diameter is reported for the Figure 2 representative.",
+        },
+        {
+            "code": "FIG3_GAMMA_FE",
+            "label": "Figure 3 gamma-Fe-dominant route",
+            "summary": "Representative in-situ XRD run with gamma-Fe dominant during growth and no detected carbide; CNTs averaged 26 nm in diameter.",
+            "phase": "gamma-Fe-dominant metallic route during growth; no carbide detected",
+            "result_span": "SPAN_E930D3421D08A0FED2BC",
+            "diameter_mean": "26",
+            "diameter_range": "9-50",
+            "diameter_note": "standard deviation 11 nm",
+        },
+        {
+            "code": "FIG4_CARBIDE",
+            "label": "Figure 4 cementite-dominant carbide route",
+            "summary": "Representative in-situ XRD run in which cementite becomes the dominant growth-stage phase; CNTs averaged 24 nm in diameter.",
+            "phase": "cementite-dominant carbide route during growth with alpha-Fe/gamma-Fe also present",
+            "result_span": "SPAN_181FABA80420DCF58523",
+            "diameter_mean": "24",
+            "diameter_range": "11-49",
+            "diameter_note": "standard deviation 9 nm",
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Three figure-defined phase-evolution groups representing 12 nominally repeated in-situ XRD CVD runs, plus the separate ETEM CNT-nucleation experiment.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+
+    direct_anneal_fields = ";".join(
+        [
+            "stage_type",
+            "reactor_type",
+            "temperature_setpoint_C",
+            "pressure_original",
+            "reducing_gas",
+            "reducing_gas_flow_original",
+            "reducing_gas_flow_sccm",
+            "inert_gas",
+            "inert_gas_flow_original",
+            "inert_gas_flow_sccm",
+            "gas_composition_summary",
+        ]
+    )
+    direct_growth_fields = ";".join(
+        [
+            "stage_type",
+            "reactor_type",
+            "temperature_setpoint_C",
+            "pressure_original",
+            "carbon_source",
+            "carbon_source_flow_original",
+            "carbon_source_flow_sccm",
+            "reducing_gas",
+            "reducing_gas_flow_original",
+            "reducing_gas_flow_sccm",
+            "inert_gas",
+            "inert_gas_flow_original",
+            "inert_gas_flow_sccm",
+            "gas_composition_summary",
+        ]
+    )
+
+    for index, item in enumerate(groups, start=1):
+        run = source_run_row(
+            source_id,
+            item["code"],
+            item["label"],
+            item["summary"],
+            data_type="experimental_series",
+        )
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="oxide-supported thermally evaporated Fe film",
+            active_metals="Fe",
+            support_material="thermal SiO2 or sputtered Al2O3 on silicon; figure-to-support mapping not reported",
+            preparation_method="thermal evaporation of Fe onto oxide-supported silicon wafer",
+            preparation_detail="nominally 8 nm Fe film",
+            activation_condition="single-step hydrogen-containing anneal before acetylene exposure",
+            phase_or_state_summary=item["phase"],
+        )
+        stages = [
+            process_row(
+                run_id,
+                1,
+                "Ar_H2_annealing",
+                reactor_type="synchrotron cold-wall reactor chamber",
+                temperature_setpoint_C="750",
+                pressure_original="~150 mbar",
+                pressure_kPa="~15",
+                reducing_gas="H2",
+                reducing_gas_flow_original="10 sccm",
+                reducing_gas_flow_sccm="10",
+                inert_gas="Ar",
+                inert_gas_flow_original="30 sccm",
+                inert_gas_flow_sccm="30",
+                gas_composition_summary="Ar/H2 = 30/10 sccm",
+                process_note="Stage II; approximate pressure and original gas flows retained.",
+            ),
+            process_row(
+                run_id,
+                2,
+                "acetylene_CNT_growth",
+                reactor_type="synchrotron cold-wall reactor chamber",
+                temperature_setpoint_C="750",
+                pressure_original="~150 mbar",
+                pressure_kPa="~15",
+                carbon_source="C2H2",
+                carbon_source_flow_original="1 sccm",
+                carbon_source_flow_sccm="1",
+                reducing_gas="H2",
+                reducing_gas_flow_original="10 sccm",
+                reducing_gas_flow_sccm="10",
+                inert_gas="Ar",
+                inert_gas_flow_original="30 sccm",
+                inert_gas_flow_sccm="30",
+                gas_composition_summary="C2H2 added to the 30 sccm Ar / 10 sccm H2 annealing flow",
+                process_note="Stage III; no exact growth duration is reported. The chamber is pumped out and the sample cools in vacuum after CVD.",
+            ),
+        ]
+        product = yield_row(
+            run_id,
+            primary_yield_metric="qualitative CNT growth",
+            yield_original="CNT growth confirmed by post-growth SEM; quantitative yield not reported",
+            yield_definition_original="ex-situ SEM confirmation across the repeated in-situ runs",
+            yield_standardization_note="No mass yield is inferred; the paper only states that yields are similar across routes.",
+            CNT_type_reported="predominantly multi-walled carbon nanotubes",
+            CNT_type_confirmed="predominantly multi-walled, partly defective CNTs",
+            product_mixture_summary="predominantly MWCNTs with some bamboo-type structures and graphite-cage-encapsulated catalyst particles",
+            CNT_type_evidence="post-growth SEM and TEM",
+            outer_diameter_mean_nm=item["diameter_mean"] or "not_reported",
+            outer_diameter_range_nm=item["diameter_range"] or "not_reported",
+            morphology="entangled MWCNTs with some bamboo-type structures",
+            characterization_methods="in-situ GIXRD; ex-situ SEM; HR-TEM",
+            notes=item["diameter_note"],
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="synchrotron in-situ cold-wall reactor experiment",
+            scale_level_claimed="not_reported",
+            quantitative_cost_reported="not_reported",
+            review_note="No quantitative cost or production scale is reported.",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].extend(stages)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].extend(
+            [
+                evidence_row(source_id, f"{prefix}_CAT_METHOD", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_5BFC850BD9A3FF3004B9", "Methods report the two possible oxide supports, nominal 8 nm Fe film, annealing recipe and 12 nominally repeated samples."),
+                evidence_row(source_id, f"{prefix}_CAT_ROUTE", run_id, "catalyst_system", catalyst["catalyst_id"], "phase_or_state_summary", item["result_span"], item["summary"]),
+                evidence_row(source_id, f"{prefix}_REACTOR", run_id, "reactor_process_gas", stages[0]["process_stage_id"], "reactor_type", "SPAN_AA0F98EE4E7F69B00512", "Experimental section identifies the synchrotron cold-wall reactor chamber."),
+                evidence_row(source_id, f"{prefix}_ANNEAL", run_id, "reactor_process_gas", stages[0]["process_stage_id"], direct_anneal_fields, "SPAN_AEE4186784B2DBE19DBB", "Methods report 750 C annealing in 30 sccm Ar and 10 sccm H2 at approximately 150 mbar."),
+                evidence_row(source_id, f"{prefix}_ANNEAL_KPA", run_id, "reactor_process_gas", stages[0]["process_stage_id"], "pressure_kPa", "SPAN_AEE4186784B2DBE19DBB", "Approximate conversion of ~150 mbar to ~15 kPa; original pressure retained.", value_status="normalized"),
+                evidence_row(source_id, f"{prefix}_GROW", run_id, "reactor_process_gas", stages[1]["process_stage_id"], direct_growth_fields, "SPAN_AEE4186784B2DBE19DBB", "Methods report addition of 1 sccm acetylene to the Ar/H2 flow; Figure 1 and Results confirm 750 C for growth."),
+                evidence_row(source_id, f"{prefix}_GROW_KPA", run_id, "reactor_process_gas", stages[1]["process_stage_id"], "pressure_kPa", "SPAN_AEE4186784B2DBE19DBB", "Approximate conversion of ~150 mbar to ~15 kPa; original pressure retained.", value_status="normalized"),
+                evidence_row(source_id, f"{prefix}_RESULT", run_id, "yield_quality", product["product_id"], "record_level", item["result_span"], item["summary"]),
+                evidence_row(source_id, f"{prefix}_PRODUCT_COMMON", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_E930D3421D08A0FED2BC", "Results confirm CNT growth for all main-series samples and report predominantly multi-walled products with bamboo-type structures and encapsulated catalyst particles."),
+                evidence_row(source_id, f"{prefix}_COST", run_id, "cost_scale_review", run_id, "record_level", "SPAN_AA0F98EE4E7F69B00512", "The source demonstrates a synchrotron cold-wall reactor experiment; cost and production scale are not reported.", value_status="review_assessment"),
+            ]
+        )
+
+    etem = source_run_row(
+        source_id,
+        "ETEM_CNT_NUCLEATION",
+        "ETEM Fe nanoparticle restructuring and CNT nucleation",
+        "Separate environmental-TEM experiment showing reduction/restructuring of an Fe nanoparticle and lift-off nucleation of a CNT carbon cap under acetylene.",
+        target_track="CNT_nucleation_mechanism",
+    )
+    etem_id = etem["run_id"]
+    etem_catalyst = catalyst_row(
+        etem_id,
+        catalyst_label="Fe film on SiOx-covered Mo-TEM grid",
+        active_metals="Fe",
+        support_material="SiOx-covered Mo-TEM grid",
+        preparation_method="thermal evaporation",
+        preparation_detail="0.7 nm Fe film; lamp heated in air before ETEM loading",
+        activation_condition="1.3 mbar NH3 at 650 C for 1 hour; treatment did not fully reduce oxidized Fe",
+        phase_or_state_summary="initially oxidized Fe nanoparticle that restructures/reduces under acetylene",
+    )
+    etem_stages = [
+        process_row(
+            etem_id,
+            1,
+            "NH3_pretreatment",
+            reactor_type="modified environmental TEM with differential pumping",
+            temperature_setpoint_C="650",
+            holding_time_min="60",
+            pressure_original="1.3 mbar",
+            pressure_kPa="0.13",
+            cofeed_or_reactive_gas="NH3",
+            process_note="The low-pressure NH3 treatment was insufficient to fully reduce the oxidized Fe catalyst.",
+        ),
+        process_row(
+            etem_id,
+            2,
+            "ETEM_acetylene_CNT_nucleation",
+            reactor_type="modified environmental TEM with differential pumping",
+            temperature_setpoint_C="650",
+            pressure_original="~10^-2 mbar",
+            pressure_kPa="~0.001",
+            carbon_source="undiluted C2H2",
+            gas_composition_summary="undiluted acetylene under ETEM differential-pumping conditions",
+            process_note="Figure 6 records Fe-particle restructuring, reduction and CNT nucleation; exact growth duration is not reported.",
+        ),
+    ]
+    etem_product = yield_row(
+        etem_id,
+        primary_yield_metric="qualitative CNT nucleation observation",
+        yield_original="CNT nucleation observed by carbon-cap lift-off",
+        yield_definition_original="time-resolved ETEM observation",
+        yield_standardization_note="No bulk yield or tube diameter is inferred from the image sequence.",
+        CNT_type_reported="carbon nanotube; wall number not reported",
+        CNT_type_confirmed="CNT nucleation from reduced Fe particle",
+        product_mixture_summary="single observed CNT nucleation sequence; bulk product composition not applicable",
+        CNT_type_evidence="ETEM image sequence and FFT",
+        morphology="carbon cap lifts off from a reduced Fe particle and develops into a CNT",
+        characterization_methods="environmental TEM; FFT; time-resolved video",
+    )
+    etem_cost = cost_row(
+        etem_id,
+        scale_level_demonstrated="environmental-TEM mechanistic experiment",
+        scale_level_claimed="not_reported",
+        quantitative_cost_reported="not_reported",
+        review_note="Mechanistic microscopy experiment; no production cost or scale is reported.",
+    )
+    tables["source_run"].append(etem)
+    tables["catalyst_system"].append(etem_catalyst)
+    tables["reactor_process_gas"].extend(etem_stages)
+    tables["yield_quality"].append(etem_product)
+    tables["cost_scale_review"].append(etem_cost)
+    tables["evidence_index"].extend(
+        [
+            evidence_row(source_id, f"{source_id}_EV_04_CAT", etem_id, "catalyst_system", etem_catalyst["catalyst_id"], "record_level", "SPAN_C91CFC18784746E1E6CD", "Methods report the 0.7 nm Fe/SiOx/Mo-TEM preparation, air heating and 1.3 mbar NH3 treatment at 650 C for 1 hour."),
+            evidence_row(source_id, f"{source_id}_EV_04_PRETREAT", etem_id, "reactor_process_gas", etem_stages[0]["process_stage_id"], "stage_type;reactor_type;temperature_setpoint_C;pressure_original;cofeed_or_reactive_gas", "SPAN_3883E4C962DE97B43DA1", "Methods report the modified ETEM and NH3 pretreatment at 650 C and 1.3 mbar for 1 hour."),
+            evidence_row(source_id, f"{source_id}_EV_04_PRETREAT_TIME", etem_id, "reactor_process_gas", etem_stages[0]["process_stage_id"], "holding_time_min", "SPAN_3883E4C962DE97B43DA1", "Normalized conversion of the reported 1 hour pretreatment to 60 minutes.", value_status="normalized"),
+            evidence_row(source_id, f"{source_id}_EV_04_PRETREAT_KPA", etem_id, "reactor_process_gas", etem_stages[0]["process_stage_id"], "pressure_kPa", "SPAN_3883E4C962DE97B43DA1", "Normalized conversion of 1.3 mbar to 0.13 kPa.", value_status="normalized"),
+            evidence_row(source_id, f"{source_id}_EV_04_GROW", etem_id, "reactor_process_gas", etem_stages[1]["process_stage_id"], "stage_type;reactor_type;temperature_setpoint_C;pressure_original;carbon_source;gas_composition_summary", "SPAN_E8FA5612372E2AEF5D00", "Methods report undiluted acetylene at approximately 10^-2 mbar; Figure 6 reports the 650 C ETEM sequence."),
+            evidence_row(source_id, f"{source_id}_EV_04_GROW_TEMP", etem_id, "reactor_process_gas", etem_stages[1]["process_stage_id"], "temperature_setpoint_C", "SPAN_D6B162647D9169108E8C", "Results identify the ETEM image sequence at 650 C."),
+            evidence_row(source_id, f"{source_id}_EV_04_GROW_KPA", etem_id, "reactor_process_gas", etem_stages[1]["process_stage_id"], "pressure_kPa", "SPAN_E8FA5612372E2AEF5D00", "Normalized conversion of approximately 10^-2 mbar to approximately 0.001 kPa.", value_status="normalized"),
+            evidence_row(source_id, f"{source_id}_EV_04_RESULT", etem_id, "yield_quality", etem_product["product_id"], "record_level", "SPAN_0B70AB2C95BE40F9310A", "The ETEM sequence shows carbon-cap lift-off and CNT nucleation from a reduced Fe particle."),
+            evidence_row(source_id, f"{source_id}_EV_04_COST", etem_id, "cost_scale_review", etem_id, "record_level", "SPAN_C91CFC18784746E1E6CD", "The work demonstrates an ETEM mechanistic experiment and reports no cost or production scale.", value_status="review_assessment"),
+        ]
+    )
+    tables["review_issue_log"].extend(
+        [
+            issue_row(
+                f"{source_id}_ISS_REPLICATE_GROUPING",
+                source_id,
+                tables["source_run"][0]["run_id"],
+                "series_members_not_individually_resolvable",
+                "source_run",
+                tables["source_run"][0]["run_id"],
+                "run_summary",
+                "The article reports 12 nominally repeated in-situ XRD runs but publishes three representative/grouped phase-evolution cases. Three group-level records are retained; nine unspecified members are not fabricated.",
+                evidence_ids=f"{source_id}_EV_01_CAT_METHOD;{source_id}_EV_03_RESULT",
+                severity="high",
+                conflicting_values="12 physical repeats | 3 published representative groups",
+            ),
+            issue_row(
+                f"{source_id}_ISS_SUPPORT_MAPPING",
+                source_id,
+                tables["source_run"][0]["run_id"],
+                "run_level_support_not_reported",
+                "catalyst_system",
+                tables["catalyst_system"][0]["catalyst_id"],
+                "support_material",
+                "Both SiO2 and Al2O3 supports were used, but the Figure 2-4 representative cases are not mapped to a specific support. The alternatives are retained without cross-run assignment.",
+                evidence_ids=f"{source_id}_EV_01_CAT_METHOD",
+                severity="medium",
+                conflicting_values="SiO2 | Al2O3; figure mapping not reported",
+            ),
+        ]
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 4,
+                "extracted_runs": 4,
+                "negative_runs_preserved": 0,
+                "matrix_note": "Three group-level in-situ XRD records preserve the Figure 2-4 phase routes representing 12 nominal repeats. The separate ETEM nucleation experiment is the fourth record; unspecified repeat members are not invented.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 22],
+                "objects_checked": ["Experimental Section recipes", "Figure 1 four-stage CVD schematic", "Figures 2-4 phase-route XRD/SEM/TEM panels", "Figure 3 and Figure 4 diameter-linked samples", "Figure 6 ETEM nucleation sequence"],
+            },
+            "pressure_policy_check": "The source reports approximately 150 mbar for the main CVD and separate 1.3 mbar / approximately 10^-2 mbar ETEM conditions. Original approximate forms are retained; kPa fields are explicitly normalized and preserve approximation.",
+            "cross_run_inheritance_check": "The 26 nm and 24 nm distributions are confined to the Figure 3 and Figure 4 samples. Figure 2 remains without a diameter. SiO2/Al2O3 support alternatives are not assigned to individual figures because the mapping is absent.",
+            "unit_policy_check": "Visual review confirms 26 +/- 11 nm (9-50 nm), 24 +/- 9 nm (11-49 nm), approximately 150 mbar, 30/10/1 sccm and 750 C for the main XRD series.",
+            "conflict_check": "No contradictory product values were found. The unresolved 12-repeat-to-3-group representation and support mapping are logged rather than silently expanded or assigned.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_a2ad11a6(context: SourceContext) -> Path:
+    """Lin et al. 2015, four patterned VACNT-bundle field emitters."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    samples = [
+        {
+            "code": "A",
+            "arrangement": "square",
+            "pitch": "30",
+            "ratio": "2",
+            "bundle_density": "1.0 x 10^5 cm^-2",
+            "turn_on": "2.0",
+            "beta": "1020",
+            "stability": "higher current density with stronger long-term fluctuations",
+        },
+        {
+            "code": "B",
+            "arrangement": "square",
+            "pitch": "45",
+            "ratio": "3",
+            "bundle_density": "4.9 x 10^4 cm^-2",
+            "turn_on": "2.8",
+            "beta": "840",
+            "stability": "most stable long-term field-emission response among the four samples",
+        },
+        {
+            "code": "C",
+            "arrangement": "hexagonal",
+            "pitch": "30",
+            "ratio": "2",
+            "bundle_density": "1.6 x 10^5 cm^-2",
+            "turn_on": "1.6",
+            "beta": "1770",
+            "stability": "lowest turn-on field and highest enhancement factor, with stronger long-term fluctuations",
+        },
+        {
+            "code": "D",
+            "arrangement": "hexagonal",
+            "pitch": "45",
+            "ratio": "3",
+            "bundle_density": "7.0 x 10^4 cm^-2",
+            "turn_on": "2.5",
+            "beta": "905",
+            "stability": "more stable long-term response than the R=2 samples",
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Four Table 1 patterned VACNT-bundle samples A-D are retained as separate result-linked runs and reconciled to Table 2 field-emission results.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, sample in enumerate(samples, start=1):
+        run = source_run_row(
+            source_id,
+            f"SAMPLE_{sample['code']}",
+            f"Sample {sample['code']}: {sample['arrangement']} VACNT bundles, R={sample['ratio']}",
+            (
+                f"Thermal-CVD VACNT bundles on a photolithographically patterned Fe/Al/Si catalyst; "
+                f"{sample['arrangement']} arrangement, {sample['pitch']} micrometre pitch, "
+                f"15 micrometre bundle height, and the source-linked Table 2 field-emission result."
+            ),
+        )
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="3 nm Fe catalyst film on 5 nm Al buffer over patterned Si",
+            active_metals="Fe",
+            support_material="silicon substrate with 5 nm Al buffer layer",
+            preparation_method="photolithography followed by electron-beam evaporation",
+            preparation_detail=(
+                f"10 micrometre circular catalyst sites in a {sample['arrangement']} arrangement "
+                f"with {sample['pitch']} micrometre centre-to-centre pitch; 5 nm Al and 3 nm Fe films"
+            ),
+        )
+        growth = process_row(
+            run_id,
+            1,
+            "thermal_chemical_vapor_deposition",
+            reactor_type="thermal CVD system",
+            temperature_setpoint_C="750",
+            pressure_original="4 Torr working pressure",
+            pressure_kPa="0.533",
+            carbon_source="C2H2",
+            process_note=(
+                "Growth time was adjusted to obtain a 15 micrometre VACNT-bundle height; "
+                "the exact time and acetylene flow were not reported."
+            ),
+        )
+        product = yield_row(
+            run_id,
+            primary_yield_metric="not_reported",
+            yield_original="not_reported",
+            yield_definition_original="not_reported",
+            secondary_result_summary=(
+                f"Sample {sample['code']} turn-on field {sample['turn_on']} V micrometre^-1, "
+                f"enhancement factor {sample['beta']}, and VACNT-bundle number density "
+                f"{sample['bundle_density']}; {sample['stability']}."
+            ),
+            CNT_type_reported="vertically aligned carbon nanotubes (VACNTs)",
+            CNT_type_confirmed="vertically aligned CNT bundle morphology confirmed by SEM; wall count not reported",
+            product_mixture_summary="not_reported",
+            CNT_type_evidence="SEM shows cylindrical bundles composed of dense CNTs aligned vertically to the Si substrate",
+            length_summary="bundle height 15 micrometres; individual-CNT length not separately reported",
+            morphology="cylindrical VACNT bundle approximately 10 micrometres in diameter and 15 micrometres high",
+            alignment_or_array=(
+                f"vertically aligned CNT bundles in a {sample['arrangement']} array at "
+                f"{sample['pitch']} micrometre pitch; interbundle-distance/height ratio R={sample['ratio']}"
+            ),
+            characterization_methods="SEM; field-emission J-E and Fowler-Nordheim analysis; long-term stability test; fluorescence imaging",
+            application_property_summary=(
+                f"Field emitter: turn-on field {sample['turn_on']} V micrometre^-1, "
+                f"enhancement factor {sample['beta']}, bundle number density {sample['bundle_density']}."
+            ),
+            notes="Field-emission performance is reported for the patterned bundle array rather than an individual CNT.",
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory patterned-substrate CVD experiment",
+            scale_level_claimed="not_reported",
+            scale_evidence_summary="Photolithography, thin-film deposition, thermal CVD, and field-emission testing were demonstrated on patterned silicon samples.",
+            quantitative_cost_reported="not_reported",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].append(growth)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].extend(
+            [
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CAT_METHOD",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_E2FBC3E9B5EFD0FA74D0",
+                    "Methods report the patterned Si substrate, 5 nm Al buffer, 3 nm Fe catalyst, electron-beam evaporation, and the shared thermal-CVD recipe.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CAT_PATTERN",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_C7B1B6B201724CDE9304",
+                    f"Printed Table 1 maps sample {sample['code']} to its {sample['arrangement']} arrangement, {sample['pitch']} micrometre pitch, 15 micrometre height, and R={sample['ratio']}.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PROCESS",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "stage_type;reactor_type;temperature_setpoint_C;pressure_original;carbon_source;process_note",
+                    "SPAN_E2FBC3E9B5EFD0FA74D0",
+                    "Methods identify acetylene thermal CVD at 750 C and 4 Torr; growth time controls the 15 micrometre bundle height but its exact value is omitted.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRESSURE_NORMALIZED",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "pressure_kPa",
+                    "SPAN_E2FBC3E9B5EFD0FA74D0",
+                    "The reported 4 Torr working pressure is converted to 0.533 kPa.",
+                    value_status="normalized",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_E2FBC3E9B5EFD0FA74D0",
+                    "Methods and SEM results report dense, vertically aligned cylindrical CNT bundles about 10 micrometres in diameter and 15 micrometres high.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_ARRANGEMENT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_C7B1B6B201724CDE9304",
+                    f"Table 1 links sample {sample['code']} to the run-specific array geometry and pitch.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_FIELD_EMISSION",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_DD36536E961186B124AE",
+                    f"Printed Table 2 links sample {sample['code']} to turn-on field, enhancement factor, and bundle number density.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_STABILITY",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_5AA42E57A380B33C9DE9",
+                    "The long-term field-emission discussion distinguishes the more fluctuating R=2 samples from the more stable R=3 samples and identifies sample B as most stable.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_COST",
+                    run_id,
+                    "cost_scale_review",
+                    run_id,
+                    "record_level",
+                    "SPAN_E2FBC3E9B5EFD0FA74D0",
+                    "The demonstrated patterned-substrate CVD setup is assessed as laboratory scale; no quantitative cost is reported.",
+                    value_status="review_assessment",
+                ),
+            ]
+        )
+        tables["review_issue_log"].append(
+            issue_row(
+                f"{source_id}_ISS_{sample['code']}_GROWTH_TIME",
+                source_id,
+                run_id,
+                "missing_run_parameter",
+                "reactor_process_gas",
+                growth["process_stage_id"],
+                "holding_time_min",
+                "The source says growth time was adjusted to control the common 15 micrometre bundle height but does not report the time for this sample; no value is inferred.",
+                evidence_ids=f"{prefix}_PROCESS",
+                severity="medium",
+            )
+        )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 4,
+                "extracted_runs": 4,
+                "negative_runs_preserved": 0,
+                "matrix_note": "Samples A-D in printed Table 1 are four distinct patterned catalyst/growth products and are mapped one-to-one to the printed Table 2 field-emission outcomes.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [1, 2, 3, 4, 5, 6],
+                "objects_checked": ["Methods recipe", "Table 1 sample/geometry matrix", "Figures 1-2 SEM morphology", "Table 2 field-emission metrics", "Figures 4-6 stability and fluorescence", "Conclusions"],
+            },
+            "pressure_policy_check": "The reported 4 Torr working pressure is retained and normalized to 0.533 kPa; no unreported atmospheric pressure is introduced.",
+            "cross_run_inheritance_check": "Each sample retains only its own Table 1 geometry and Table 2 field-emission values. Shared catalyst/CVD conditions are explicitly stated as common in Methods.",
+            "unit_policy_check": "The PDF confirms 5 nm Al, 3 nm Fe, 750 C, 4 Torr, 10/15/30/45 micrometre dimensions, and the four printed field-emission values.",
+            "conflict_check": "No contradictory sample mapping was found. Exact growth times and acetylene flow are absent and remain unfilled, with a per-run issue recorded.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_ed1d628b(context: SourceContext) -> Path:
+    """Bouanis et al. 2011, Ru-SAM hot-filament CVD comparison and temperature series."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    runs = [
+        {
+            "code": "HF_COMPARE_OFF_900",
+            "label": "Hot-filament comparison: classical CVD at 900 C",
+            "series": "hot-filament comparison",
+            "temperature": "900",
+            "hot_filament": False,
+            "result_span": "SPAN_E3EA52282556050D813D",
+            "result": "SWCNTs formed, but with lower density and shorter length than the hot-filament-assisted comparison sample",
+            "cnt_type": "single-walled carbon nanotubes (SWCNTs)",
+            "confirmed": "RBM peaks at 135 and 197 cm^-1 confirm SWCNTs",
+            "rbm": "135 and 197 cm^-1",
+            "diameter": "1.2-1.8",
+            "raman_value": "0.15",
+            "raman_summary": "I_D/I_G 0.15",
+            "morphology": "lower-density, shorter SWCNT film than the 900 C hot-filament-assisted comparison",
+            "alignment": "not_reported",
+        },
+        {
+            "code": "HF_COMPARE_ON_900",
+            "label": "Hot-filament comparison: HFCVD at 900 C",
+            "series": "hot-filament comparison",
+            "temperature": "900",
+            "hot_filament": True,
+            "result_span": "SPAN_E3EA52282556050D813D",
+            "result": "Hot-filament assistance increased RBM intensity, RBM peak count, SWCNT density, and SWCNT length",
+            "cnt_type": "single-walled carbon nanotubes (SWCNTs)",
+            "confirmed": "stronger and more numerous RBM modes plus SEM morphology confirm SWCNTs",
+            "rbm": "multiple stronger RBM modes; exact peak list not stated in prose",
+            "diameter": "",
+            "raman_value": "0.09",
+            "raman_summary": "I_D/I_G 0.09",
+            "morphology": "higher-density, longer SWCNT film than the 900 C classical-CVD comparison",
+            "alignment": "not_reported",
+        },
+        {
+            "code": "TEMP_HF_800",
+            "label": "HFCVD temperature series at 800 C",
+            "series": "HFCVD temperature series",
+            "temperature": "800",
+            "hot_filament": True,
+            "result_span": "SPAN_0BDE4DD2E4FF92B19BEC",
+            "result": "No CNT growth was observed; Raman features were very weak, I_D/I_G was near unity, and no RBM peaks were observed",
+            "cnt_type": "not_observed",
+            "confirmed": "no CNT growth by SEM/AFM and no RBM evidence",
+            "rbm": "not_observed",
+            "diameter": "",
+            "raman_value": "",
+            "raman_summary": "I_D/I_G near unity",
+            "morphology": "no CNT growth observed",
+            "alignment": "not_applicable",
+        },
+        {
+            "code": "TEMP_HF_900",
+            "label": "HFCVD temperature series at 900 C",
+            "series": "HFCVD temperature series",
+            "temperature": "900",
+            "hot_filament": True,
+            "result_span": "SPAN_0BDE4DD2E4FF92B19BEC",
+            "result": "Quite dense, well-crystallized SWCNTs with RBM-derived diameters of 1.78, 1.66, and 1.28 nm",
+            "cnt_type": "single-walled carbon nanotubes (SWCNTs)",
+            "confirmed": "RBM peaks at 139, 149, and 193 cm^-1 plus SEM/AFM confirm SWCNTs",
+            "rbm": "139, 149 and 193 cm^-1",
+            "diameter": "1.28-1.78",
+            "raman_value": "",
+            "raman_summary": "I_D/I_G lower than 0.09",
+            "morphology": "quite dense SWCNT film",
+            "alignment": "less straight and less aligned than the 1000 C product",
+        },
+        {
+            "code": "TEMP_HF_1000",
+            "label": "HFCVD temperature series at 1000 C",
+            "series": "HFCVD temperature series",
+            "temperature": "1000",
+            "hot_filament": True,
+            "result_span": "SPAN_0BDE4DD2E4FF92B19BEC",
+            "result": "Quite dense SWCNTs with a larger-diameter preference and straighter, better-aligned morphology than at lower temperatures",
+            "cnt_type": "single-walled carbon nanotubes (SWCNTs)",
+            "confirmed": "RBM peaks at 138 and 196 cm^-1 plus SEM/AFM confirm SWCNTs",
+            "rbm": "138 and 196 cm^-1",
+            "diameter": "",
+            "raman_value": "",
+            "raman_summary": "I_D/I_G approximately 0.2",
+            "morphology": "quite dense SWCNT film; straighter nanotubes than at lower temperatures",
+            "alignment": "better aligned than products grown at lower temperatures",
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "The two-sample 900 C hot-filament comparison and the separate three-temperature HFCVD series are retained as five figure-linked records; the duplicate nominal 900 C HFCVD condition is not silently deduplicated across series.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, item in enumerate(runs, start=1):
+        run = source_run_row(
+            source_id,
+            item["code"],
+            item["label"],
+            (
+                f"{item['series']} using a Ru-porphyrin-derived catalyst at {item['temperature']} C for 30 min; "
+                f"{item['result']}."
+            ),
+        )
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="Ru tetraphenyl-porphyrin self-assembled-monolayer-derived catalyst",
+            active_metals="Ru",
+            support_material="RCA-cleaned silicon oxide substrate",
+            precursor_summary="Ru tetraphenyl porphyrin carbonyl complex, 1 mg/mL in anhydrous dichloromethane",
+            preparation_method="pyridine-terminated silanisation followed by Ru-porphyrin self-assembly",
+            preparation_detail=(
+                "Silanisation overnight in anhydrous toluene under argon using 100 mg organosilane per 100 mL; "
+                "the pyridine-functionalized substrate anchors the Ru-porphyrin monolayer"
+            ),
+        )
+        activation = process_row(
+            run_id,
+            1,
+            "hydrogen_hot_filament_activation",
+            reactor_type="quartz-tube hot-filament CVD system",
+            holding_time_min="5",
+            pressure_original="90 mbar",
+            pressure_kPa="9",
+            reducing_gas="hydrogen",
+            process_note="Hydrogen filament operated at 160 W and approximately 1900 C to burn the organic monolayer and free the Ru catalyst.",
+        )
+        growth_note = (
+            "Methane filament was not powered for this classical-CVD comparison condition."
+            if not item["hot_filament"]
+            else "Methane filament operated at 1700 C and 120 W; hot-filament methane pre-dissociation was enabled."
+        )
+        growth = process_row(
+            run_id,
+            2,
+            ("classical_thermal_CVD" if not item["hot_filament"] else "hot_filament_assisted_CVD"),
+            reactor_type=("quartz-tube thermal CVD" if not item["hot_filament"] else "quartz-tube hot-filament-assisted CVD"),
+            reactor_setup_summary="Quartz tube in a cylindrical heater with separate 0.38 mm tungsten filaments for methane and hydrogen; residual base pressure 10^-6 mbar before gas feed.",
+            temperature_setpoint_C=item["temperature"],
+            holding_time_min="30",
+            carbon_source="methane",
+            carbon_source_flow_original="10 sccm in the figure caption",
+            carbon_source_flow_sccm="10",
+            reducing_gas="hydrogen",
+            gas_composition_summary="Methods state CH4 relative concentration 10%; figure captions state CH4 10 sccm.",
+            process_note=growth_note + " The actual CNT-growth pressure and hydrogen flow were not reported.",
+        )
+        product = yield_row(
+            run_id,
+            primary_yield_metric="not_reported",
+            yield_original="not_reported",
+            yield_definition_original="not_reported",
+            secondary_result_summary=item["result"] + "; " + item["raman_summary"] + ".",
+            CNT_type_reported=item["cnt_type"],
+            CNT_type_confirmed=item["confirmed"],
+            product_mixture_summary=("weak carbonaceous Raman signal with no CNT growth" if item["temperature"] == "800" else "not_reported"),
+            CNT_type_evidence=("absence of RBM peaks and absence of CNTs in SEM/AFM" if item["temperature"] == "800" else "Raman RBM signatures with SEM and AFM morphology"),
+            RBM_peak_reported=item["rbm"],
+            outer_diameter_range_nm=item["diameter"],
+            morphology=item["morphology"],
+            alignment_or_array=item["alignment"],
+            Raman_ratio_type="I_D/I_G",
+            Raman_ratio_value=item["raman_value"],
+            characterization_methods="SEM; AFM; confocal Raman spectroscopy",
+            notes=f"Result belongs to the {item['series']}; no gravimetric CNT yield was reported.",
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory quartz-tube CVD experiment",
+            scale_level_claimed="not_reported",
+            scale_evidence_summary="A homemade quartz-tube reactor with two independently powered tungsten filaments was used.",
+            quantitative_cost_reported="not_reported",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].extend([activation, growth])
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].extend(
+            [
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CAT_PREP",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_B5462E0A116C82655E31",
+                    "Catalyst preparation begins with overnight pyridine-terminated silanisation of RCA-cleaned silicon oxide using 100 mg organosilane per 100 mL under argon.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CAT_RU",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_2B1577F61DFF3835179A",
+                    "The source identifies the Ru tetraphenyl-porphyrin carbonyl complex at 1 mg/mL in anhydrous dichloromethane.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CAT_ROUTE",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_A95F611EB71455C4363A",
+                    "The two-step route coordinates Ru ions in a self-assembled Ru-porphyrin monolayer to pyridine groups on the silanized substrate.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_ACTIVATION",
+                    run_id,
+                    "reactor_process_gas",
+                    activation["process_stage_id"],
+                    "stage_type;reactor_type;holding_time_min;pressure_original;reducing_gas;process_note",
+                    "SPAN_D62C8FD165FBF1432AA6",
+                    "Before growth, the sample receives 5 min of hydrogen at 90 mbar activated by a 160 W, approximately 1900 C hot filament.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_ACT_PRESSURE_NORMALIZED",
+                    run_id,
+                    "reactor_process_gas",
+                    activation["process_stage_id"],
+                    "pressure_kPa",
+                    "SPAN_D62C8FD165FBF1432AA6",
+                    "The reported 90 mbar activation pressure is converted to 9 kPa.",
+                    value_status="normalized",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_REACTOR",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "record_level",
+                    "SPAN_202462C1D67D482FDC2D",
+                    "The homemade reactor is a quartz tube in a cylindrical heater with methane/H2 feeds, a 10^-6 mbar residual base pressure, and two 0.38 mm tungsten filaments.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_GROWTH_COMMON",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "record_level",
+                    "SPAN_D62C8FD165FBF1432AA6",
+                    "Methods report 30 min growth from 800 to 1000 C with methane at 10% relative concentration and classical or hot-filament-assisted operation.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_GROWTH_FIGURE",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "record_level",
+                    ("SPAN_026DE49B573C0425026F" if item["series"] == "hot-filament comparison" else "SPAN_47FFC0CDCED5301153DA"),
+                    "Figure-linked growth evidence supplies the series temperature, 30 min duration, and the caption's 10 sccm methane expression.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_HF_POWER",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "record_level",
+                    ("SPAN_B5FDFDA52988DB545DCA" if item["hot_filament"] else "SPAN_D62C8FD165FBF1432AA6"),
+                    ("The HFCVD methane filament is operated at 1700 C and 120 W." if item["hot_filament"] else "The source distinguishes the classical-CVD condition from the HFCVD condition."),
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    item["result_span"],
+                    item["result"],
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT_QUALITY",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    ("SPAN_D62C8FD165FBF1432AA6" if item["series"] == "hot-filament comparison" else "SPAN_151378D6306543221A0B"),
+                    item["raman_summary"],
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CHARACTERIZATION",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_8E2F410747A370D06217",
+                    "The products were characterized by AFM, SEM, and high-resolution confocal Raman spectroscopy.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_COST",
+                    run_id,
+                    "cost_scale_review",
+                    run_id,
+                    "record_level",
+                    "SPAN_202462C1D67D482FDC2D",
+                    "The demonstrated homemade quartz-tube/tungsten-filament setup is assessed as laboratory scale; the paper reports no quantitative cost.",
+                    value_status="review_assessment",
+                ),
+            ]
+        )
+        if item["temperature"] == "1000":
+            tables["evidence_index"].append(
+                evidence_row(
+                    source_id,
+                    f"{prefix}_ALIGNMENT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_20C7F201F1FDCB4328C0",
+                    "At 1000 C the CNTs are reported to be straighter and better aligned than at lower temperatures.",
+                )
+            )
+        tables["review_issue_log"].extend(
+            [
+                issue_row(
+                    f"{source_id}_ISS_{index:02d}_CH4_EXPRESSION",
+                    source_id,
+                    run_id,
+                    "feed_reporting_ambiguity",
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "gas_composition_summary",
+                    "Methods give methane as a 10% relative concentration, while the Figure 1/3 captions give 10 sccm. Both original expressions are retained; no total flow is inferred.",
+                    evidence_ids=f"{prefix}_GROWTH_COMMON;{prefix}_GROWTH_FIGURE",
+                    severity="high",
+                    conflicting_values="10% relative concentration | 10 sccm",
+                ),
+                issue_row(
+                    f"{source_id}_ISS_{index:02d}_GROWTH_PRESSURE",
+                    source_id,
+                    run_id,
+                    "missing_run_parameter",
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "pressure_original",
+                    "The paper reports 90 mbar for the pre-growth H2 activation and 10^-6 mbar as residual base pressure, but not the CNT-growth pressure; neither value is inherited into growth.",
+                    evidence_ids=f"{prefix}_ACTIVATION;{prefix}_REACTOR",
+                    severity="medium",
+                ),
+            ]
+        )
+    tables["review_issue_log"].append(
+        issue_row(
+            f"{source_id}_ISS_900_SERIES_IDENTITY",
+            source_id,
+            f"{source_id}_TEMP_HF_900",
+            "series_identity_ambiguity",
+            "yield_quality",
+            f"{source_id}_TEMP_HF_900_PROD",
+            "record_level",
+            "The hot-filament comparison and the temperature series both contain a nominal 900 C HFCVD condition, but the paper does not state that they are the same physical specimen. They are retained as separate figure-linked records.",
+            evidence_ids=f"{source_id}_EV_02_PRODUCT;{source_id}_EV_04_PRODUCT",
+            severity="medium",
+            conflicting_values="Figure 1/2 comparison series | Figure 3/4 temperature series",
+        )
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 5,
+                "extracted_runs": 5,
+                "negative_runs_preserved": 1,
+                "matrix_note": "Two Figure 1/2 hot-filament-comparison records and three Figure 3/4 temperature-series records are retained. The two nominal 900 C HFCVD records remain separate because cross-series specimen identity is not stated.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [2, 3, 4, 5],
+                "objects_checked": ["catalyst preparation", "two-filament reactor recipe", "Figure 1 Raman hot-filament comparison", "Figure 2 SEM comparison", "Figure 3 temperature-series Raman", "Figure 4 SEM/AFM temperature series", "Conclusion"],
+            },
+            "pressure_policy_check": "The 90 mbar value is confined to pre-growth H2 activation and normalized to 9 kPa. Residual base pressure 10^-6 mbar is kept only in the reactor setup; growth pressure remains blank.",
+            "cross_run_inheritance_check": "Figure 1/2 hot-filament outcomes and Figure 3/4 temperature outcomes are assigned only within their stated series. The failed 800 C condition is retained without successful-SWCNT diameter fields.",
+            "unit_policy_check": "The PDF confirms 5 min, 90 mbar, approximately 1900 C/160 W activation, 30 min growth, 1700 C/120 W methane filament, and the printed Raman/diameter values. The 10% versus 10 sccm feed expressions are not silently reconciled.",
+            "conflict_check": "Feed-expression ambiguity and duplicate nominal 900 C series identity are logged. No growth pressure or hydrogen flow is invented.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_d74c5abb(context: SourceContext) -> Path:
+    """Jeon et al. 2008, Müller-catalyst serpentine-CNT orientation and mechanism matrix."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    runs = [
+        {
+            "code": "MULLER_ANGLE_0",
+            "label": "Müller catalyst, gas-flow/step-edge angle 0 degrees",
+            "kind": "orientation",
+            "angle": "0",
+            "result": "Mostly straight growth; more than 2 continuous regularly spaced turns were rare",
+            "morphology": "mostly straight CNTs with rare serpentine sequences longer than 2 turns",
+            "result_span": "SPAN_1370DDFC021988789B56",
+        },
+        {
+            "code": "MULLER_ANGLE_45",
+            "label": "Müller catalyst, gas-flow/step-edge angle 45 degrees",
+            "kind": "orientation",
+            "angle": "45",
+            "result": "Serpentine CNTs formed; more than 20 continuous regular turns were rare and straight segments before turns were approximately 10-30 micrometres",
+            "morphology": "serpentine CNTs with fewer than 20 continuous regular turns in most cases and approximately 10-30 micrometre straight segments",
+            "result_span": "SPAN_1370DDFC021988789B56",
+        },
+        {
+            "code": "MULLER_ANGLE_90",
+            "label": "Müller catalyst, gas-flow/step-edge angle 90 degrees",
+            "kind": "orientation",
+            "angle": "90",
+            "result": "More than 50 continuous serpentine turns were frequently observed and straight segments before turns were approximately 5-15 micrometres",
+            "morphology": "dense serpentine CNTs with frequently more than 50 turns and approximately 5-15 micrometre straight segments",
+            "result_span": "SPAN_1370DDFC021988789B56",
+        },
+        {
+            "code": "FECL3_DENSITY_CONTROL",
+            "label": "FeCl3 catalyst-density control",
+            "kind": "fecl3_control",
+            "angle": "",
+            "result": "Concentrated FeCl3 regions produced extremely straight, dense CNTs, whereas sparse isolated catalyst locations initiated serpentine CNTs",
+            "morphology": "spatially mixed straight/dense and serpentine/sparse CNT growth controlled by FeCl3 aggregation",
+            "result_span": "SPAN_18592166DD97628E9131",
+        },
+        {
+            "code": "MULLER_HFO2_BARRIER",
+            "label": "Müller catalyst with HfO2 barrier stripes",
+            "kind": "barrier",
+            "angle": "",
+            "result": "Serpentine lateral undulation was lost or became straight over the HfO2 barrier and resumed after crossing it",
+            "morphology": "serpentine CNT becomes straight over the 1 nm HfO2 stripe and resumes lateral undulation beyond the barrier",
+            "result_span": "SPAN_D84A8CC1672882E57CBC",
+        },
+        {
+            "code": "MULLER_FLOW_GT100_SERIES",
+            "label": "Müller catalyst, flow-rate series above 100 sccm",
+            "kind": "high_flow_series",
+            "angle": "",
+            "result": "Flow rates greater than 100 sccm under the study growth conditions reduced the yield of serpentine CNTs",
+            "morphology": "serpentine CNT morphology; run-resolved turn geometry not reported for the high-flow series",
+            "result_span": "SPAN_F1DB05C888C5568D765B",
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Six result-linked records preserve three Müller-catalyst orientation samples, one FeCl3 catalyst-density control, one HfO2-barrier mechanism sample, and one group-level high-flow low-yield series.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, item in enumerate(runs, start=1):
+        is_fecl3 = item["kind"] == "fecl3_control"
+        is_high_flow = item["kind"] == "high_flow_series"
+        run = source_run_row(
+            source_id,
+            item["code"],
+            item["label"],
+            item["result"],
+            data_type=("experimental_series" if is_high_flow else "experimental_condition"),
+        )
+        run_id = run["run_id"]
+        if is_fecl3:
+            catalyst = catalyst_row(
+                run_id,
+                catalyst_label="FeCl3 in ethanol catalyst-density control",
+                active_metals="Fe",
+                support_material="quartz substrate",
+                precursor_summary="1:10 solution of FeCl3 and ethanol",
+                preparation_method="solution deposition; drying produced a concentrated aggregation stripe",
+                preparation_detail="High-concentration FeCl3 stripe and sparse isolated catalyst regions coexist on the control substrate.",
+            )
+        else:
+            modifier = (
+                "Atomic-layer-deposited HfO2 stripes, 50 micrometres wide, 1 nm high, and 150 micrometre pitch, parallel to the quartz step edge"
+                if item["kind"] == "barrier"
+                else ""
+            )
+            catalyst = catalyst_row(
+                run_id,
+                catalyst_label="Fe-Mo Müller supramolecular cluster catalyst with Keggin-ion core",
+                active_metals="Fe; Mo",
+                support_material="cleaved quartz substrate",
+                precursor_summary="Müller catalyst diluted in ethanol to 10^-7-10^-8 mol/L",
+                preparation_method="wet deposition by cotton swab after quartz orientation and air annealing",
+                preparation_modifier=modifier,
+                preparation_detail="Quartz was cleaved to the desired orientation, annealed in air at 900 C for approximately 8 h, and coated with catalyst solution at one edge.",
+            )
+        stages: list[dict[str, str]] = []
+        if is_fecl3:
+            growth = process_row(
+                run_id,
+                1,
+                "comparative_CVD_growth",
+                reactor_type="quartz-tube CVD comparison",
+                carbon_source="ethanol",
+                process_note="The FeCl3 control is presented as a catalyst-density comparison under the study growth conditions; its pretreatment, exact orientation, and run-specific gas recipe are not separately reported.",
+            )
+            stages.append(growth)
+        else:
+            oxidation = process_row(
+                run_id,
+                1,
+                "catalyst_oxidation",
+                reactor_type="1-inch quartz tube",
+                reactor_size_summary="1-inch quartz tube",
+                temperature_setpoint_C="500",
+                holding_time_min="60",
+                process_note="Catalyst-coated quartz sample oxidized for one hour; oxidizing atmosphere not stated.",
+            )
+            reduction = process_row(
+                run_id,
+                2,
+                "catalyst_reduction",
+                reactor_type="1-inch quartz tube",
+                temperature_setpoint_C="750",
+                holding_time_min="60",
+                reducing_gas="H2",
+                reducing_gas_flow_original="100 sccm",
+                reducing_gas_flow_sccm="100",
+                inert_gas="Ar",
+                inert_gas_flow_original="300 sccm",
+                inert_gas_flow_sccm="300",
+                gas_composition_summary="300 sccm Ar and 100 sccm H2",
+                process_note="Nanoparticle reduction for one hour after Ar purge.",
+            )
+            if is_high_flow:
+                growth = process_row(
+                    run_id,
+                    3,
+                    "ethanol_CVD_high_flow_series",
+                    reactor_type="1-inch quartz-tube CVD",
+                    temperature_setpoint_C="880",
+                    carbon_source="ethanol vapor from bubbler",
+                    cofeed_or_reactive_gas="Ar and H2 carrier gases",
+                    total_flow_original=">100 sccm; component flows not reported",
+                    process_note="Group-level higher-flow series under the study growth conditions; exact points, gas split, and growth time are not reported.",
+                )
+            else:
+                growth = process_row(
+                    run_id,
+                    3,
+                    "ethanol_bubbler_CVD_growth",
+                    reactor_type="1-inch quartz-tube CVD",
+                    temperature_setpoint_C="880",
+                    holding_time_min="30",
+                    carbon_source="ethanol vapor from an ice-bath bubbler",
+                    reducing_gas="H2",
+                    reducing_gas_flow_original="10 sccm",
+                    reducing_gas_flow_sccm="10",
+                    inert_gas="Ar",
+                    inert_gas_flow_original="20 sccm",
+                    inert_gas_flow_sccm="20",
+                    gas_composition_summary="20 sccm Ar and 10 sccm H2 passed through an ethanol bubbler in an ice bath",
+                    process_note="CNT growth for approximately 30 min; reactor pressure not reported.",
+                )
+            stages.extend([oxidation, reduction, growth])
+        product = yield_row(
+            run_id,
+            primary_yield_metric=("qualitative serpentine-CNT yield" if is_high_flow else "not_reported"),
+            yield_original=("reduced yield at flow rates >100 sccm" if is_high_flow else "not_reported"),
+            yield_definition_original=("qualitative comparison with the standard-flow growth" if is_high_flow else "not_reported"),
+            secondary_result_summary=item["result"],
+            CNT_type_reported="carbon nanotubes; wall number not assigned to this run",
+            CNT_type_confirmed="not_reported",
+            product_mixture_summary="not_reported",
+            CNT_type_evidence="SEM identifies CNT structures; Table 1 AFM diameter samples are not mapped to synthesis-run identities",
+            morphology=item["morphology"],
+            alignment_or_array=(
+                f"gas-flow direction at {item['angle']} degrees to the quartz step edge"
+                if item["angle"]
+                else "not_reported"
+            ),
+            characterization_methods=("SEM" if item["kind"] != "high_flow_series" else "not_reported"),
+            notes="No gravimetric CNT yield or run-specific wall-count assignment is reported.",
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory quartz-tube substrate-growth experiment",
+            scale_level_claimed="not_reported",
+            scale_evidence_summary=("A 1-inch quartz-tube sequence was demonstrated." if not is_fecl3 else "A catalyst-density comparison was demonstrated on quartz."),
+            quantitative_cost_reported="not_reported",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].extend(stages)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        if is_fecl3:
+            tables["evidence_index"].extend(
+                [
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_CATALYST",
+                        run_id,
+                        "catalyst_system",
+                        catalyst["catalyst_id"],
+                        "record_level",
+                        "SPAN_1370DDFC021988789B56",
+                        "The catalyst-density control uses a 1:10 FeCl3/ethanol solution.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "record_level",
+                        "SPAN_18592166DD97628E9131",
+                        "Figure 2(a) is the FeCl3 catalyst-density growth control; run-specific pretreatment and gas values are not separately supplied.",
+                    ),
+                ]
+            )
+        else:
+            tables["evidence_index"].extend(
+                [
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_CAT_IDENTITY",
+                        run_id,
+                        "catalyst_system",
+                        catalyst["catalyst_id"],
+                        "record_level",
+                        "SPAN_3B051C314C3B2B06568B",
+                        "The Müller catalyst is a homogeneous Fe-Mo supramolecular cluster complex with a Keggin-ion core.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_CAT_CONCENTRATION",
+                        run_id,
+                        "catalyst_system",
+                        catalyst["catalyst_id"],
+                        "record_level",
+                        "SPAN_16ABDCA5B3F9C6ADC69B",
+                        "The source reports Müller catalyst diluted in ethanol to 10^-7-10^-8 mol/L.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_CAT_SUBSTRATE_PREP",
+                        run_id,
+                        "catalyst_system",
+                        catalyst["catalyst_id"],
+                        "record_level",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "Quartz is oriented, annealed in air at 900 C for approximately 8 h, and coated at one edge with catalyst solution.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_OXIDATION",
+                        run_id,
+                        "reactor_process_gas",
+                        oxidation["process_stage_id"],
+                        "stage_type;reactor_type;reactor_size_summary;temperature_setpoint_C;process_note",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "The coated sample is oxidized for one hour at 500 C in a 1-inch quartz tube.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_OXIDATION_TIME_NORMALIZED",
+                        run_id,
+                        "reactor_process_gas",
+                        oxidation["process_stage_id"],
+                        "holding_time_min",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "One hour is normalized to 60 min.",
+                        value_status="normalized",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_REDUCTION",
+                        run_id,
+                        "reactor_process_gas",
+                        reduction["process_stage_id"],
+                        "stage_type;reactor_type;temperature_setpoint_C;reducing_gas;reducing_gas_flow_original;reducing_gas_flow_sccm;inert_gas;inert_gas_flow_original;inert_gas_flow_sccm;gas_composition_summary;process_note",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "Nanoparticles are reduced for one hour at 750 C in 300 sccm Ar and 100 sccm H2.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_REDUCTION_TIME_NORMALIZED",
+                        run_id,
+                        "reactor_process_gas",
+                        reduction["process_stage_id"],
+                        "holding_time_min",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "One hour is normalized to 60 min.",
+                        value_status="normalized",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "record_level",
+                        ("SPAN_F1DB05C888C5568D765B" if is_high_flow else "SPAN_E1A5CF6B1964A30D5706"),
+                        ("The group-level >100 sccm series is reported to reduce serpentine yield." if is_high_flow else "Growth uses 20 sccm Ar and 10 sccm H2 through an ice-bath ethanol bubbler at 880 C for approximately 30 min."),
+                    ),
+                ]
+            )
+            if is_high_flow:
+                tables["evidence_index"].append(
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH_COMMON_CONTEXT",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "record_level",
+                        "SPAN_E1A5CF6B1964A30D5706",
+                        "The study's base growth context uses an ethanol bubbler at 880 C; the high-flow series does not report its component split or exact duration.",
+                    )
+                )
+        if item["kind"] == "barrier":
+            tables["evidence_index"].append(
+                evidence_row(
+                    source_id,
+                    f"{prefix}_BARRIER_PREP",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    "SPAN_D3E7FE17B6EAB20EEF18",
+                    "ALD HfO2 stripes are 50 micrometres wide, 1 nm high, on 150 micrometre pitch, parallel to the step edge.",
+                )
+            )
+        tables["evidence_index"].extend(
+            [
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    item["result_span"],
+                    item["result"],
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_COST",
+                    run_id,
+                    "cost_scale_review",
+                    run_id,
+                    "record_level",
+                    ("SPAN_18592166DD97628E9131" if is_fecl3 else "SPAN_E1A5CF6B1964A30D5706"),
+                    "The demonstrated substrate-growth setup is assessed as laboratory scale; no quantitative cost is reported.",
+                    value_status="review_assessment",
+                ),
+            ]
+        )
+        if item["kind"] == "orientation":
+            tables["evidence_index"].append(
+                evidence_row(
+                    source_id,
+                    f"{prefix}_ORIENTATION_GEOMETRY",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    "SPAN_18592166DD97628E9131",
+                    "The orientation comparison reports the run-linked straight-segment ranges and turn-count differences for the 0, 45, and 90 degree samples.",
+                )
+            )
+    tables["review_issue_log"].extend(
+        [
+            issue_row(
+                f"{source_id}_ISS_TABLE1_MAPPING",
+                source_id,
+                f"{source_id}_MULLER_ANGLE_90",
+                "cross_run_result_mapping_missing",
+                "yield_quality",
+                f"{source_id}_MULLER_ANGLE_90_PROD",
+                "outer_diameter_range_nm",
+                "Table 1 reports seven AFM/SEM diameter-curvature samples but does not map them to the 0/45/90 degree, FeCl3, or HfO2 synthesis records. No diameter is inherited into those runs.",
+                evidence_ids=f"{source_id}_EV_03_PRODUCT",
+                severity="high",
+            ),
+            issue_row(
+                f"{source_id}_ISS_FECL3_PROCESS",
+                source_id,
+                f"{source_id}_FECL3_DENSITY_CONTROL",
+                "missing_run_parameter",
+                "reactor_process_gas",
+                f"{source_id}_FECL3_DENSITY_CONTROL_S01",
+                "record_level",
+                "The FeCl3 control is described as a growth experiment, but its exact pretreatment, orientation, temperature, flow split, duration, and pressure are not separately stated; standard Müller-run values are not copied into it.",
+                evidence_ids=f"{source_id}_EV_04_GROWTH",
+                severity="medium",
+            ),
+            issue_row(
+                f"{source_id}_ISS_HIGH_FLOW_SERIES",
+                source_id,
+                f"{source_id}_MULLER_FLOW_GT100_SERIES",
+                "series_resolution_limit",
+                "reactor_process_gas",
+                f"{source_id}_MULLER_FLOW_GT100_SERIES_S03",
+                "total_flow_original",
+                "Only the range >100 sccm and the reduced-yield outcome are reported for the high-flow controls; exact setpoints, repetitions, component split, and duration are unavailable, so one group-level record is retained.",
+                evidence_ids=f"{source_id}_EV_06_GROWTH",
+                severity="high",
+                conflicting_values=">100 sccm series; exact points not reported",
+            ),
+        ]
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 6,
+                "extracted_runs": 6,
+                "negative_runs_preserved": 1,
+                "matrix_note": "Three printed Figure 1 orientation samples, the Figure 2(a) FeCl3 density control, the Figure 2(b-c) HfO2 barrier sample, and one explicitly group-level >100 sccm low-yield series are retained.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [1, 2, 3, 4, 5, 6],
+                "objects_checked": ["Müller catalyst and CVD recipe", "Figure 1 orientation matrix", "Figure 2 FeCl3 and HfO2 controls", "Table 1 diameter-curvature matrix", "Figures 3-5 morphology/electrical data", "Conclusion"],
+            },
+            "pressure_policy_check": "The paper does not report reactor pressure for oxidation, reduction, or CNT growth; all pressure fields remain blank.",
+            "cross_run_inheritance_check": "Orientation-specific turn counts and straight-segment lengths stay with their 0/45/90 degree samples. Table 1 diameters are not assigned because their synthesis-run mapping is absent. Standard Müller process values are not copied into the FeCl3 control.",
+            "unit_policy_check": "One-hour oxidation/reduction durations are normalized to 60 min with explicit normalized evidence. Approximate 30 min growth and original sccm/temperature values are retained.",
+            "conflict_check": "FeCl3 process incompleteness, Table 1 run mapping, and the unresolved >100 sccm series resolution are logged; no exact high-flow setpoint is fabricated.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_d5bd8bd5(context: SourceContext) -> Path:
+    """Pint et al. 2009, odako SWNT growth on grafoil and carbon fibre."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    runs = [
+        {
+            "code": "GRAFOIL_LP_1P4",
+            "substrate": "grafoil carbon surface",
+            "pressure": "1.4",
+            "pressure_kPa": "0.187",
+            "duration": "15",
+            "high_pressure": False,
+            "result_span": "SPAN_2B1F5B3CCDAC6EE80D7A",
+            "result": "Uniform, dense odako SWNT fibrils grew across the grafoil surface at 1.4 Torr for 15 min",
+        },
+        {
+            "code": "GRAFOIL_HP_25",
+            "substrate": "grafoil carbon surface",
+            "pressure": "25",
+            "pressure_kPa": "3.33",
+            "duration": "30",
+            "high_pressure": True,
+            "result_span": "SPAN_2B1F5B3CCDAC6EE80D7A",
+            "result": "Uniform, dense odako fibrils grew across the grafoil surface at 25 Torr for 30 min with faster growth",
+        },
+        {
+            "code": "CARBON_FIBER_LP_1P4",
+            "substrate": "carbon-fiber weave",
+            "pressure": "1.4",
+            "pressure_kPa": "0.187",
+            "duration": "",
+            "high_pressure": False,
+            "result_span": "SPAN_2BB04E7179DCBF0C8169",
+            "result": "Odako SWNT fibrils grew uniformly on catalyst-coated carbon-fiber surfaces at 1.4 Torr",
+        },
+        {
+            "code": "CARBON_FIBER_HP_25",
+            "substrate": "carbon-fiber weave",
+            "pressure": "25",
+            "pressure_kPa": "3.33",
+            "duration": "",
+            "high_pressure": True,
+            "result_span": "SPAN_CDEC306C5C425415F047",
+            "result": "Elevated-pressure odako growth produced longer fibrils on carbon-fiber surfaces and was demonstrated over a full weave strand",
+        },
+        {
+            "code": "CARBON_FIBER_FE_ONLY_CONTROL",
+            "substrate": "carbon-fiber surface",
+            "pressure": "",
+            "pressure_kPa": "",
+            "duration": "",
+            "high_pressure": False,
+            "result_span": "SPAN_3C901043551AC486C7E3",
+            "result": "A 1 nm Fe layer deposited directly on carbon fiber without the alumina overlayer produced no measurable CNT growth",
+            "negative": True,
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Four substrate-pressure odako products (grafoil and carbon fibre at 1.4 and 25 Torr) plus the Fe-only/no-alumina zero-growth control are retained. Representative Raman/TEM diameter data are not assigned because the specimen mapping is absent.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, item in enumerate(runs, start=1):
+        is_control = item.get("negative", False)
+        run = source_run_row(
+            source_id,
+            item["code"],
+            (f"Odako growth on {item['substrate']} at {item['pressure']} Torr" if not is_control else "Fe-only carbon-fiber control without Al2O3"),
+            item["result"],
+        )
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label=("1 nm e-beam Fe on carbon fiber without oxide support" if is_control else "1 nm Fe with 5 nm Al2O3 overlayer on carbon surface"),
+            active_metals="Fe",
+            support_material=item["substrate"],
+            preparation_method="electron-beam deposition",
+            preparation_detail=(
+                "1 nm Fe deposited directly onto carbon fiber; no alumina overlayer"
+                if is_control
+                else "1 nm Fe deposited directly onto the carbon surface followed immediately by a 5 nm Al2O3 overlayer"
+            ),
+        )
+        stages: list[dict[str, str]] = []
+        if is_control:
+            growth = process_row(
+                run_id,
+                1,
+                "water_assisted_CVD_control",
+                reactor_type="water-assisted CVD control",
+                process_note="The Fe-only control was exposed to the study growth protocol, but its pressure, flow, activation, temperature, and duration are not separately identified.",
+            )
+            stages.append(growth)
+        else:
+            activation = process_row(
+                run_id,
+                1,
+                "atomic_hydrogen_catalyst_activation",
+                reactor_type="water-assisted CVD with tungsten hot filament",
+                holding_time_min="0.5",
+                reducing_gas="H2",
+                process_note="30 s exposure to tungsten-hot-filament-generated atomic hydrogen immediately before growth after rapid insertion into a pre-heated furnace.",
+            )
+            growth = process_row(
+                run_id,
+                2,
+                "water_assisted_acetylene_CVD_growth",
+                reactor_type="water-assisted low-pressure CVD",
+                temperature_setpoint_C="750",
+                holding_time_min=item["duration"],
+                pressure_original=f"{item['pressure']} Torr",
+                pressure_kPa=item["pressure_kPa"],
+                carbon_source="C2H2",
+                carbon_source_flow_original="2 sccm",
+                carbon_source_flow_sccm="2",
+                reducing_gas="H2",
+                reducing_gas_flow_original="400 sccm",
+                reducing_gas_flow_sccm="400",
+                cofeed_or_reactive_gas="H2O",
+                cofeed_flow_original="2 sccm",
+                cofeed_flow_sccm="2",
+                gas_composition_summary="400 sccm H2, 2 sccm H2O, and 2 sccm C2H2",
+                process_note=(
+                    "Elevated pressure increases acetylene partial pressure and growth rate, with some double- and few-walled tubes forming amid the SWNT population."
+                    if item["high_pressure"]
+                    else "Low-pressure water-assisted odako growth."
+                ),
+            )
+            stages.extend([activation, growth])
+        if is_control:
+            product = yield_row(
+                run_id,
+                primary_yield_metric="qualitative CNT growth observation",
+                yield_original="no measurable carbon nanotube growth",
+                yield_definition_original="control observation",
+                secondary_result_summary=item["result"],
+                CNT_type_reported="not_observed",
+                CNT_type_confirmed="no measurable CNT growth",
+                product_mixture_summary="not_reported",
+                CNT_type_evidence="control experiment reports no measurable carbon nanotube growth",
+                morphology="no CNT growth observed",
+                alignment_or_array="not_applicable",
+                characterization_methods="not_reported",
+                notes="Negative control retained to preserve the demonstrated requirement for the alumina overlayer.",
+            )
+        else:
+            product = yield_row(
+                run_id,
+                primary_yield_metric="not_reported",
+                yield_original="not_reported",
+                yield_definition_original="not_reported",
+                secondary_result_summary=item["result"],
+                CNT_type_reported=("predominantly single-walled carbon nanotubes with some double- and few-walled tubes" if item["high_pressure"] else "single-walled carbon nanotubes (SWNTs)"),
+                CNT_type_confirmed="dense aligned SWNT fibrils identified by SEM; run-specific Raman/TEM specimen mapping not reported",
+                product_mixture_summary=("SWNT population with some double- and few-walled CNTs" if item["high_pressure"] else "dense SWNT array fibrils"),
+                CNT_type_evidence="The source identifies the odako products as dense SWNT arrays; elevated pressure introduces some double-/few-walled tubes.",
+                wall_number_summary=("mainly single-walled with some double- and few-walled tubes" if item["high_pressure"] else "single-walled"),
+                morphology=(
+                    "cylindrical odako fibrils anchored to carbon fiber, with alumina flakes capping exposed fibril ends"
+                    if "fiber" in item["substrate"]
+                    else "individual compact odako fibrils of dense aligned SWNTs, with alumina flakes supporting catalyst at fibril tips"
+                ),
+                alignment_or_array="dense aligned SWNT arrays bundled into odako fibrils and anchored at the carbon interface",
+                characterization_methods="SEM",
+                notes="No gravimetric yield is reported; representative Raman/TEM diameter data are not mapped to this substrate-pressure run.",
+            )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory substrate CVD experiment",
+            scale_level_claimed=("full carbon-fiber weave strand demonstration" if item["code"] == "CARBON_FIBER_HP_25" else "not_reported"),
+            scale_evidence_summary=("Growth was demonstrated across a full strand of carbon-fiber weave." if item["code"] == "CARBON_FIBER_HP_25" else "Growth was demonstrated on carbon-surface specimens."),
+            quantitative_cost_reported="not_reported",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].extend(stages)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].append(
+            evidence_row(
+                source_id,
+                f"{prefix}_CATALYST",
+                run_id,
+                "catalyst_system",
+                catalyst["catalyst_id"],
+                "record_level",
+                ("SPAN_3C901043551AC486C7E3" if is_control else "SPAN_2836B776A2E4D2182987"),
+                ("The negative control uses 1 nm Fe directly on carbon fiber without the alumina support." if is_control else "Odako catalyst preparation uses 1 nm e-beam Fe followed by a 5 nm Al2O3 overlayer on grafoil or carbon fiber."),
+            )
+        )
+        if is_control:
+            tables["evidence_index"].extend(
+                [
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_PROCESS",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "record_level",
+                        "SPAN_3C901043551AC486C7E3",
+                        "The Fe-only sample is explicitly identified as a growth control, but its run-specific CVD parameters are not restated.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_PRODUCT",
+                        run_id,
+                        "yield_quality",
+                        product["product_id"],
+                        "record_level",
+                        "SPAN_3C901043551AC486C7E3",
+                        "The 1 nm Fe-only carbon-fiber control produced no measurable CNT growth.",
+                    ),
+                ]
+            )
+        else:
+            tables["evidence_index"].extend(
+                [
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_ACTIVATION",
+                        run_id,
+                        "reactor_process_gas",
+                        activation["process_stage_id"],
+                        "stage_type;reactor_type;reducing_gas;process_note",
+                        "SPAN_16B140CE09721FAA7D7D",
+                        "Atomic hydrogen generated by a tungsten hot filament activates the catalyst for 30 s immediately before growth.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_ACTIVATION_TIME_NORMALIZED",
+                        run_id,
+                        "reactor_process_gas",
+                        activation["process_stage_id"],
+                        "holding_time_min",
+                        "SPAN_16B140CE09721FAA7D7D",
+                        "The reported 30 s activation is converted to 0.5 min.",
+                        value_status="normalized",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH_RECIPE",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "stage_type;reactor_type;temperature_setpoint_C;carbon_source;carbon_source_flow_original;carbon_source_flow_sccm;reducing_gas;reducing_gas_flow_original;reducing_gas_flow_sccm;cofeed_or_reactive_gas;cofeed_flow_original;cofeed_flow_sccm;gas_composition_summary;process_note",
+                        "SPAN_349C9147C2A3A2D63E53",
+                        "The water-assisted recipe uses 400 sccm H2, 2 sccm H2O, and 2 sccm C2H2 at 750 C; 25 Torr raises acetylene partial pressure and growth rate.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH_PRESSURE",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "pressure_original",
+                        ("SPAN_2B1F5B3CCDAC6EE80D7A" if "GRAFOIL" in item["code"] else "SPAN_2BB04E7179DCBF0C8169"),
+                        f"The figure-linked {item['substrate']} specimen is assigned to {item['pressure']} Torr.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_PRESSURE_NORMALIZED",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "pressure_kPa",
+                        ("SPAN_2B1F5B3CCDAC6EE80D7A" if "GRAFOIL" in item["code"] else "SPAN_2BB04E7179DCBF0C8169"),
+                        f"The reported {item['pressure']} Torr is converted to {item['pressure_kPa']} kPa.",
+                        value_status="normalized",
+                    ),
+                ]
+            )
+            if item["duration"]:
+                tables["evidence_index"].append(
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_GROWTH_TIME",
+                        run_id,
+                        "reactor_process_gas",
+                        growth["process_stage_id"],
+                        "holding_time_min",
+                        "SPAN_2B1F5B3CCDAC6EE80D7A",
+                        f"Figure 3 links {item['pressure']} Torr grafoil growth to {item['duration']} min.",
+                    )
+                )
+            tables["evidence_index"].append(
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    item["result_span"],
+                    item["result"],
+                )
+            )
+            if item["high_pressure"]:
+                tables["evidence_index"].append(
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_WALL_MIXTURE",
+                        run_id,
+                        "yield_quality",
+                        product["product_id"],
+                        "record_level",
+                        "SPAN_B8CA535B9AC656B4687E",
+                        "Elevated pressure gives faster growth at the expense of some double- and few-walled tubes within the SWNT population.",
+                    )
+                )
+        tables["evidence_index"].append(
+            evidence_row(
+                source_id,
+                f"{prefix}_COST",
+                run_id,
+                "cost_scale_review",
+                run_id,
+                "record_level",
+                item["result_span"],
+                "The demonstrated carbon-surface growth is assessed as laboratory scale; the carbon-fiber high-pressure specimen also demonstrates full-strand coverage. No quantitative cost is reported.",
+                value_status="review_assessment",
+            )
+        )
+    tables["review_issue_log"].extend(
+        [
+            issue_row(
+                f"{source_id}_ISS_REPRESENTATIVE_CHARACTERIZATION",
+                source_id,
+                f"{source_id}_GRAFOIL_LP_1P4",
+                "cross_run_result_mapping_missing",
+                "yield_quality",
+                f"{source_id}_GRAFOIL_LP_1P4_PROD",
+                "outer_diameter_mean_nm",
+                "Raman and TEM provide a representative odako diameter/wall distribution, including an approximately 3.1 nm peak and a few 2-3-wall tubes, but the specimen is not mapped to a substrate-pressure run. Those values are not inherited.",
+                evidence_ids=f"{source_id}_EV_01_PRODUCT",
+                severity="high",
+            ),
+            issue_row(
+                f"{source_id}_ISS_CARBON_FIBER_DURATION",
+                source_id,
+                f"{source_id}_CARBON_FIBER_LP_1P4",
+                "missing_run_parameter",
+                "reactor_process_gas",
+                f"{source_id}_CARBON_FIBER_LP_1P4_S02",
+                "holding_time_min",
+                "Figure 6 maps carbon-fiber products to 1.4 and 25 Torr but does not restate their growth durations. The grafoil Figure 3 durations are not copied across substrates.",
+                evidence_ids=f"{source_id}_EV_03_GROWTH_PRESSURE;{source_id}_EV_04_GROWTH_PRESSURE",
+                severity="medium",
+            ),
+            issue_row(
+                f"{source_id}_ISS_CONTROL_PROCESS",
+                source_id,
+                f"{source_id}_CARBON_FIBER_FE_ONLY_CONTROL",
+                "missing_run_parameter",
+                "reactor_process_gas",
+                f"{source_id}_CARBON_FIBER_FE_ONLY_CONTROL_S01",
+                "record_level",
+                "The Fe-only negative control is explicit, but its exact activation, pressure, temperature, gas flows, and duration are not separately identified; successful-run values are not copied into it.",
+                evidence_ids=f"{source_id}_EV_05_PROCESS",
+                severity="medium",
+            ),
+        ]
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 5,
+                "extracted_runs": 5,
+                "negative_runs_preserved": 1,
+                "matrix_note": "Figure 3 supplies two grafoil pressure runs; Figure 6 supplies two carbon-fiber pressure runs (with Figure 7 as scale evidence for the high-pressure fibre run); the Fe-only/no-alumina control is retained as the fifth record.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [1, 2, 3, 4, 5, 6, 7, 8],
+                "objects_checked": ["Experimental recipe", "Figure 1 odako mechanism", "Figures 2-3 grafoil products", "Figures 4-5 Raman/TEM characterization", "Figure 6 carbon-fiber pressure products", "Figure 7 full-strand demonstration", "Conclusions"],
+            },
+            "pressure_policy_check": "Growth pressures 1.4 and 25 Torr remain run-specific and are normalized to 0.187 and 3.33 kPa. No pressure is assigned to the atomic-H activation or Fe-only control.",
+            "cross_run_inheritance_check": "Grafoil durations 15/30 min are not copied to carbon-fiber runs. Representative Raman/TEM diameters and wall counts are not assigned because their substrate-pressure identity is absent. High-pressure wall-mixture language is confined to 25 Torr runs.",
+            "unit_policy_check": "The 30 s activation is normalized to 0.5 min with explicit evidence. Original Torr and sccm values are preserved with separate kPa normalization evidence.",
+            "conflict_check": "No contradictory pressure or flow values were found. Missing carbon-fiber durations, Fe-only control parameters, and representative-product mapping are logged instead of inferred.",
+        },
+    )
+    update_manifest(
+        source_id,
+        "extracted_needs_supervisory_review",
+        package_path=package.relative_to(REDO_ROOT).as_posix(),
+    )
+    return package
+
+
+def build_lit_65c8bd1b(context: SourceContext) -> Path:
+    """He et al. 2016, partially carbon-coated Co catalysts for selective SWCNT growth."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    runs = [
+        {
+            "code": "PARTIAL_CO_1P7NM",
+            "label": "Partially carbon-coated Co catalyst, 1.7 nm SWCNT product",
+            "kind": "partial",
+            "summary": "The standard partially carbon-coated Co catalyst produced isolated SWCNTs centred at 1.7 nm with very high semiconducting content.",
+            "diameter_mean": "1.7",
+            "diameter_range": "1.6-1.9",
+            "cnt_result": "SWCNTs; approximately 98% semiconducting by 160 Raman spectra and approximately 99% by absorption analysis",
+            "morphology": "isolated, straight, randomly dispersed SWCNTs approximately 10 micrometres long",
+            "result_span": "SPAN_C20A7F719450CA135ABB",
+        },
+        {
+            "code": "EXPOSED_CO_CONTROL",
+            "label": "Fully exposed Co catalyst comparison",
+            "kind": "exposed",
+            "summary": "A fully exposed, uncoated Co catalyst comparison produced a broad RBM distribution containing both semiconducting and metallic SWCNTs.",
+            "diameter_mean": "",
+            "diameter_range": "",
+            "cnt_result": "SWCNTs with broad Raman RBM distribution from both semiconducting and metallic tubes",
+            "morphology": "not_reported",
+            "result_span": "SPAN_2ED7F97931E6B5F117F9",
+        },
+        {
+            "code": "PARTIAL_CO_2P1NM",
+            "label": "Larger exposed-area carbon-coated Co catalyst, 2.1 nm product",
+            "kind": "tuned",
+            "summary": "Increasing the exposed Co area by stronger hydrogen heat treatment produced SWCNTs with a 2.1 nm mean diameter and approximately 96% semiconducting content.",
+            "diameter_mean": "2.1",
+            "diameter_range": "2.0-2.2",
+            "cnt_result": "SWCNTs with approximately 96% semiconducting content",
+            "morphology": "not_reported",
+            "result_span": "SPAN_7A17878DDC01492C98C7",
+        },
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [
+            source_master_row(
+                context,
+                "Three result-linked records: standard partially carbon-coated Co, fully exposed Co comparison, and larger-exposed-area 2.1 nm tuning condition.",
+            )
+        ],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, item in enumerate(runs, start=1):
+        run = source_run_row(
+            source_id,
+            item["code"],
+            item["label"],
+            item["summary"],
+            data_type="experimental_condition",
+        )
+        run_id = run["run_id"]
+        if item["kind"] == "exposed":
+            catalyst = catalyst_row(
+                run_id,
+                catalyst_label="fully exposed Co nanoparticles from block-copolymer template",
+                active_metals="Co",
+                support_material="Si/SiO2 substrate",
+                precursor_summary="cobalt cyanide complex adsorbed on a PS-b-P4VP thin film",
+                preparation_method="block-copolymer templating with solvent annealing omitted; 750 C air treatment for 5 min removed the carbon/polymer coating",
+                calcination_condition="750 C in air for 5 min",
+                phase_or_state_summary="uncoated, fully exposed Co nanoparticles",
+            )
+        else:
+            heat = (
+                "200 sccm H2 at 500 C for 5 min followed by 700 C for 5 min"
+                if item["kind"] == "partial"
+                else "stronger H2 heat treatment culminating at 800 C for 10 min; the printed method also mentions an intervening 700 C for 10 min step"
+            )
+            catalyst = catalyst_row(
+                run_id,
+                catalyst_label="acorn-like partially carbon-coated Co nanoparticles",
+                active_metals="Co",
+                support_material="Si/SiO2 substrate",
+                precursor_summary="cobalt cyanide complex adsorbed on self-assembled PS-b-P4VP nanodomains",
+                preparation_method="block-copolymer self-assembly, precursor adsorption, air plasma opening, and hydrogen thermal reduction",
+                reduction_condition=heat,
+                phase_or_state_summary="Co nanoparticle partially coated with carbon",
+                catalyst_particle_size_mean_nm=("3.1" if item["kind"] == "partial" else ""),
+                catalyst_particle_size_range_nm=("2.5-4.5" if item["kind"] == "partial" else ""),
+            )
+        growth = process_row(
+            run_id,
+            1,
+            "ethanol_CVD_growth",
+            reactor_type="horizontal quartz-tube CVD furnace",
+            reactor_size_summary="25 mm diameter quartz tube",
+            temperature_setpoint_C="700",
+            temperature_program_summary="substrate inserted into reactor centre after furnace reached 700 C",
+            holding_time_min="10-25",
+            carbon_source="ethanol vapor from bubbler in a 35 C water bath",
+            carbon_source_flow_original="75 sccm Ar passed through ethanol bubbler",
+            reducing_gas="H2",
+            reducing_gas_flow_original="200 sccm",
+            reducing_gas_flow_sccm="200",
+            inert_gas="Ar",
+            inert_gas_flow_original="75 sccm",
+            inert_gas_flow_sccm="75",
+            gas_composition_summary="75 sccm Ar through a 35 C ethanol bubbler plus 200 sccm H2",
+            cooling_condition="cooled to room temperature under Ar/H2",
+            process_note="The same printed CVD recipe is explicitly used for the exposed-Co and diameter-tuning comparisons.",
+        )
+        product = yield_row(
+            run_id,
+            primary_yield_metric="not_reported",
+            yield_original="not_reported",
+            secondary_result_summary=item["cnt_result"],
+            yield_definition_original="not_reported",
+            CNT_type_reported="single-walled carbon nanotubes",
+            CNT_type_confirmed="SWCNT",
+            CNT_type_evidence="TEM, multi-wavelength Raman spectroscopy, optical absorption, and electron diffraction",
+            outer_diameter_mean_nm=item["diameter_mean"],
+            outer_diameter_range_nm=item["diameter_range"],
+            length_summary=("approximately 10 micrometres" if item["kind"] == "partial" else "not_reported"),
+            morphology=item["morphology"],
+            characterization_methods="SEM; TEM; Raman spectroscopy; UV-vis-NIR absorption; electron diffraction",
+            notes="No gravimetric CNT yield is reported for this comparison.",
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory substrate CVD",
+            scale_level_claimed="not_reported",
+            scale_evidence_summary="CNTs were grown on catalyst-coated Si/SiO2 substrates in a 25 mm quartz tube.",
+            quantitative_cost_reported="not_reported",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].append(growth)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        prefix = f"{source_id}_EV_{index:02d}"
+        tables["evidence_index"].extend(
+            [
+                evidence_row(
+                    source_id,
+                    f"{prefix}_CATALYST",
+                    run_id,
+                    "catalyst_system",
+                    catalyst["catalyst_id"],
+                    "record_level",
+                    (
+                        "SPAN_2ED7F97931E6B5F117F9"
+                        if item["kind"] == "exposed"
+                        else (
+                            "SPAN_2AB2D21B8D4FFD5E93DC"
+                            if item["kind"] == "partial"
+                            else "SPAN_35998E3DF954E6DC5A5B"
+                        )
+                    ),
+                    "The source describes the run-specific Co exposure/carbon-coating preparation.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_GROWTH",
+                    run_id,
+                    "reactor_process_gas",
+                    growth["process_stage_id"],
+                    "record_level",
+                    "SPAN_9A40B4B910B402AAA7F9",
+                    "Growth used a 25 mm quartz tube at 700 C with 75 sccm Ar through a 35 C ethanol bubbler and 200 sccm H2 for 10-25 min.",
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "record_level",
+                    item["result_span"],
+                    item["cnt_result"],
+                ),
+                evidence_row(
+                    source_id,
+                    f"{prefix}_COST",
+                    run_id,
+                    "cost_scale_review",
+                    run_id,
+                    "record_level",
+                    "SPAN_9A40B4B910B402AAA7F9",
+                    "The demonstrated setup is assessed as laboratory substrate CVD; quantitative cost was not reported.",
+                    value_status="review_assessment",
+                ),
+            ]
+        )
+        if item["kind"] == "partial":
+            tables["evidence_index"].extend(
+                [
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_CATALYST_SIZE",
+                        run_id,
+                        "catalyst_system",
+                        catalyst["catalyst_id"],
+                        "catalyst_particle_size_mean_nm;catalyst_particle_size_range_nm",
+                        "SPAN_32EA2CF762A9C8F7E643",
+                        "More than 90% of catalyst particles were 2.5-4.5 nm with a 3.1 nm mean diameter.",
+                    ),
+                    evidence_row(
+                        source_id,
+                        f"{prefix}_PRODUCT_RANGE_AND_ABSORPTION",
+                        run_id,
+                        "yield_quality",
+                        product["product_id"],
+                        "outer_diameter_range_nm;secondary_result_summary",
+                        "SPAN_18372861E31BDB5BDDB3",
+                        "The main product spans 1.6-1.9 nm and absorption analysis gives approximately 99% semiconducting content.",
+                    ),
+                ]
+            )
+        elif item["kind"] == "tuned":
+            tables["evidence_index"].append(
+                evidence_row(
+                    source_id,
+                    f"{prefix}_PRODUCT_DIAMETER_RANGE",
+                    run_id,
+                    "yield_quality",
+                    product["product_id"],
+                    "outer_diameter_range_nm;secondary_result_summary",
+                    "SPAN_EA9E7CB38B1CA3EE47B0",
+                    "The tuned product has a 2.0-2.2 nm diameter range and approximately 96% semiconducting content.",
+                )
+            )
+    tables["review_issue_log"].extend(
+        [
+            issue_row(
+                f"{source_id}_ISS_TUNING_HEAT_SEQUENCE",
+                source_id,
+                f"{source_id}_PARTIAL_CO_2P1NM",
+                "ambiguous_process_sequence",
+                "catalyst_system",
+                f"{source_id}_PARTIAL_CO_2P1NM_CAT",
+                "reduction_condition",
+                "The method grammatically lists changes from 500 C/5 min to 700 C/10 min and to 800 C/10 min, while the discussion directly links the 2.1 nm product to 800 C/10 min. The exact sequence is retained in prose and not split into fabricated runs.",
+                evidence_ids=f"{source_id}_EV_03_CATALYST;{source_id}_EV_03_PRODUCT",
+                severity="high",
+            ),
+            issue_row(
+                f"{source_id}_ISS_GROWTH_TIME_RANGE",
+                source_id,
+                f"{source_id}_PARTIAL_CO_1P7NM",
+                "series_resolution_limit",
+                "reactor_process_gas",
+                f"{source_id}_PARTIAL_CO_1P7NM_S01",
+                "holding_time_min",
+                "The paper reports a 10-25 min growth-time range but does not map an exact time to each product comparison.",
+                evidence_ids=f"{source_id}_EV_01_GROWTH",
+                severity="medium",
+            ),
+        ]
+    )
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {
+                "result_linked_campaigns_in_paper": 3,
+                "extracted_runs": 3,
+                "negative_runs_preserved": 1,
+                "matrix_note": "The standard partially coated catalyst, fully exposed comparison, and 2.1 nm tuning result remain separate.",
+            },
+            "pdf_visual_review": {
+                "completed": True,
+                "pages_checked": [1, 2, 3, 4, 5, 6, 7, 8],
+                "objects_checked": ["Figures 1-4 catalyst/product evidence", "Discussion comparison", "Methods catalyst preparation", "Methods CVD recipe"],
+            },
+            "pressure_policy_check": "Reactor pressure is not reported and remains blank for all three runs.",
+            "cross_run_inheritance_check": "The 1.7 nm diameter range and high semiconducting fractions stay with the standard run; the exposed-Co comparator receives no diameter; the 2.1 nm result stays with the stronger-treatment run.",
+            "unit_policy_check": "Original sccm, C, nm, and min values are retained; no unsupported pressure conversion is introduced.",
+            "conflict_check": "The ambiguous thermal-treatment grammar and unmapped 10-25 min growth-time range are explicitly logged.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
+def build_lit_b917c961(context: SourceContext) -> Path:
+    """Yang et al. 2023, in-situ VACNT growth on carbon-fibre fabric."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    run = source_run_row(
+        source_id,
+        "FECO_CF_VACNT",
+        "Fe/Co nitrate on carbon-fibre fabric, 660 C acetylene CVD",
+        "Fe/Co-catalysed CVD grew several-micrometre VACNTs vertically around carbon fibres, forming intertwined three-dimensional fibre networks.",
+    )
+    run_id = run["run_id"]
+    catalyst = catalyst_row(
+        run_id,
+        catalyst_label="Fe/Co nitrate-coated carbon-fibre fabric",
+        active_metals="Fe; Co",
+        support_material="3K plain-woven carbon-fibre fabric",
+        precursor_summary="mixed 1 mol/L Fe(NO3)3 and 1 mol/L Co(NO3)2 solutions",
+        preparation_method="20 min immersion followed by oven drying",
+        drying_condition="200 C for 1 h",
+        preparation_detail="Carbon-fibre fabric was immersed in the mixed nitrate solutions for 20 min and dried to evaporate water.",
+    )
+    growth = process_row(
+        run_id,
+        1,
+        "acetylene_CVD_growth",
+        reactor_type="tube furnace",
+        temperature_setpoint_C="660",
+        holding_time_min="30",
+        carbon_source="C2H2",
+        carbon_source_flow_original="40 mL/min",
+        carbon_source_flow_sccm="40",
+        inert_gas="N2",
+        inert_gas_flow_original="100 mL/min",
+        inert_gas_flow_sccm="100",
+        gas_composition_summary="100 mL/min N2 and 40 mL/min C2H2",
+        process_note="Pressure was not reported.",
+    )
+    product = yield_row(
+        run_id,
+        primary_yield_metric="not_reported",
+        yield_original="not_reported",
+        yield_definition_original="not_reported",
+        secondary_result_summary="Several-micrometre CNTs grew vertically around and fully wrapped the carbon-fibre trunks.",
+        CNT_type_reported="vertically aligned carbon nanotubes",
+        CNT_type_confirmed="not_reported",
+        CNT_type_evidence="SEM morphology; wall number was not established in the source",
+        length_summary="several micrometres",
+        morphology="vertically aligned CNTs intertwined into a three-dimensional network around carbon fibres",
+        alignment_or_array="quasi-vertically aligned around carbon-fibre surface",
+        characterization_methods="SEM; BET N2 adsorption/desorption",
+        application_property_summary="Used as an interfacial reinforcement in CFRP; the CNT-grown-plus-RPC composite reached 718.86 MPa flexural strength, 27.1% above untreated composite.",
+        notes="Composite mechanical performance is downstream application evidence, not CNT synthesis yield.",
+    )
+    cost = cost_row(
+        run_id,
+        scale_level_demonstrated="laboratory fabric treatment",
+        scale_level_claimed="potential manufacturing route for high-strength CFRP",
+        scale_evidence_summary="CNTs were grown directly on woven carbon-fibre fabric and incorporated into ten-ply CFRP test coupons.",
+        quantitative_cost_reported="not_reported",
+    )
+    tables = {
+        "source_master": [source_master_row(context, "One result-linked CNT growth condition on carbon-fibre fabric; RPC and composite curing are downstream processing, not separate CNT synthesis runs.")],
+        "source_run": [run],
+        "catalyst_system": [catalyst],
+        "reactor_process_gas": [growth],
+        "yield_quality": [product],
+        "cost_scale_review": [cost],
+        "evidence_index": [
+            evidence_row(source_id, f"{source_id}_EV_01_CATALYST", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_158C2FAA17BB02803FEE", "Carbon-fibre fabric was immersed in 1 mol/L Fe and Co nitrate solutions for 20 min and dried at 200 C for 1 h."),
+            evidence_row(source_id, f"{source_id}_EV_01_GROWTH", run_id, "reactor_process_gas", growth["process_stage_id"], "record_level", "SPAN_192EE084C661C9B7FE89", "CNT growth used 100 mL/min N2 and 40 mL/min C2H2 at 660 C for 30 min."),
+            evidence_row(source_id, f"{source_id}_EV_01_PRODUCT", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_1844F6A44B866B1173F8", "SEM showed several-micrometre CNTs growing vertically around carbon fibres and intertwining into a three-dimensional network."),
+            evidence_row(source_id, f"{source_id}_EV_01_APPLICATION", run_id, "yield_quality", product["product_id"], "application_property_summary", "SPAN_206586880112B7044EE3", "The CNT-grown-plus-RPC composite reached 718.86 MPa flexural strength, 27.1% above the untreated composite."),
+            evidence_row(source_id, f"{source_id}_EV_01_COST", run_id, "cost_scale_review", run_id, "record_level", "SPAN_158C2FAA17BB02803FEE", "The demonstrated woven-fabric treatment is assessed as laboratory scale; no quantitative cost is reported.", value_status="review_assessment"),
+        ],
+        "review_issue_log": [
+            issue_row(
+                f"{source_id}_ISS_WALL_NUMBER",
+                source_id,
+                run_id,
+                "missing_product_subtype_evidence",
+                "yield_quality",
+                product["product_id"],
+                "CNT_type_confirmed",
+                "The paper calls the product VACNTs but does not establish single-wall or multi-wall identity; wall number is not inferred from morphology.",
+                evidence_ids=f"{source_id}_EV_01_PRODUCT",
+                severity="medium",
+            )
+        ],
+    }
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {"result_linked_campaigns_in_paper": 1, "extracted_runs": 1, "negative_runs_preserved": 0},
+            "pdf_visual_review": {"completed": False, "pages_checked": [], "not_applicable_reason": "Local source is HTML rather than PDF."},
+            "html_source_review": {"completed": True, "sections_checked": ["2.2 Starting Materials", "Figure 2 growth scheme", "3.1 Microstructure", "4. Conclusions"]},
+            "pressure_policy_check": "Pressure is not reported and remains blank.",
+            "cross_run_inheritance_check": "Only one CNT synthesis condition exists; RPC/composite test groups are not duplicated as growth runs.",
+            "unit_policy_check": "mL/min gas flows are normalized one-to-one to sccm at the reporting level.",
+            "conflict_check": "VACNT wall number is not reported and is logged rather than inferred.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
+def build_lit_c604f012(context: SourceContext) -> Path:
+    """Mirza Gheitaghy et al. 2020, patterned VA-MWCNT pillar LPCVD."""
+    source_id = context.source_id
+    package = SHARD_ROOT / source_id
+    run = source_run_row(
+        source_id,
+        "FE_TIN_VAMWCNT_PILLARS",
+        "Patterned Fe/TiN VA-MWCNT pillar growth",
+        "A patterned 5 nm Fe catalyst on Ti/TiN-coated silicon produced 120 micrometre-tall VA-MWCNT pillars with lithographically varied pillar diameters.",
+    )
+    run_id = run["run_id"]
+    catalyst = catalyst_row(
+        run_id,
+        catalyst_label="patterned Fe film on Ti/TiN diffusion-barrier stack",
+        active_metals="Fe",
+        support_material="Si wafer with Ti/TiN diffusion-barrier stack",
+        precursor_summary="5 nm Fe film deposited by electron-beam evaporation",
+        preparation_method="optical lithography, Fe e-beam evaporation, and lift-off",
+        preparation_detail="Photoresist pattern defines circular CNT growth regions; TiN acts as the catalyst diffusion barrier.",
+    )
+    growth = process_row(
+        run_id,
+        1,
+        "LPCVD_growth",
+        reactor_type="LPCVD reactor",
+        process_note="Pillar diameter was set by catalyst lithography rather than a change in the CVD recipe. Numeric method values were visually checked but are omitted here because the immutable candidate ledger did not capture the supporting paragraph.",
+    )
+    product = yield_row(
+        run_id,
+        primary_yield_metric="not_reported",
+        yield_original="not_reported",
+        yield_definition_original="not_reported",
+        secondary_result_summary="VA-MWCNT pillars were approximately 120 micrometres tall; pillar diameters ranged from 30 to 150 micrometres.",
+        CNT_type_reported="vertically aligned multi-walled carbon nanotubes",
+        CNT_type_confirmed="MWCNT",
+        CNT_type_evidence="TEM and SEM",
+        outer_diameter_mean_nm="30",
+        length_summary="pillar height 120 +/- 5 micrometres",
+        morphology="vertically aligned MWCNT arrays patterned as cylindrical pillars",
+        alignment_or_array="vertical pillars; lithographic pillar diameter 30-150 micrometres",
+        characterization_methods="SEM; TEM; Raman spectroscopy; FIB; EDX",
+        notes="The 30-150 micrometre values are pillar diameters, not nanotube outer diameters. Individual nanotube diameter is 30 +/- 4 nm.",
+    )
+    cost = cost_row(
+        run_id,
+        scale_level_demonstrated="wafer microfabrication and commercial LPCVD",
+        scale_level_claimed="superconducting vertical-interconnect concept",
+        scale_evidence_summary="Patterned growth was demonstrated on a Si wafer in a commercial AIXTRON reactor.",
+        reactor_capacity_or_throughput="wafer diameter and reactor throughput not entered because ledger support is incomplete",
+        quantitative_cost_reported="not_reported",
+    )
+    tables = {
+        "source_master": [source_master_row(context, "One common LPCVD synthesis recipe produced a lithographic pillar-diameter matrix; downstream NbTiN ALD coatings and compression tests are not separate CNT growth runs.")],
+        "source_run": [run],
+        "catalyst_system": [catalyst],
+        "reactor_process_gas": [growth],
+        "yield_quality": [product],
+        "cost_scale_review": [cost],
+        "evidence_index": [
+            evidence_row(source_id, f"{source_id}_EV_01_CATALYST", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_FD21E5F3BB8ABE0B0EA0", "Figure 1 describes the Ti/TiN barrier, optical lithography, 5 nm Fe evaporation, lift-off, and patterned CNT growth regions."),
+            evidence_row(source_id, f"{source_id}_EV_01_GROWTH", run_id, "reactor_process_gas", growth["process_stage_id"], "stage_type;reactor_type;process_note", "SPAN_4264F0052239494B6AEE", "The abstract identifies low-pressure chemical vapor deposition as the VA-MWCNT growth method; unsupported numeric method values remain omitted."),
+            evidence_row(source_id, f"{source_id}_EV_01_PILLARS", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_DB862CEC5763FFAAA026", "The study fabricated 30-150 micrometre-diameter MWCNT pillars approximately 120 micrometres high."),
+            evidence_row(source_id, f"{source_id}_EV_01_CNT_DIAMETER", run_id, "yield_quality", product["product_id"], "outer_diameter_mean_nm", "SPAN_EAD611F7657A9BD181BE", "TEM/SEM analysis reports an individual nanotube average diameter of 30 +/- 4 nm."),
+            evidence_row(source_id, f"{source_id}_EV_01_COST", run_id, "cost_scale_review", run_id, "record_level", "SPAN_67D46CFAF948FFD15753", "The 100 mm wafer and commercial reactor demonstration is assessed as wafer-scale microfabrication; no quantitative cost is reported.", value_status="review_assessment"),
+        ],
+        "review_issue_log": [
+            issue_row(
+                f"{source_id}_ISS_PROCESS_LEDGER_GAP",
+                source_id,
+                run_id,
+                "evidence_ledger_coverage_gap",
+                "reactor_process_gas",
+                growth["process_stage_id"],
+                "record_level",
+                "The PDF methods visually report the LPCVD temperature, pressure, flows, and duration, but the immutable candidate ledger does not contain that paragraph. Numeric process fields are left blank pending ledger repair rather than supported by a mismatched span.",
+                evidence_ids=f"{source_id}_EV_01_CATALYST",
+                severity="high",
+            )
+        ],
+    }
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "extracted_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "campaign_reconciliation": {"result_linked_campaigns_in_paper": 1, "extracted_runs": 1, "negative_runs_preserved": 0, "matrix_note": "Pillar diameters are lithographic product geometries under one common growth recipe."},
+            "pdf_visual_review": {"completed": True, "pages_checked": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "objects_checked": ["Section 2.1 LPCVD recipe", "Figure 1 process flow", "Figure 2 morphology", "Raman spectra", "compression-series figures"]},
+            "pressure_policy_check": "The PDF reports pressure, but it remains blank in the tables because the immutable evidence ledger did not capture the supporting methods paragraph.",
+            "cross_run_inheritance_check": "NbTiN coating thicknesses and compression-test pillar diameters are downstream variants and are not represented as separate CNT synthesis runs.",
+            "unit_policy_check": "30 +/- 4 nm individual-tube diameter is kept separate from 30-150 micrometre pillar diameter and 120 micrometre pillar height.",
+            "conflict_check": "No conflicting synthesis values were found in the visually checked methods and figure caption.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
+def build_lit_9d1d16c5(context: SourceContext) -> Path:
+    """El-Hendawy et al. 2009, nine MgO-supported Fe/Mo/Ce catalysts."""
+    source_id = context.source_id
+    matrix = [
+        ("FE100", "Fe100", "Fe", "100 Fe : 0 Mo : 0 Ce", "10.9", "0.09", "Yes", "212"),
+        ("MO100", "Mo100", "Mo", "0 Fe : 100 Mo : 0 Ce", "12.2", "0.78", "No", ""),
+        ("CE100", "Ce100", "Ce", "0 Fe : 0 Mo : 100 Ce", "10.3", "0.92", "No", ""),
+        ("CE10", "Ce10", "Fe; Ce", "90 Fe : 0 Mo : 10 Ce", "14.2", "0.10", "Yes", "188"),
+        ("CE50", "Ce50", "Fe; Ce", "50 Fe : 0 Mo : 50 Ce", "13.6", "0.20", "Yes", "188"),
+        ("CE90", "Ce90", "Fe; Ce", "10 Fe : 0 Mo : 90 Ce", "13.6", "0.81", "Yes", "188"),
+        ("MO10", "Mo10", "Fe; Mo", "90 Fe : 10 Mo : 0 Ce", "18.8", "0.11", "Yes", "212"),
+        ("MO50", "Mo50", "Fe; Mo", "50 Fe : 50 Mo : 0 Ce", "30.3", "0.17", "Yes", "212"),
+        ("MO90", "Mo90", "Fe; Mo", "10 Fe : 90 Mo : 0 Ce", "15.9", "0.40", "Yes", "212"),
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [source_master_row(context, "Nine catalyst compositions from Table 1 are reconciled one-to-one with the nine Table 2 outcomes.")],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, (code, label, metals, ratio, carbon_mass, dg, rbm, rbm_peak) in enumerate(matrix, 1):
+        run = source_run_row(
+            source_id,
+            code,
+            label,
+            f"Methane CVD using the {label} MgO-supported catalyst; Table 2 reports {carbon_mass} mg graphitic carbon and D/G {dg}.",
+        )
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label=f"{label} on MgO",
+            active_metals=metals,
+            support_material="MgO nanopowder",
+            metal_ratio_original=ratio,
+            precursor_summary="iron nitrate, cerium nitrate, and ammonium molybdate as applicable",
+            preparation_method="aqueous slurry mixing followed by drying and grinding",
+            preparation_detail="total metal loading 28 mol.% relative to MgO; stirred 20 min and ultrasonicated 10 min",
+            drying_condition="80 C overnight",
+        )
+        process = process_row(
+            run_id,
+            1,
+            "methane_CVD_growth",
+            reactor_type="tube furnace",
+            reactor_material="alumina",
+            reactor_size_summary="25.4 mm diameter alumina work tube",
+            catalyst_loading_mass_g="0.1",
+            temperature_setpoint_C="900",
+            heating_rate_C_min="30",
+            holding_time_min="30",
+            cooling_condition="400 cm3/min argon; sample removed below 200 C",
+            carbon_source="methane",
+            carbon_source_flow_original="200 cm3/min",
+            carbon_source_flow_sccm="200",
+            inert_gas="Ar",
+            inert_gas_flow_original="400 cm3/min",
+            inert_gas_flow_sccm="400",
+        )
+        product = yield_row(
+            run_id,
+            primary_yield_metric="graphitic carbon mass",
+            yield_original=f"{carbon_mass} mg graphitic C",
+            yield_definition_original="graphitic carbon determined by high-temperature burn-off in TGA",
+            yield_calculation_method="TGA high-temperature carbon burn-off",
+            secondary_result_summary=f"D/G-band ratio {dg}; RBM detected: {rbm}" + (f"; most intense RBM {rbm_peak} cm-1" if rbm_peak else ""),
+            CNT_type_reported="single-walled carbon nanotubes" if rbm == "Yes" else "no or very few single-walled carbon nanotubes",
+            CNT_type_confirmed="SWCNT" if rbm == "Yes" else "not_reported",
+            product_mixture_summary="graphitic carbon with SWCNT RBM evidence" if rbm == "Yes" else "graphitic carbon with no detected RBM",
+            CNT_type_evidence="Raman RBM" if rbm == "Yes" else "Raman spectroscopy did not detect RBM",
+            RBM_peak_reported=(f"{rbm_peak} cm-1" if rbm_peak else "not_detected"),
+            Raman_ratio_type="D/G integrated-area ratio",
+            Raman_ratio_value=dg,
+            characterization_methods="Raman spectroscopy; TGA; SEM; TEM",
+            notes="The reported graphitic-carbon mass is preserved and is not relabelled as an exact CNT mass.",
+        )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory tube-furnace batch",
+            scale_level_claimed="not_reported",
+            scale_evidence_summary="A powdered catalyst charge was processed in an alumina tube furnace.",
+            quantitative_cost_reported="not_reported",
+            cost_driver_summary="methane, argon, furnace heat, and supported catalyst preparation",
+            industrial_readiness_assessment="laboratory comparison study",
+        )
+        issue_id = f"{source_id}_ISS_{index:02d}_YIELD_BASIS"
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].append(process)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        tables["evidence_index"].extend(
+            [
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_CAT", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_3547BE8D3B0F42D420DD", f"Table 1 identifies {label}, its Fe/Mo/Ce proportions, MgO support, total metal loading, and preparation sequence."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROC", run_id, "reactor_process_gas", process["process_stage_id"], "record_level", "SPAN_E001FC1DD3506591BFDA", "The common methane-CVD paragraph reports catalyst mass, tube size, temperature, heating rate, gas flows, duration, and cooling condition."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROD", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_3BF5A2FA447FD562D7A2", f"Table 2 reports the graphitic-carbon mass, D/G ratio, RBM detection, and RBM peak for {label}.", linked_issue_id=issue_id),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_COST", run_id, "cost_scale_review", run_id, "record_level", "SPAN_E001FC1DD3506591BFDA", "The reported apparatus supports a laboratory tube-furnace assessment; no quantitative cost is reported.", value_status="review_assessment"),
+            ]
+        )
+        tables["review_issue_log"].append(
+            issue_row(
+                issue_id,
+                source_id,
+                run_id,
+                "yield_definition_scope",
+                "yield_quality",
+                product["product_id"],
+                "yield_original",
+                "Table 2 reports graphitic-carbon mass. The authors state that this closely represents CNT mass, but it is retained as graphitic carbon rather than converted to an exact CNT yield.",
+                evidence_ids=f"{source_id}_EV_{index:02d}_PROD",
+                severity="medium",
+            )
+        )
+    package = SHARD_ROOT / source_id
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "source_review_complete_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "evidence_sections_checked": ["2.1 Catalyst preparation", "2.2 Sample analysis", "Table 1", "Table 2", "Results and discussion"],
+            "campaign_reconciliation": {"result_linked_campaigns_in_paper": 9, "extracted_runs": 9, "negative_runs_preserved": 2},
+            "pdf_visual_review": {"completed": True, "pages_checked": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "objects_checked": ["Table 1 catalyst matrix", "Table 2 outcome matrix", "Raman and microscopy figures"]},
+            "matrix_coverage_check": "All nine Table 1 catalysts map one-to-one to all nine Table 2 rows; Mo100 and Ce100 negative/near-negative SWCNT outcomes are retained.",
+            "yield_policy_check": "Graphitic-carbon TGA mass is not silently relabelled as CNT mass.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
+def build_lit_f140d55e(context: SourceContext) -> Path:
+    """Park et al. 2023, wafer-scale SWCNT forest parameter scans."""
+    source_id = context.source_id
+    series = [
+        ("STANDARD", "standard recipe", "experimental_condition", "standard", "Standard wafer-scale SWCNT forest recipe.", "SPAN_CBCA0D478FEA4A2C26C9", "Standard forests contained more than 96% SWCNTs with about 2 nm average diameter."),
+        ("TIME_SCAN", "growth-time scan", "experimental_series", "time", "Growth duration was scanned; forest mass increased linearly and mass kinetics remained constant.", "SPAN_76BE708A7CB64843FF33", "Forest mass increased linearly with growth time, giving constant mass kinetics over the tested range."),
+        ("ACETYLENE_SCAN", "acetylene-partial-pressure scan", "experimental_series", "acetylene", "Acetylene partial pressure was scanned up to a 30-fold precursor-concentration range.", "SPAN_A0D92EC2D2155196C6B7", "Mass kinetics increased linearly with acetylene partial pressure up to a limit."),
+        ("HYDROGEN_SCAN", "hydrogen-partial-pressure scan", "experimental_series", "hydrogen", "Hydrogen partial pressure was scanned at constant 80 mbar growth pressure.", "SPAN_7A5AD1394BB1E0BF8879", "At 80 mbar, mass kinetics increased slightly with hydrogen partial pressure."),
+        ("PRESSURE_CONST_PARTIAL", "pressure scan at constant acetylene partial pressure", "experimental_series", "pressure", "Growth pressure was scanned from 20 to 790 mbar while acetylene partial pressure was held constant.", "SPAN_BFC31E2B81A43E362F77", "Mass kinetics decayed inversely as total pressure increased at constant acetylene partial pressure."),
+        ("PRESSURE_CONST_FLOW", "pressure scan at constant acetylene flow", "experimental_series", "pressure", "Growth pressure was scanned from 20 to 790 mbar while acetylene flow was held constant.", "SPAN_BFC31E2B81A43E362F77", "A shallow mass-kinetics maximum occurred as pressure increased at constant acetylene flow."),
+        ("FLOW_CONST_PARTIAL", "total-flow scan at constant acetylene partial pressure", "experimental_series", "flow", "Total gas flow was scanned over an up-to-8-fold range while acetylene partial pressure was held constant.", "SPAN_7A5AD1394BB1E0BF8879", "Mass kinetics increased as total flow increased at constant acetylene partial pressure."),
+        ("FLOW_CONST_FLOW", "total-flow scan at constant acetylene flow", "experimental_series", "flow", "Total gas flow was scanned over an up-to-8-fold range while acetylene flow was held constant.", "SPAN_7A5AD1394BB1E0BF8879", "Mass kinetics decreased as total flow increased at constant acetylene flow."),
+        ("TEMPERATURE_SCAN", "growth-temperature scan", "experimental_series", "temperature", "Growth temperature was scanned from 700 to 900 C at 80 mbar.", "SPAN_7A80C6F4108D3CF2432C", "Preliminary temperature data showed weak mass-kinetics scaling over 700-900 C."),
+        ("AREA_SCAN", "catalyst-area scan", "experimental_series", "area", "Catalyst substrate area was scanned from 1 to 180 cm2.", "SPAN_4886FFB884738CCD18AC", "Mass kinetics decreased inversely with catalyst area."),
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [source_master_row(context, "One standard recipe and nine source-declared parameter-scan series are represented without fabricating unreported individual scan points.")],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, (code, label, data_type, variant, process_note, outcome_span, outcome) in enumerate(series, 1):
+        run = source_run_row(source_id, code, label, outcome, data_type=data_type)
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="400 A Al2O3 / 0.5 A Mo / 5.5 A Fe thin-film stack",
+            active_metals="Fe; Mo",
+            support_material="silicon wafer with Al2O3 underlayer",
+            metal_ratio_original="400 A Al2O3 / 0.5 A Mo / 5.5 A Fe",
+            precursor_summary="e-beam-evaporated Al2O3, Mo, and Fe thin films",
+            preparation_method="e-beam evaporation onto silicon wafer",
+        )
+        process_values: dict[str, str] = {
+            "reactor_type": "AIXTRON Black Magic cold-wall CVD furnace",
+            "reactor_setup_summary": "graphite heating stage, quartz showerhead, and mass-flow-controlled gas delivery",
+            "temperature_setpoint_C": "800",
+            "pressure_original": "80 mbar",
+            "carbon_source": "C2H2",
+            "carbon_source_flow_original": "4 sccm",
+            "carbon_source_flow_sccm": "4",
+            "reducing_gas": "H2",
+            "reducing_gas_flow_original": "700 sccm",
+            "reducing_gas_flow_sccm": "700",
+            "inert_gas": "Ar",
+            "inert_gas_flow_original": "400 sccm",
+            "inert_gas_flow_sccm": "400",
+            "cofeed_or_reactive_gas": "H2O",
+            "cofeed_flow_original": "100-200 ppm by volume",
+            "process_note": process_note,
+        }
+        if variant == "acetylene":
+            process_values.pop("carbon_source_flow_original")
+            process_values.pop("carbon_source_flow_sccm")
+        elif variant == "hydrogen":
+            process_values.pop("reducing_gas_flow_original")
+            process_values.pop("reducing_gas_flow_sccm")
+        elif variant == "pressure":
+            process_values["pressure_original"] = "20-790 mbar"
+        elif variant == "flow":
+            for field in ["carbon_source_flow_original", "carbon_source_flow_sccm", "reducing_gas_flow_original", "reducing_gas_flow_sccm", "inert_gas_flow_original", "inert_gas_flow_sccm"]:
+                process_values.pop(field)
+        elif variant == "temperature":
+            process_values.pop("temperature_setpoint_C")
+            process_values["temperature_range_reported_C"] = "700-900"
+        process = process_row(run_id, 1, "SWCNT_forest_growth", **process_values)
+        if variant == "standard":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="CNT forest mass kinetics",
+                yield_original="not_reported",
+                yield_definition_original="mass accumulation rate per unit catalyst area",
+                secondary_result_summary=outcome,
+                CNT_type_reported="single-walled carbon nanotube forest",
+                CNT_type_confirmed="SWCNT",
+                CNT_type_evidence="HRTEM and Raman RBM",
+                outer_diameter_mean_nm="2",
+                outer_diameter_range_nm="maximum 5",
+                alignment_or_array="vertically aligned forest",
+                purified_product_purity_wt_percent="96",
+                purity_basis=">96% single-wall selectivity",
+                characterization_methods="HRTEM; Raman spectroscopy; SEM; gravimetry",
+            )
+        else:
+            product = yield_row(
+                run_id,
+                primary_yield_metric="CNT forest mass kinetics",
+                yield_original="not_reported",
+                yield_definition_original="mass accumulation rate per unit catalyst area",
+                secondary_result_summary=outcome,
+                CNT_type_reported="single-walled carbon nanotube forest",
+                CNT_type_confirmed="SWCNT",
+                CNT_type_evidence="HRTEM and Raman RBM across the scanned parameter space",
+                outer_diameter_range_nm="2-2.3",
+                alignment_or_array="vertically aligned forest",
+                purity_basis="single-wall selectivity 96.6-99+% across the scanned parameter space",
+                characterization_methods="HRTEM; Raman spectroscopy; SEM; gravimetry",
+                notes="Structural fields are series-level ranges reported across the multidimensional scan, not values assigned to an unreported individual point.",
+            )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="wafer-scale batch CVD",
+            scale_level_claimed="large-area SWCNT forest synthesis",
+            scale_evidence_summary="Uniform SWCNT forests were shown on 4-in and 6-in silicon wafers.",
+            reactor_capacity_or_throughput="graphite stage accommodates up to 6-in wafers",
+            quantitative_cost_reported="not_reported",
+            scale_up_issue="mass kinetics depends on gas diffusion, total flow, pressure, and catalyst area",
+            industrial_readiness_assessment="wafer-scale research demonstration",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].append(process)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        tables["evidence_index"].extend(
+            [
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_CAT", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_6DC4C158638E27C4C291", "The Methods report the silicon wafer, catalyst-film stack, e-beam deposition, reactor, and standard anneal recipe."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROC_A", run_id, "reactor_process_gas", process["process_stage_id"], "record_level", "SPAN_6DC4C158638E27C4C291", "The standard recipe reports reactor configuration, pressure, temperature, Ar/H2 flows, and water cofeed."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROC_B", run_id, "reactor_process_gas", process["process_stage_id"], "record_level", "SPAN_D9AC2E80A88AA88E4BF3", "The growth step adds acetylene and explains how pressure and temperature scans depart from the standard recipe."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROC_RANGE", run_id, "reactor_process_gas", process["process_stage_id"], "process_note;pressure_original;temperature_range_reported_C", "SPAN_370758231A36DE2478C8", "The conclusion reports the precursor, area, pressure, and flow ranges covered by the multidimensional scans."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_OUTCOME", run_id, "yield_quality", product["product_id"], "secondary_result_summary", outcome_span, outcome),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_STRUCT", run_id, "yield_quality", product["product_id"], "record_level", ("SPAN_CBCA0D478FEA4A2C26C9" if variant == "standard" else "SPAN_370758231A36DE2478C8"), "The source reports standard-recipe or scan-wide SWCNT selectivity and diameter characteristics."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_COST_A", run_id, "cost_scale_review", run_id, "record_level", "SPAN_6DC4C158638E27C4C291", "The reactor stage accommodates wafers up to 6 in.", value_status="review_assessment"),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_COST_B", run_id, "cost_scale_review", run_id, "record_level", "SPAN_A27B561B7A02B541D47E", "The figure shows uniform forests grown on 4-in and 6-in silicon wafers.", value_status="review_assessment"),
+            ]
+        )
+        if variant != "standard":
+            issue_id = f"{source_id}_ISS_{index:02d}_SERIES_RESOLUTION"
+            tables["review_issue_log"].append(
+                issue_row(
+                    issue_id,
+                    source_id,
+                    run_id,
+                    "series_point_resolution",
+                    "source_run",
+                    run_id,
+                    "data_type",
+                    "The main text and figure establish a parameter-scan series and its trend, but do not enumerate every plotted condition in machine-readable text. The series is preserved as one record rather than fabricating point-level runs.",
+                    evidence_ids=f"{source_id}_EV_{index:02d}_OUTCOME",
+                    severity="medium",
+                )
+            )
+    package = SHARD_ROOT / source_id
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "source_review_complete_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "evidence_sections_checked": ["2.1 CNT synthesis", "3.2 Parametric scans", "3.2.1 Mass kinetics", "3.2.2 CNT forest properties", "Figures 3-7", "Tables 1-2"],
+            "campaign_reconciliation": {"result_linked_campaigns_in_paper": 10, "extracted_runs": 10, "negative_runs_preserved": 0},
+            "pdf_visual_review": {"completed": True, "pages_checked": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39], "objects_checked": ["standard-recipe methods", "Figure 3 parametric scans", "Figures 4-7 structure and validation plots", "Tables 1-2"]},
+            "series_resolution_check": "The source's parameter scans are series-level records because exact plotted point sets are not machine-readable in the immutable evidence ledger.",
+            "cross_run_inheritance_check": "Only the declared standard recipe is inherited; the scanned variable is explicitly removed or replaced in each series record.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
+def build_lit_8af8b4db(context: SourceContext) -> Path:
+    """Chen et al. 2023, waste-plastic pyrolysis over SS 316 mesh."""
+    source_id = context.source_id
+    records = [
+        {"code": "PRETREATMENT_MATRIX", "label": "Raw/A/C/A+C pretreatment matrix", "kind": "pretreatment", "data_type": "experimental_series", "span": "SPAN_EC65E5B3235036D326F1"},
+        {"code": "REUSE_SERIES", "label": "catalyst reuse series", "kind": "reuse", "data_type": "experimental_series", "span": "SPAN_2DE31D7701033E6314FF"},
+        {"code": "TEMPERATURE_SERIES", "label": "catalytic-temperature series", "kind": "temperature", "data_type": "experimental_series", "span": "SPAN_7D04839B646D693E9909"},
+        {"code": "CATALYST_RATIO_SERIES", "label": "SS 316-to-PP mass-ratio series", "kind": "ratio", "data_type": "experimental_series", "span": "SPAN_4C5C8CFE115911982771"},
+        {"code": "LDPE", "label": "LDPE feedstock", "kind": "feedstock", "feedstock": "LDPE", "carbon_yield": "59.4", "data_type": "experimental_run", "span": "SPAN_384185DFA09CFA115855"},
+        {"code": "HDPE", "label": "HDPE feedstock", "kind": "feedstock", "feedstock": "HDPE", "carbon_yield": "64.1", "data_type": "experimental_run", "span": "SPAN_384185DFA09CFA115855"},
+        {"code": "PP", "label": "PP feedstock", "kind": "feedstock", "feedstock": "PP", "carbon_yield": "67.6", "data_type": "experimental_run", "span": "SPAN_384185DFA09CFA115855"},
+        {"code": "GPPS", "label": "GPPS feedstock", "kind": "feedstock", "feedstock": "GPPS", "carbon_yield": "78.0", "data_type": "experimental_run", "span": "SPAN_384185DFA09CFA115855"},
+        {"code": "HIPS", "label": "HIPS feedstock", "kind": "feedstock", "feedstock": "HIPS", "carbon_yield": "80.9", "data_type": "experimental_run", "span": "SPAN_384185DFA09CFA115855"},
+        {"code": "ETHYLENE_CONTROL", "label": "ethylene model-compound control", "kind": "ethylene", "data_type": "experimental_run", "span": "SPAN_7C7DFDA1EA1D563D1C0F"},
+        {"code": "BENZENE_CONTROL", "label": "benzene model-compound control", "kind": "benzene", "data_type": "experimental_run", "span": "SPAN_48D6E17F7EDABF64D7D8"},
+    ]
+    tables: dict[str, list[dict[str, str]]] = {
+        "source_master": [source_master_row(context, "Pretreatment, reuse, temperature, catalyst/feed ratio, five plastic feedstocks, and two model-compound controls are reconciled as eleven source-declared records.")],
+        "source_run": [],
+        "catalyst_system": [],
+        "reactor_process_gas": [],
+        "yield_quality": [],
+        "cost_scale_review": [],
+        "evidence_index": [],
+        "review_issue_log": [],
+    }
+    for index, item in enumerate(records, 1):
+        kind = item["kind"]
+        if kind == "pretreatment":
+            summary = "Raw, acid-etched, calcined, and acid-plus-calcined SS 316 catalysts were compared; solid yield rose from 11.0 to 47.6 wt.% with A+C pretreatment."
+        elif kind == "reuse":
+            summary = "A+C-pretreated SS 316 was reused for 10 cycles; peak MWCNT yield was 662.0 mg per g plastic in cycle 3 and cumulative product was about 6 g."
+        elif kind == "temperature":
+            summary = "A 600-900 C catalytic-temperature series identified 800 C as preferred, with 662.0 mg MWCNT per g plastic and D/G 0.64."
+        elif kind == "ratio":
+            summary = "The SS 316-to-PP mass ratio was scanned from 0 to 30; product yields showed no obvious difference above 15."
+        elif kind == "feedstock":
+            summary = f"{item['feedstock']} produced {item['carbon_yield']} wt.% carbon, of which more than 96% was identified as MWCNTs."
+        elif kind == "ethylene":
+            summary = "Ethylene model-compound control formed CNTs through a VLS pathway involving Fe3C and liquid-like particles."
+        else:
+            summary = "Benzene model-compound control formed CNTs through a VSS pathway involving a solid Fe-Ni alloy."
+        run = source_run_row(source_id, item["code"], item["label"], summary, data_type=item["data_type"])
+        run_id = run["run_id"]
+        catalyst = catalyst_row(
+            run_id,
+            catalyst_label="A+C-pretreated SS 316 mesh monolith" if kind != "pretreatment" else "Raw/A/C/A+C SS 316 pretreatment matrix",
+            active_metals="Fe; Ni",
+            support_material="self-supported multilayer stainless-steel 316 mesh",
+            preparation_method="acid etching followed by air calcination" if kind != "pretreatment" else "raw, acid etching, air calcination, and combined acid-plus-calcination variants",
+            preparation_detail="1 M HCl at 60 C for 12 h; air at 750 C for 15 min with 35 C/min ramp",
+            drying_condition="ethanol-cleaned and dried overnight at 105 C",
+            calcination_condition="750 C in air for 15 min at 35 C/min" if kind != "pretreatment" else "variant-dependent",
+            phase_or_state_summary="50 mm high, 15 mm outer-diameter hollow mesh cylinder",
+        )
+        if kind in {"ethylene", "benzene"}:
+            carbon_source = "C2H4" if kind == "ethylene" else "C6H6"
+            process = process_row(
+                run_id,
+                1,
+                "model_compound_control",
+                reactor_type="not_reported",
+                carbon_source=carbon_source,
+                process_note="Model compound used to distinguish the CNT growth mechanism; exact control flow and duration are not reported in the main-text evidence ledger.",
+            )
+        else:
+            process_values: dict[str, str] = {
+                "reactor_type": "two-stage fixed-bed system",
+                "reactor_material": "quartz",
+                "reactor_size_summary": "upper section 26 mm x 300 mm; lower section 16 mm x 300 mm",
+                "reactor_setup_summary": "plastic pyrolysis in the upper heated section followed by catalytic deposition in the lower heated section",
+                "catalyst_loading_mass_g": "15",
+                "heating_rate_C_min": "20",
+                "inert_gas": "N2",
+                "inert_gas_flow_original": "50 mL/min",
+                "inert_gas_flow_sccm": "50",
+                "carbon_source": item.get("feedstock", "waste plastic"),
+            }
+            if kind == "temperature":
+                process_values["temperature_range_reported_C"] = "600-900"
+                process_values["process_note"] = "Catalytic deposition temperatures tested: 600, 700, 800, and 900 C."
+            elif kind == "ratio":
+                process_values["carbon_source"] = "PP"
+                process_values["process_note"] = "SS 316 catalyst-to-PP mass ratio scanned from 0 to 30; no obvious differences above 15."
+            elif kind == "reuse":
+                process_values["process_note"] = "MWCNTs were ultrasonically separated after each cycle; the recovered catalyst was reused and recalcinated after cycle 5."
+            elif kind == "pretreatment":
+                process_values["process_note"] = "Common plastic pyrolysis-catalysis process used to compare Raw, A, C, and A+C catalyst variants."
+            else:
+                process_values["process_note"] = f"Waste-plastic universality test using {item['feedstock']}."
+            process = process_row(run_id, 1, "plastic_pyrolysis_catalysis", **process_values)
+        if kind == "pretreatment":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="solid carbon yield",
+                yield_original="11.0-47.6 wt.% solid yield",
+                yield_definition_original="solid product mass fraction across the pretreatment comparison",
+                secondary_result_summary="A+C pretreatment increased solid yield from 11.0 wt.% to 47.6 wt.%; filamentous carbon was mainly MWCNTs.",
+                CNT_type_reported="multi-walled carbon nanotubes",
+                CNT_type_confirmed="MWCNT",
+                CNT_type_evidence="SEM and TEM",
+                morphology="filamentous carbon mainly composed of MWCNTs",
+                characterization_methods="SEM; TEM",
+            )
+        elif kind == "reuse":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="MWCNT yield and cumulative recovered mass",
+                yield_original="maximum 662.0 mg g_plastic^-1 in cycle 3; approximately 6 g cumulative after 10 cycles",
+                yield_definition_original="MWCNT mass per mass of plastic and cumulative MWCNT mass over reuse cycles",
+                secondary_result_summary="Peak yield occurred in cycle 3; activity was recoverable by recalcination and approximately 6 g MWCNTs were collected after 10 cycles.",
+                CNT_type_reported="multi-walled carbon nanotubes",
+                CNT_type_confirmed="MWCNT",
+                CNT_type_evidence="microscopy and recovered product identification",
+                post_treatment_or_purification="ultrasonic separation from the monolithic catalyst after each cycle",
+            )
+        elif kind == "temperature":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="MWCNT mass per plastic feed",
+                yield_original="662.0 mg g_plastic^-1 at 800 C",
+                yield_definition_original="MWCNT mass per mass of plastic feed",
+                secondary_result_summary="At 800 C the H2 yield was 51.3 mmol g_plastic^-1 and the MWCNT D/G ratio was 0.64.",
+                CNT_type_reported="multi-walled carbon nanotubes",
+                CNT_type_confirmed="MWCNT",
+                CNT_type_evidence="Raman and microscopy",
+                Raman_ratio_type="D/G",
+                Raman_ratio_value="0.64",
+                characterization_methods="Raman spectroscopy; microscopy",
+            )
+        elif kind == "ratio":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="solid yield trend",
+                yield_original="not_reported",
+                yield_definition_original="solid product yield over catalyst-to-PP mass-ratio scan",
+                secondary_result_summary="Adding SS 316 sharply increased solid yield; no obvious differences were observed when the mass ratio exceeded 15.",
+                CNT_type_reported="multi-walled carbon nanotubes",
+                CNT_type_confirmed="MWCNT",
+                CNT_type_evidence="study product identification",
+            )
+        elif kind == "feedstock":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="carbon yield",
+                yield_original=f"{item['carbon_yield']} wt.% carbon",
+                yield_definition_original="carbon-product mass fraction from the plastic feedstock",
+                secondary_result_summary=f"More than 96% of the {item['feedstock']} carbon product was identified as MWCNTs.",
+                CNT_type_reported="multi-walled carbon nanotubes",
+                CNT_type_confirmed="MWCNT",
+                CNT_type_evidence="more than 96% product identification",
+                purified_product_purity_wt_percent="96",
+                purity_basis=">96% of carbon product identified as MWCNTs",
+                characterization_methods="TEM; product-yield analysis",
+                notes="The reported carbon yield is retained as carbon yield and is not converted into an exact MWCNT yield.",
+            )
+        elif kind == "ethylene":
+            product = yield_row(
+                run_id,
+                primary_yield_metric="not_reported",
+                yield_original="not_reported",
+                yield_definition_original="not_reported",
+                secondary_result_summary="Fe3C and liquid-like particles inside CNT cavities supported a vapor-liquid-solid mechanism.",
+                CNT_type_reported="carbon nanotubes",
+                CNT_type_confirmed="not_reported",
+                CNT_type_evidence="microscopy and phase identification",
+                product_mixture_summary="CNTs with encapsulated Fe3C/liquid-like particles",
+            )
+        else:
+            product = yield_row(
+                run_id,
+                primary_yield_metric="not_reported",
+                yield_original="not_reported",
+                yield_definition_original="not_reported",
+                secondary_result_summary="The Fe-Ni catalyst remained solid and CNT growth followed a vapor-solid-solid mechanism; carbon yield was higher than in the ethylene control.",
+                CNT_type_reported="carbon nanotubes",
+                CNT_type_confirmed="not_reported",
+                CNT_type_evidence="solid-state catalyst observation and control comparison",
+                product_mixture_summary="CNTs grown from benzene over solid Fe-Ni alloy",
+            )
+        cost = cost_row(
+            run_id,
+            scale_level_demonstrated="laboratory two-stage fixed-bed batch",
+            scale_level_claimed="massive industrial-scale MWCNT production",
+            scale_evidence_summary="A self-supported monolithic mesh acts as both active component and support and permits physical CNT separation.",
+            reactor_capacity_or_throughput="15 g monolithic catalyst charge",
+            catalyst_lifetime_or_reuse="at least 10 cycles",
+            catalyst_reuse_cycles="10",
+            quantitative_cost_reported="not_reported",
+            cost_driver_summary="waste-plastic feed, reactor heat, nitrogen, catalyst pretreatment, and ultrasonic CNT separation",
+            emission_or_waste="waste plastic converted to carbon products and gas; quantitative emissions not reported",
+            industrial_readiness_assessment="laboratory demonstration with repeat-use and scale-up claim",
+        )
+        tables["source_run"].append(run)
+        tables["catalyst_system"].append(catalyst)
+        tables["reactor_process_gas"].append(process)
+        tables["yield_quality"].append(product)
+        tables["cost_scale_review"].append(cost)
+        tables["evidence_index"].extend(
+            [
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_CAT_A", run_id, "catalyst_system", catalyst["catalyst_id"], "record_level", "SPAN_174E118370956E68EEA2", "The Methods report SS 316 monolith geometry and the acid/calcination pretreatment sequence."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_CAT_B", run_id, "catalyst_system", catalyst["catalyst_id"], "active_metals", "SPAN_497A4789C42AC873FC28", "Microscopy and elemental mapping identify Fe-Ni alloy participation in CNT growth."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROC", run_id, "reactor_process_gas", process["process_stage_id"], "record_level", (item["span"] if kind in {"ethylene", "benzene"} else "SPAN_12B28DD108E21440FBDD"), "The source reports the model compound or the common two-stage fixed-bed plastic pyrolysis-catalysis setup."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_VARIANT", run_id, "reactor_process_gas", process["process_stage_id"], "record_level", item["span"], "The source identifies the record-specific pretreatment, reuse, temperature, ratio, feedstock, or model-compound variable."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROD", run_id, "yield_quality", product["product_id"], "record_level", item["span"], "The source reports the record-specific yield, quality, or mechanism outcome."),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_COST_A", run_id, "cost_scale_review", run_id, "record_level", "SPAN_12B28DD108E21440FBDD", "The apparatus and catalyst charge support a laboratory fixed-bed assessment.", value_status="review_assessment"),
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_COST_B", run_id, "cost_scale_review", run_id, "record_level", "SPAN_7E3362C159DF32835932", "The monolith reuse, physical separation, and industrial-scale claim support the scale review.", value_status="review_assessment"),
+            ]
+        )
+        if kind == "reuse":
+            tables["evidence_index"].append(
+                evidence_row(source_id, f"{source_id}_EV_{index:02d}_PROD_CUMULATIVE", run_id, "yield_quality", product["product_id"], "record_level", "SPAN_303A6F72C38E0855415C", "The source reports recalcination recovery and approximately 6 g cumulative MWCNTs after 10 reuse cycles.")
+            )
+        if kind in {"pretreatment", "reuse", "temperature", "ratio"}:
+            issue_id = f"{source_id}_ISS_{index:02d}_SERIES_RESOLUTION"
+            tables["review_issue_log"].append(
+                issue_row(
+                    issue_id,
+                    source_id,
+                    run_id,
+                    "series_point_resolution",
+                    "source_run",
+                    run_id,
+                    "data_type",
+                    "The HTML main text supports the experimental series and key endpoints but not every supplementary plotted point. The series is represented once rather than inventing point-level runs.",
+                    evidence_ids=f"{source_id}_EV_{index:02d}_PROD",
+                    severity="medium",
+                )
+            )
+        elif kind == "feedstock":
+            issue_id = f"{source_id}_ISS_{index:02d}_YIELD_BASIS"
+            tables["review_issue_log"].append(
+                issue_row(
+                    issue_id,
+                    source_id,
+                    run_id,
+                    "yield_definition_scope",
+                    "yield_quality",
+                    product["product_id"],
+                    "yield_original",
+                    "The source reports total carbon yield and separately states that more than 96% was identified as MWCNTs. The carbon yield is not converted into an exact MWCNT yield.",
+                    evidence_ids=f"{source_id}_EV_{index:02d}_PROD",
+                    severity="medium",
+                )
+            )
+    package = SHARD_ROOT / source_id
+    write_package(package, tables)
+    write_review(
+        package,
+        {
+            "source_id": source_id,
+            "review_status": "source_review_complete_needs_supervisory_review",
+            "reviewer": "Codex",
+            "source_identity_checked": True,
+            "evidence_sections_checked": ["Catalyst preparation", "Pyrolysis-catalysis process", "Catalytic performance", "Reuse", "Temperature and mass-ratio effects", "Waste-plastic universality", "Mechanism controls"],
+            "campaign_reconciliation": {"result_linked_campaigns_in_paper": 11, "extracted_runs": 11, "negative_runs_preserved": 0},
+            "pdf_visual_review": {"completed": False, "pages_checked": [], "not_applicable_reason": "Local full text is HTML rather than PDF."},
+            "html_source_review": {"completed": True, "sections_checked": ["Methods", "Figures 1-4 and captions", "Results", "Discussion"]},
+            "series_resolution_check": "Pretreatment, reuse, temperature, and ratio sweeps remain series-level because supplementary point matrices are not present in the immutable main-text ledger.",
+            "yield_policy_check": "Feedstock carbon yields are not silently relabelled as exact MWCNT yields; the separate >96% MWCNT identification is retained as its basis.",
+            "cross_run_inheritance_check": "The grouped 20-50 nm diameter range is not copied into individual feedstock rows, and exact control-compound flow or duration is left unreported.",
+        },
+    )
+    update_manifest(source_id, "extracted_needs_supervisory_review", package_path=package.relative_to(REDO_ROOT).as_posix())
+    return package
+
+
 BUILDERS = {
     "LIT_004FAE25B3DA5255": build_lit_004fae25,
     "LIT_1E15BC8013D45B19": build_lit_1e15bc80,
@@ -3382,6 +6659,18 @@ BUILDERS = {
     "LIT_4B3D3C5CD3B8D731": build_lit_4b3d3c5c,
     "LIT_5925FB1BAD7692D5": build_lit_5925fb1b,
     "LIT_60168627B3641616": build_lit_60168627,
+    "LIT_65C8BD1BF4B591DD": build_lit_65c8bd1b,
+    "LIT_87B8240D8CDFE77C": build_lit_87b8240d,
+    "LIT_8AF8B4DBFDD89066": build_lit_8af8b4db,
+    "LIT_9D1D16C5D2C154FD": build_lit_9d1d16c5,
+    "LIT_A2AD11A61964181A": build_lit_a2ad11a6,
+    "LIT_BD24584C41DAE4DD": build_lit_bd24584c,
+    "LIT_B917C9617169F443": build_lit_b917c961,
+    "LIT_C604F0126CF213E1": build_lit_c604f012,
+    "LIT_D5BD8BD50A4E57A2": build_lit_d5bd8bd5,
+    "LIT_D74C5ABB8CDC64C5": build_lit_d74c5abb,
+    "LIT_ED1D628BC55C93F4": build_lit_ed1d628b,
+    "LIT_F140D55ED8245E17": build_lit_f140d55e,
 }
 
 NON_EXTRACTABLE = {
@@ -3439,6 +6728,68 @@ NON_EXTRACTABLE = {
             "Cite this article",
         ],
         "pdf_pages_checked": [],
+    },
+    "LIT_B49F1E2FC9A56304": {
+        "reason": (
+            "The experiment deposits graphitic/graphene shells onto pre-existing arc-discharge "
+            "SWCNT paper and a pre-existing vertically aligned MWCNT forest. It thickens and "
+            "encapsulates those CNT substrates but does not synthesize a new CNT campaign, so the "
+            "methane-CVD conditions belong to graphene growth rather than CNT synthesis."
+        ),
+        "evidence_sections": [
+            "Abstract",
+            "Results and Figures 1-2",
+            "Methods: Materials synthesis",
+            "Author contributions",
+        ],
+        "pdf_pages_checked": [1, 2, 4],
+    },
+    "LIT_E047BBA44C22AA22": {
+        "reason": (
+            "The paper acid-treats an existing MWCNT material, loads Ni and Pt nanoparticles onto "
+            "it, and evaluates NO2 removal. It reports no source-linked CNT growth recipe or CNT "
+            "synthesis result; the performed synthesis is the supported Ni-Pt catalyst only."
+        ),
+        "evidence_sections": [
+            "Abstract",
+            "2.1 Material",
+            "2.2 Acid treatment of multi-walled carbon nanotubes",
+            "2.3 Preparation and synthesis of Ni-Pt/MWCNT nanocatalysts",
+            "4. Conclusion",
+        ],
+        "pdf_pages_checked": [1, 2, 3, 8, 9],
+    },
+    "LIT_E7868486310B8B49": {
+        "reason": (
+            "The abstract explicitly describes the article as a brief review, and the body "
+            "summarizes CNT synthesis methods, solar-cell concepts, and literature-derived "
+            "performance tables without a reproducible CNT synthesis experiment performed in "
+            "this paper."
+        ),
+        "evidence_sections": [
+            "Abstract",
+            "I. Introduction",
+            "CNT synthesis-method overview and literature tables",
+            "VI. Conclusion",
+            "References",
+        ],
+        "pdf_pages_checked": [1, 2, 9, 10, 11],
+    },
+    "LIT_E9E787428CFD3649": {
+        "reason": (
+            "This is a review of published VACNT growth on flexible metal substrates. Its "
+            "abstract and highlights state that substrate, catalyst, process, CNT-characteristic, "
+            "and application results are reviewed; the document provides no new performed CNT "
+            "synthesis campaign attributable to this source."
+        ),
+        "evidence_sections": [
+            "Highlights",
+            "Abstract",
+            "Table of Contents",
+            "8. Conclusion",
+            "References",
+        ],
+        "pdf_pages_checked": [1, 3, 4, 5, 78, 79],
     },
 }
 

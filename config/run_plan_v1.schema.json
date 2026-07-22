@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "CNT-PatSight experiment run planning contract v1",
+  "title": "CNT-LitSight experiment run planning contract v1",
   "type": "object",
   "additionalProperties": false,
   "required": [

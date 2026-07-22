@@ -1,4 +1,4 @@
-# CNT-PatSight nanopublication PoC
+# CNT-LitSight nanopublication PoC
 
 This directory contains a local-only export layer for one existing, manually curated eight-table paper package. The formal CSV tables remain the source of truth. Version 0.2 creates five independent run-level nanopublications instead of one paper-sized RDF mirror.
 

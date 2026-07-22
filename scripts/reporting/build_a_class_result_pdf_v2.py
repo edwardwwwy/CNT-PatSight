@@ -10,9 +10,7 @@ from reportlab.pdfgen import canvas
 
 from build_a_class_result_pdf import (
     AMBER,
-    BASE,
     BLUE,
-    CASE_BASE,
     CORAL,
     FONT,
     FONT_BOLD,
@@ -38,7 +36,9 @@ from build_a_class_result_pdf import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "output/pdf/CNT-PatSight_A-Class_Result_Report_WangYang.pdf"
+BASE = ROOT / "output/delivery/CNT-LitSight_结构化数据交付_2026-07-17/01_A类66篇_合并八表"
+CASE_BASE = BASE
+OUT = ROOT / "output/pdf/CNT-LitSight_A-Class_Result_Report_WangYang.pdf"
 RUN_ID = "LIT_DB283D1C5235DA93_EI_11"
 
 
@@ -197,7 +197,7 @@ def build() -> Path:
     case_cost = case["cost_scale_review"].query("run_id == @RUN_ID").iloc[0]
     case_ev = case["evidence_index"].query("run_id == @RUN_ID")
     c = canvas.Canvas(str(OUT), pagesize=A4, pageCompression=1)
-    c.setTitle("CNT-PatSight 当前成果展示与 A 类文献数据说明")
+    c.setTitle("CNT-LitSight 当前成果展示与 A 类文献数据说明")
     c.setAuthor("王扬")
     c.setCreator("GPT 5.6 Sol")
     c.setSubject("CNT 文献结构化提取、A 类66篇总结与八表示例")
@@ -210,7 +210,7 @@ def build() -> Path:
     pill(c, "CURRENT RESULTS / 2026", M, H - 95, bg=TEAL)
     c.setFillColor(white)
     c.setFont(FONT_BOLD, 31)
-    c.drawString(M, H - 170, "CNT-PatSight")
+    c.drawString(M, H - 170, "CNT-LitSight")
     c.setFont(FONT_BOLD, 25)
     c.drawString(M, H - 210, "当前成果展示与 A 类文献数据说明")
     c.setFillColor(HexColor("#AFC3D1"))

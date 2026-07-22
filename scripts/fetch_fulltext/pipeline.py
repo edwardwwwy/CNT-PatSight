@@ -172,7 +172,7 @@ class FulltextPipeline:
         load_dotenv(env_file)
         self.email = os.environ.get("UNPAYWALL_EMAIL", "").strip()
         contact = self.email or "contact-not-configured"
-        self.downloader = Downloader(f"CNT-PatSight/0.2 fulltext-fetcher ({contact})")
+        self.downloader = Downloader(f"CNT-LitSight/0.2 fulltext-fetcher ({contact})")
         self.pdf_dir.mkdir(parents=True, exist_ok=True)
         self.html_dir.mkdir(parents=True, exist_ok=True)
         self.reports_dir.mkdir(parents=True, exist_ok=True)

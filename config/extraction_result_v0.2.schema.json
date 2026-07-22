@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "CNT-PatSight evidence-value extraction contract v0.2",
+  "title": "CNT-LitSight evidence-value extraction contract v0.2",
   "type": "object",
   "additionalProperties": false,
   "required": [

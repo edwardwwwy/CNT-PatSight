@@ -1,4 +1,4 @@
-# CNT-PatSight repository structure
+# CNT-LitSight repository structure
 
 ## Data lifecycle
 

@@ -851,7 +851,7 @@ def validate_rows_with_formal_validator(
     schema_path: Path,
     dictionary_path: Path,
 ) -> None:
-    with tempfile.TemporaryDirectory(prefix="cnt_patsight_staging_") as temporary:
+    with tempfile.TemporaryDirectory(prefix="cnt_litsight_staging_") as temporary:
         directory = Path(temporary)
         _write_staging_csvs(directory, rows_by_table, formal_schema)
         return_code, report = _formal_validation_report(directory, schema_path, dictionary_path)

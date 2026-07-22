@@ -31,9 +31,16 @@ CANDIDATE_DB = (
     ROOT
     / "cache/databases/extraction_candidates.sqlite3"
 )
+PARSED_TEXT_DIR = ROOT / "data/interim/parsed_text/by_source"
+EVIDENCE_CANDIDATES = (
+    ROOT / "data/interim/evidence/evidence_candidates.jsonl"
+)
 SCHEMA_PATH = ROOT / "config/schema.json"
 SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 TABLES = tuple(SCHEMA["tables"])
+
+_SPAN_CACHE: dict[str, dict[str, Any]] | None = None
+_SECTION_CACHE: dict[str, dict[str, dict[str, Any]]] = {}
 
 MANIFEST_COLUMNS = [
     "source_id",
@@ -144,14 +151,38 @@ def load_available_sources() -> list[SourceContext]:
                 """
             )
         }
-    with sqlite3.connect(CANDIDATE_DB) as connection:
-        connection.row_factory = sqlite3.Row
-        parsed = {
-            row["source_id"]: dict(row)
-            for row in connection.execute(
-                "SELECT * FROM parse_source_status WHERE parse_status='success'"
-            )
-        }
+    if CANDIDATE_DB.is_file():
+        with sqlite3.connect(CANDIDATE_DB) as connection:
+            connection.row_factory = sqlite3.Row
+            parsed = {
+                row["source_id"]: dict(row)
+                for row in connection.execute(
+                    "SELECT * FROM parse_source_status WHERE parse_status='success'"
+                )
+            }
+    else:
+        # ``cache/`` is intentionally disposable.  The repository migration
+        # preserves canonical per-source parse packages under ``data/interim``;
+        # rebuild the small status view from those packages instead of forcing
+        # every PDF/HTML through the parser again just to recreate SQLite.
+        parsed = {}
+        for path in PARSED_TEXT_DIR.glob("*.parsed.json"):
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            report = payload.get("parse_report", {})
+            document = payload.get("document_metadata", {})
+            source_id = str(payload.get("source_id") or report.get("source_id") or "")
+            if not source_id or report.get("parse_quality") == "unreadable":
+                continue
+            parsed[source_id] = {
+                **report,
+                "source_id": source_id,
+                "parse_status": "success",
+                "input_content_hash": document.get("source_file_sha256", ""),
+                "section_count": report.get(
+                    "section_count", len(payload.get("sections", []))
+                ),
+                "span_count": report.get("candidate_span_count", 0),
+            }
 
     output: list[SourceContext] = []
     for source_id, meta in metadata.items():
@@ -177,22 +208,61 @@ def load_available_sources() -> list[SourceContext]:
 
 
 def load_span(source_id: str, span_id: str) -> dict[str, Any]:
-    with sqlite3.connect(CANDIDATE_DB) as connection:
-        connection.row_factory = sqlite3.Row
-        item = connection.execute(
-            """
-            SELECT s.*, p.section_name_raw, p.section_name_normalized,
-                   p.page_start AS section_page_start,
-                   p.page_end AS section_page_end
-            FROM candidate_experiment_span AS s
-            LEFT JOIN paper_text_section AS p ON p.section_id=s.section_id
-            WHERE s.source_id=? AND s.span_id=?
-            """,
-            (source_id, span_id),
-        ).fetchone()
-    if item is None:
+    if CANDIDATE_DB.is_file():
+        with sqlite3.connect(CANDIDATE_DB) as connection:
+            connection.row_factory = sqlite3.Row
+            item = connection.execute(
+                """
+                SELECT s.*, p.section_name_raw, p.section_name_normalized,
+                       p.page_start AS section_page_start,
+                       p.page_end AS section_page_end
+                FROM candidate_experiment_span AS s
+                LEFT JOIN paper_text_section AS p ON p.section_id=s.section_id
+                WHERE s.source_id=? AND s.span_id=?
+                """,
+                (source_id, span_id),
+            ).fetchone()
+        if item is None:
+            raise KeyError(f"Unknown evidence span: {source_id}/{span_id}")
+        return dict(item)
+
+    global _SPAN_CACHE
+    if _SPAN_CACHE is None:
+        if not EVIDENCE_CANDIDATES.is_file():
+            raise FileNotFoundError(
+                "Neither the disposable candidate database nor the migrated "
+                f"evidence ledger exists: {CANDIDATE_DB}, {EVIDENCE_CANDIDATES}"
+            )
+        _SPAN_CACHE = {}
+        with EVIDENCE_CANDIDATES.open(encoding="utf-8") as handle:
+            for line in handle:
+                if line.strip():
+                    row = json.loads(line)
+                    _SPAN_CACHE[str(row["span_id"])] = row
+
+    item = _SPAN_CACHE.get(span_id)
+    if item is None or item.get("source_id") != source_id:
         raise KeyError(f"Unknown evidence span: {source_id}/{span_id}")
-    return dict(item)
+
+    sections = _SECTION_CACHE.get(source_id)
+    if sections is None:
+        parsed_path = PARSED_TEXT_DIR / f"{source_id}.parsed.json"
+        if not parsed_path.is_file():
+            raise FileNotFoundError(f"Missing parsed source package: {parsed_path}")
+        payload = json.loads(parsed_path.read_text(encoding="utf-8"))
+        sections = {
+            str(section["section_id"]): section
+            for section in payload.get("sections", [])
+        }
+        _SECTION_CACHE[source_id] = sections
+    section = sections.get(str(item.get("section_id")), {})
+    return {
+        **item,
+        "section_name_raw": section.get("section_name_raw", ""),
+        "section_name_normalized": section.get("section_name_normalized", ""),
+        "section_page_start": section.get("page_start"),
+        "section_page_end": section.get("page_end"),
+    }
 
 
 def source_master_row(context: SourceContext, scope: str) -> dict[str, str]:

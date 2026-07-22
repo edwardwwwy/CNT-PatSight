@@ -45,12 +45,12 @@ AUDIT_SUMMARIES = DATA / "audit" / "summaries"
 MANIFEST = AUDIT_SUMMARIES / "migration_manifest.csv"
 BASELINE = AUDIT_SUMMARIES / "migration_baseline.json"
 VERIFY_REPORT = AUDIT_SUMMARIES / "migration_verification.json"
-ARCHIVE_DIR = Path(os.environ.get("CNT_ARCHIVE_DIR", r"E:\CNT-PatSight-archive"))
+ARCHIVE_DIR = Path(os.environ.get("CNT_ARCHIVE_DIR", r"E:\CNT-LitSight-archive"))
 ARCHIVE_STEM = "20260720_pre_restructure"
 PRIVATE_COMPANY = Path(
     os.environ.get(
         "CNT_COMPANY_DATA_DIR",
-        str(ROOT.parent / "CNT-PatSight-private" / "company"),
+        str(ROOT.parent / "CNT-LitSight-private" / "company"),
     )
 )
 

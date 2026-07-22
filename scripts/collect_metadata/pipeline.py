@@ -39,7 +39,7 @@ class CollectionPipeline:
             max_retries=self.credentials.max_retries,
         )
         email = self.credentials.crossref_email or self.credentials.unpaywall_email
-        user_agent = f"CNT-PatSight/0.1 metadata-collector ({email or 'contact-not-configured'})"
+        user_agent = f"CNT-LitSight/0.1 metadata-collector ({email or 'contact-not-configured'})"
         return {
             "openalex": OpenAlexClient(http, self.credentials.openalex_api_key, user_agent),
             "semantic_scholar": SemanticScholarClient(

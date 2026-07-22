@@ -9,7 +9,6 @@ from reportlab.pdfgen import canvas
 
 from build_a_class_result_pdf import (
     AMBER,
-    BASE,
     BLUE,
     CORAL,
     FONT,
@@ -37,7 +36,8 @@ from build_a_class_result_pdf_v2 import grid_table, kv_panel, narrative_panel
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "output/pdf/CNT-PatSight_Client_Report_WangYang.pdf"
+BASE = ROOT / "output/delivery/CNT-LitSight_结构化数据交付_2026-07-17/01_A类66篇_合并八表"
+OUT = ROOT / "output/pdf/CNT-LitSight_Client_Report_WangYang.pdf"
 
 
 def info_box(
@@ -90,7 +90,7 @@ def build() -> Path:
     evidence_count = len(evidence)
 
     c = canvas.Canvas(str(OUT), pagesize=A4, pageCompression=1)
-    c.setTitle("CNT-PatSight 碳纳米管文献数据工程阶段成果与扩展测算")
+    c.setTitle("CNT-LitSight 碳纳米管文献数据工程阶段成果与扩展测算")
     c.setAuthor("王扬")
     c.setCreator("GPT 5.6 Sol")
     c.setSubject("项目成果、核验案例、API成本与文献资源扩展说明")
@@ -103,7 +103,7 @@ def build() -> Path:
     pill(c, "CLIENT PROGRESS REPORT / 2026", M, H - 94, bg=TEAL)
     c.setFillColor(white)
     c.setFont(FONT_BOLD, 31)
-    c.drawString(M, H - 166, "CNT-PatSight")
+    c.drawString(M, H - 166, "CNT-LitSight")
     c.setFont(FONT_BOLD, 23)
     c.drawString(M, H - 208, "碳纳米管文献数据工程")
     c.drawString(M, H - 244, "阶段成果与扩展测算")
@@ -160,8 +160,8 @@ def build() -> Path:
     # 02 Project overview
     page_base(c, 2, "项目基本信息与总体目标", "Project overview")
     grid_table(c, M, 430, [105, 406], 37, ["基本信息", "内容"], [
-        ["项目名称", "CNT-PatSight 碳纳米管文献数据工程"],
-        ["数据库名称", "CNT-PatSight 碳纳米管文献实验数据库"],
+        ["项目名称", "CNT-LitSight 碳纳米管文献数据工程"],
+        ["数据库名称", "CNT-LitSight 碳纳米管文献实验数据库"],
         ["负责人", "王扬"],
         ["本周工作时间", "2026年7月13日周一至7月17日周五"],
         ["工作地点", "CNT研发室"],

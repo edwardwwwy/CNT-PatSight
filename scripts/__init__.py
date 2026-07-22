@@ -1,1 +1,1 @@
-"""CNT-PatSight pipeline modules."""
+"""CNT-LitSight pipeline modules."""

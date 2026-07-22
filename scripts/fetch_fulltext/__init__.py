@@ -1,2 +1,2 @@
-"""Idempotent full-text acquisition layer for CNT-PatSight."""
+"""Idempotent full-text acquisition layer for CNT-LitSight."""
 

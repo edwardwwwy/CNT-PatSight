@@ -1,6 +1,6 @@
 # Review and formalization policy
 
-CNT-PatSight separates first-pass extraction from formalization without requiring a separate owner review for every source. A designated evidence-review agent, including Codex, may promote a package to the formal data layer after completing an independent second pass and satisfying the gates below.
+CNT-LitSight separates first-pass extraction from formalization without requiring a separate owner review for every source. A designated evidence-review agent, including Codex, may promote a package to the formal data layer after completing an independent second pass and satisfying the gates below.
 
 ## State model
 

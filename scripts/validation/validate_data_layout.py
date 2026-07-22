@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the canonical CNT-PatSight data lifecycle and one-file packages."""
+"""Validate the canonical CNT-LitSight data lifecycle and one-file packages."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ EIGHT_TABLES = {
     "review_issue_log.csv",
 }
 ANALYSIS_FILES = {"run_level_dataset.csv", "process_comparison.csv", "data_quality_summary.csv"}
-TEMPLATE_FILES = EIGHT_TABLES | {"cnt_patsight_collection_template.xlsx"}
+TEMPLATE_FILES = EIGHT_TABLES | {"cnt_litsight_collection_template.xlsx"}
 
 
 def directories(path: Path) -> set[str]:

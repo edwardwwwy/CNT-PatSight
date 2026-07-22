@@ -181,7 +181,7 @@ def doctor() -> dict[str, Any]:
     temporary_database = "not_checked"
     if isinstance(formal_schema, dict):
         try:
-            with TemporaryDirectory(prefix="cnt_patsight_doctor_") as directory:
+            with TemporaryDirectory(prefix="cnt_litsight_doctor_") as directory:
                 database = Path(directory) / "production.sqlite3"
                 with ProductionStore(database, ROOT / "config/schema.json") as store:
                     store.integrity_check()
@@ -379,7 +379,7 @@ def worker(component: str) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="CNT-PatSight metadata/full-text production controller"
+        description="CNT-LitSight metadata/full-text production controller"
     )
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("doctor", "prepare", "smoke-test", "start", "status", "resume"):

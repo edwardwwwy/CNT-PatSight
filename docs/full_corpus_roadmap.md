@@ -1,4 +1,4 @@
-# CNT-PatSight 全量文献库路线图
+# CNT-LitSight 全量文献库路线图
 
 长期目标是建立 CVD/CCVD CNT 论文和专利数据库。扩展规模不改变八表主键、证据链和复核边界。
 

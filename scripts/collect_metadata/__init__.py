@@ -1,2 +1,2 @@
-"""Traceable, idempotent metadata collection for CNT-PatSight."""
+"""Traceable, idempotent metadata collection for CNT-LitSight."""
 

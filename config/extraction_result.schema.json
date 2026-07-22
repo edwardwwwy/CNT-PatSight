@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "CNT-PatSight extraction staging contract",
+  "title": "CNT-LitSight extraction staging contract",
   "type": "object",
   "additionalProperties": false,
   "required": [

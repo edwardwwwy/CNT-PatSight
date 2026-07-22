@@ -28,7 +28,7 @@ from rdflib.namespace import DCTERMS, PROV, RDF, XSD
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ID = "P003_Pan_2025_FeMo_MgO_Methane_CNT"
-INPUT_DIR = ROOT / "data" / "benchmark" / "samples" / "six_papers" / SOURCE_ID
+INPUT_DIR = ROOT / "data" / "benchmark" / "fixtures" / "six_papers" / SOURCE_ID
 OUTPUT_DIR = ROOT / "data" / "processed" / "analysis" / "derived" / "nanopub_demo"
 RUN_OUTPUT_DIR = OUTPUT_DIR / "runs"
 REPORT_PATH = ROOT / "reports" / "nanopub_demo.html"
@@ -38,10 +38,10 @@ MAPPING_PATH = OUTPUT_DIR / f"{SOURCE_ID}_mapping.json"
 METRICS_PATH = OUTPUT_DIR / "metrics.json"
 COMPLETENESS_PATH = OUTPUT_DIR / "completeness_report.json"
 
-PROGRAM_NAME = "CNT-PatSight nanopub_demo"
+PROGRAM_NAME = "CNT-LitSight nanopub_demo"
 PROGRAM_VERSION = "0.2.0"
 MAPPING_SCHEMA_VERSION = "2.0"
-LICENSE_ID = "CNT-PatSight-Local-Demo-Only-1.0"
+LICENSE_ID = "CNT-LitSight-Local-Demo-Only-1.0"
 LOCAL_DEMO_STATUS = "local_only_not_published"
 
 TABLES = (
@@ -126,15 +126,15 @@ NORMALIZED_FIELDS = {
 UNIT_URI = {
     ("reactor_process_gas", "catalyst_loading_mass_g"): "http://qudt.org/vocab/unit/GM",
     ("reactor_process_gas", "temperature_setpoint_C"): "http://qudt.org/vocab/unit/DEG_C",
-    ("reactor_process_gas", "heating_rate_C_min"): "https://w3id.org/cnt-patsight/unit/DegreeCelsiusPerMinute",
+    ("reactor_process_gas", "heating_rate_C_min"): "https://w3id.org/cnt-litsight/unit/DegreeCelsiusPerMinute",
     ("reactor_process_gas", "holding_time_min"): "http://qudt.org/vocab/unit/MIN",
-    ("reactor_process_gas", "carbon_source_flow_sccm"): "https://w3id.org/cnt-patsight/unit/StandardCubicCentimetrePerMinute",
-    ("yield_quality", "yield_original"): "https://w3id.org/cnt-patsight/unit/GramCarbonPerGramCatalystAt30Minutes",
+    ("reactor_process_gas", "carbon_source_flow_sccm"): "https://w3id.org/cnt-litsight/unit/StandardCubicCentimetrePerMinute",
+    ("yield_quality", "yield_original"): "https://w3id.org/cnt-litsight/unit/GramCarbonPerGramCatalystAt30Minutes",
     ("yield_quality", "inner_diameter_mean_nm"): "http://qudt.org/vocab/unit/NanoM",
 }
 
-BASE = Namespace("https://w3id.org/cnt-patsight/nanopub-demo/")
-CNT = Namespace("https://w3id.org/cnt-patsight/schema/")
+BASE = Namespace("https://w3id.org/cnt-litsight/nanopub-demo/")
+CNT = Namespace("https://w3id.org/cnt-litsight/schema/")
 NP = Namespace("http://www.nanopub.org/nschema#")
 
 
@@ -772,7 +772,7 @@ def render_html(mapping: dict[str, Any]) -> str:
 
     return f"""<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CNT-PatSight Nanopublication PoC v0.2</title>
+<title>CNT-LitSight Nanopublication PoC v0.2</title>
 <style>
 :root {{ --navy:#0b243b; --teal:#00a6a6; --bg:#f4f7f9; --line:#d7e1e8; --text:#18344b; }}
 * {{ box-sizing:border-box; }} body {{ margin:0; background:var(--bg); color:var(--text); font:15px/1.6 "Segoe UI","Microsoft YaHei",sans-serif; }}

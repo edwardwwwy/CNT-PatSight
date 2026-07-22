@@ -1,6 +1,6 @@
 # Public samples
 
-此目录只保存少量可公开复现 CNT-PatSight 八表契约的样例。当前六篇固定样本位于 `data/benchmark/fixtures/six_papers/`；新增公开样例必须先完成授权检查、独立证据复核和脱敏。
+此目录只保存少量可公开复现 CNT-LitSight 八表契约的样例。当前六篇固定样本位于 `data/benchmark/fixtures/six_papers/`；新增公开样例必须先完成授权检查、独立证据复核和脱敏。
 
 ## 每个样例应包含
 

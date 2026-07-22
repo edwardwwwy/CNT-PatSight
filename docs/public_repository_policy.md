@@ -5,7 +5,7 @@
 ## 推荐公开结构
 
 ```text
-CNT-PatSight/
+CNT-LitSight/
 ├── README.md
 ├── LICENSE                       # 由项目所有者选择后加入
 ├── requirements.txt

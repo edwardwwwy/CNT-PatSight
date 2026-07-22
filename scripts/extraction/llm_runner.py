@@ -960,7 +960,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Plan runs with an LLM, extract evidence-valued facts, and export "
-            "one validated CNT-PatSight eight-table package."
+            "one validated CNT-LitSight eight-table package."
         )
     )
     parser.add_argument("--source-id", required=True)

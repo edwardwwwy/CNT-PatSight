@@ -1,1 +1,1 @@
-"""Auditable data-layout migrations for CNT-PatSight."""
+"""Auditable data-layout migrations for CNT-LitSight."""

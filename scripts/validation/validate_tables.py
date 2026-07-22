@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a source package or the combined formal CNT-PatSight eight tables."""
+"""Validate a source package or the combined formal CNT-LitSight eight tables."""
 
 from __future__ import annotations
 

@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXTRACTION_ROOT = ROOT / "data/interim/extraction/A"
 MASTER = ROOT / "data/raw/literature/metadata/literature_master.csv"
 CASE_PATH = EXTRACTION_ROOT / "LIT_DB283D1C5235DA93.extraction.json"
-OUT = ROOT / "output/pdf/CNT-PatSight_A-Class_Result_Report_WangYang.pdf"
+OUT = ROOT / "output/pdf/CNT-LitSight_A-Class_Result_Report_WangYang.pdf"
 
 W, H = A4
 M = 42
@@ -131,7 +131,7 @@ def page_base(c: canvas.Canvas, page_no: int, title: str, kicker: str) -> None:
     c.line(M, H - 72, W - M, H - 72)
     c.setFont(FONT, 6.8)
     c.setFillColor(MUTED)
-    c.drawString(M, 22, "CNT-PatSight  当前成果展示  |  数据截止 2026-07-17")
+    c.drawString(M, 22, "CNT-LitSight  当前成果展示  |  数据截止 2026-07-17")
     c.drawRightString(W - M, 22, f"{page_no:02d}")
 
 
@@ -395,7 +395,7 @@ def build() -> Path:
         )
 
     c = canvas.Canvas(str(OUT), pagesize=A4, pageCompression=1)
-    c.setTitle("CNT-PatSight 当前成果展示与 A 类文献数据分析")
+    c.setTitle("CNT-LitSight 当前成果展示与 A 类文献数据分析")
     c.setAuthor("王扬")
     c.setCreator("GPT 5.6 Sol")
     c.setSubject("CNT 文献结构化提取、A 类66篇总结分析与项目资源说明")
@@ -413,7 +413,7 @@ def build() -> Path:
     pill(c, "CURRENT RESULTS / 2026", M, H - 95, bg=TEAL)
     c.setFillColor(WHITE)
     c.setFont(FONT_BOLD, 31)
-    c.drawString(M, H - 170, "CNT-PatSight")
+    c.drawString(M, H - 170, "CNT-LitSight")
     c.setFont(FONT_BOLD, 25)
     c.drawString(M, H - 210, "当前成果展示与 A 类文献数据分析")
     c.setFillColor(HexColor("#AFC3D1"))
@@ -445,7 +445,7 @@ def build() -> Path:
     c.drawString(M + 18, 111, "数据截止  2026年7月17日")
     c.setFillColor(HexColor("#6D879A"))
     c.setFont(FONT, 6.6)
-    c.drawRightString(W - M, 40, "CNT-PATSIGHT / RESULT REPORT")
+    c.drawRightString(W - M, 40, "CNT-LITSIGHT / RESULT REPORT")
     finish_page(c)
 
     # 02 Executive summary

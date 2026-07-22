@@ -1,8 +1,8 @@
-# CNT-PatSight v1 项目边界
+# CNT-LitSight v1 项目边界
 
 ## 定位
 
-CNT-PatSight v1 服务 CNT 研发组，用于在实验或专利实施例的 `run` 层级比较催化剂体系、CVD 工艺条件和 CNT 结果。第一版不追求构建 CNT 百科。
+CNT-LitSight v1 服务 CNT 研发组，用于在实验或专利实施例的 `run` 层级比较催化剂体系、CVD 工艺条件和 CNT 结果。第一版不追求构建 CNT 百科。
 
 机器可读范围配置见 `config/project_scope.yaml`。
 

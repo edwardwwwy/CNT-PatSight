@@ -15,6 +15,9 @@ from scripts.io_utils import utc_now
 
 ROOT = Path(__file__).resolve().parents[2]
 BENCHMARK_VERSION = "screening_benchmark_v1.1"
+# Immutable input to the reviewed 2026-07-16 sample. Renaming this legacy seed
+# would select different papers and invalidate the frozen human labels/metrics.
+FROZEN_V1_LEGACY_SEED = "cnt-patsight-benchmark-v1"
 DEFAULT_COUNTS = {"A": 30, "B": 25, "C": 20, "M": 20, "R": 25}
 HUMAN_COLUMNS = [
     "human_is_target_synthesis",
@@ -766,7 +769,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--errors-csv", type=Path, default=ROOT / "data/benchmark/results/screening_benchmark/benchmark_errors.csv")
     sub = parser.add_subparsers(dest="command", required=True)
     create = sub.add_parser("generate")
-    create.add_argument("--seed", default="cnt-patsight-benchmark-v1")
+    create.add_argument("--seed", default=FROZEN_V1_LEGACY_SEED)
     create.add_argument("--doi-audit-count", type=int, default=15)
     create.add_argument("--external-id-audit-count", type=int, default=5)
     sub.add_parser("refresh", help="Refresh automatic predictions without resampling or changing reviewer labels.")

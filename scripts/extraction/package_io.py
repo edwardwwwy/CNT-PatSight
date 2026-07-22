@@ -32,7 +32,7 @@ def validate_extraction_tables(tables: TableRows) -> None:
     extra = set(tables) - set(TABLES)
     if missing or extra:
         raise ValueError(f"invalid table set: missing={sorted(missing)} extra={sorted(extra)}")
-    with tempfile.TemporaryDirectory(prefix="cnt_patsight_extract_validate_") as directory:
+    with tempfile.TemporaryDirectory(prefix="cnt_litsight_extract_validate_") as directory:
         root = Path(directory)
         for table in TABLES:
             write_table(root, table, [dict(row) for row in tables[table]])
