@@ -1,5 +1,4 @@
-# CNT-
-litSight
+# CNT-litSight
 
 > **From carbon nanotube papers to evidence-grounded, ML-ready experimental data.**  
 > Literature-first today, patent-ready by design.
